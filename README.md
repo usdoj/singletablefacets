@@ -12,37 +12,52 @@ This class is intended as a simple faceted search solution for PHP applications 
 See example.php for a more detailed example, but here is the basic idea:
 
 ```
+// First you instantiate the object using array-based parameters and options.
+
+// Pick a database table.
 $table = 'mytable';
+
+// Pick the columns from the database table that will act as facets.
 $facet_columns = array(
   'tag' => 'Filter by tag',
   'author' => 'Filter by author',
 );
+
+// Pick the columns from the database table that will be consulted during
+// keyword searches.
 $keyword_columns = array(
   'title',
   'teaser',
   'body',
 );
+
+// Pick the columns from the database table that should be allowed as sortable
+// fields.
 $sort_columns = array(
   'title' => 'ASC',
   'author' => 'ASC',
   'date' => 'DESC',
 );
-$options = array(
-  // Put optional settings here.
-);
 
+// Any number of optional settings go here. (See later in this README.)
+$options = array();
+
+// Instantiate the object.
 $facets = new SingleTableFacets($table, $facet_columns, $keyword_columns, $sort_columns, $options);
 
-// Print the CSS.
+// Now you can use these methods on the object to output the markup on your
+// search page, wherever you would like.
+
+// Output the CSS.
 print $facets->getStyles();
 
-// Print the keyword search widget.
+// Output the keyword search widget.
 print $facets->getKeywordWidget();
 
-// Print the facet blocks.
+// Output the facet blocks.
 print $facets->getFacets();
 
-// Print the results as a table.
+// Output the results as a table.
 $table_columns = array(
   'title' => 'Title',
   'author' => 'Author',
@@ -51,10 +66,10 @@ $table_columns = array(
 );
 print $facets->getRowsAsTable($table_columns);
 
-// Print the pager.
+// Output the pager.
 print $facets->getPager();
 
-// Print the javascript.
+// Output the javascript.
 print $facets->getJavascript();
 ```
 
