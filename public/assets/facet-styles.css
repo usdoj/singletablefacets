@@ -25,6 +25,7 @@
 }
 .doj-facet .facet-items {
   margin-bottom: 0;
+  max-width: 100%;
 }
 .doj-facet-dependent .facet-items {
   margin-top: 0;
