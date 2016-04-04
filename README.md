@@ -17,7 +17,8 @@ See example.php for a more detailed example, but here is the basic idea:
 // Pick a database table.
 $table = 'mytable';
 
-// Pick the columns from the database table that will act as facets.
+// Pick the columns from the database table that will act as facets. For each,
+// assign a human-readable label that will display above the facet block.
 $facet_columns = array(
   'tag' => 'Filter by tag',
   'author' => 'Filter by author',
@@ -32,7 +33,7 @@ $keyword_columns = array(
 );
 
 // Pick the columns from the database table that should be allowed as sortable
-// fields.
+// fields. For each, choose a default direction, 'ASC' or 'DESC'.
 $sort_columns = array(
   'title' => 'ASC',
   'author' => 'ASC',
@@ -57,7 +58,8 @@ print $facets->getKeywordWidget();
 // Output the facet blocks.
 print $facets->getFacets();
 
-// Output the results as a table.
+// Output the results as an HTML table. Pick the database columns you would
+// like displayed as HTML columns, and for each, assign a human-readable header.
 $table_columns = array(
   'title' => 'Title',
   'author' => 'Author',
