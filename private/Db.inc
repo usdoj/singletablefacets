@@ -3,7 +3,7 @@
 * @file
 * Database-related utilities.
 *
-* @TODO: This should be separated out into a separate repository.
+* @TODO: Move this into a separate repository?
 */
 
 class Db {
@@ -20,7 +20,7 @@ class Db {
     if(!isset(self::$connection)) {
       // Load configuration as an array. Use the actual location of your configuration file
       $config = parse_ini_file('./config.ini');
-      self::$connection = new mysqli('localhost',$config['username'],$config['password'],$config['dbname']);
+      self::$connection = new mysqli($config['dbhost'],$config['username'],$config['password'],$config['dbname']);
     }
 
     // If connection was not successful, handle the error
@@ -28,6 +28,7 @@ class Db {
       // Handle error - notify administrator, log to a file, show an error screen, etc.
       return false;
     }
+    //@mysqli_select_db(self::$connection,$config['dbname']) or die( "Cannot open database");
     return self::$connection;
   }
 
@@ -40,11 +41,16 @@ class Db {
   public function query($query) {
     // Connect to the database
     $connection = $this -> connect();
-
     // Query the database
     $result = $connection -> query($query);
-
-    return $result;
+    $count=0;
+    $ret=array();
+    while ($count < $result->num_rows) {
+      $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
+      $ret[] = $row;
+      $count++;
+    }
+    return $ret;
   }
 
   /**
