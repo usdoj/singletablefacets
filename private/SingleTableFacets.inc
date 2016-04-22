@@ -57,6 +57,10 @@ class SingleTableFacets {
    *            to be nested from the last parent item.) This also assumes that
    *            the child facet is directly after the parent facet in the
    *            $facet_columns parameter.
+   *          - default_keyword_logic: Can be 'OR' or 'AND'. Determines the
+   *            default logic that will be used for multiple keywords. Users
+   *            will be able to specify 'OR' or 'AND' in their searches to
+   *            override this.
    */
   public function __construct($table, $facet_columns, $keyword_columns = NULL, $sort_columns = NULL, $options = NULL) {
     $this->db = new Db();
@@ -82,6 +86,7 @@ class SingleTableFacets {
       'required_columns' => array(),
       'pager_radius' => 2,
       'nested_dependents' => FALSE,
+      'default_keyword_logic' => 'AND',
     );
     $this->options = array();
     foreach ($defaults as $option => $default) {
@@ -145,11 +150,36 @@ class SingleTableFacets {
     // Keywords are a special case.
     if (!empty($current_query['keys'])) {
       $keywords = $current_query['keys'];
+      $boolean = $this->options['default_keyword_logic'];
       if (!empty($keywords) && !empty($this->keyword_columns)) {
         $parsed_keywords = array();
+        $current_quoted_phrase = '';
         foreach (explode(' ', $keywords) as $keyword) {
           if (empty($keyword)) {
             continue;
+          }
+          if ('AND' == $keyword) {
+            $boolean = 'AND';
+            continue;
+          }
+          if ('OR' == $keyword) {
+            $boolean = 'OR';
+            continue;
+          }
+          if (empty($current_quoted_phrase) && '"' == substr($keyword, 0, 1)) {
+            $current_quoted_phrase = $keyword;
+            continue;
+          }
+          if (!empty($current_quoted_phrase)) {
+            if ('"' == substr($keyword, -1)) {
+              $current_quoted_phrase .= ' ' . $keyword;
+              $keyword = str_replace('"', '', $current_quoted_phrase);
+              $current_quoted_phrase = '';
+            }
+            else {
+              $current_quoted_phrase .= ' ' . $keyword;
+              continue;
+            }
           }
           if (strlen($keyword) < $this->options['minimum_keyword_length']) {
             continue;
@@ -159,12 +189,18 @@ class SingleTableFacets {
         }
         $keyword_wheres = array();
         foreach ($parsed_keywords as $keyword) {
+          $operator = 'LIKE';
+          if ('-' == substr($keyword, 0, 1)) {
+            $operator = 'NOT LIKE';
+            $keyword = substr($keyword, 1);
+          }
           foreach ($this->keyword_columns as $keyword_column) {
-            $keyword_wheres[] = "LOWER($keyword_column) LIKE LOWER('%$keyword%')";
+            $keyword_wheres[] = "LOWER($keyword_column) $operator LOWER('%$keyword%')";
           }
         }
         $keyword_where = '((';
-        $keyword_where .= implode(') OR (', $keyword_wheres);
+        $keyword_glue = ') ' . $boolean . '(';
+        $keyword_where .= implode($keyword_glue, $keyword_wheres);
         $keyword_where .= '))';
 
         // Finally, add the big WHERE to the query.
