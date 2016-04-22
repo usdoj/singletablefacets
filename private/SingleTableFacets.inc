@@ -167,8 +167,16 @@ class SingleTableFacets {
             continue;
           }
           if (empty($current_quoted_phrase) && '\"' == substr($keyword, 0, 2)) {
-            $current_quoted_phrase = $keyword;
-            continue;
+            // If this is a single word double-quoted, treat it as a regular
+            // keyword.
+            if ('\"' == substr($keyword, -2)) {
+              $keyword = str_replace('\"', '', $keyword);
+            }
+            // Otherwise start a quoted phrase and continue.
+            else {
+              $current_quoted_phrase = $keyword;
+              continue;
+            }
           }
           if (!empty($current_quoted_phrase)) {
             if ('\"' == substr($keyword, -2)) {
