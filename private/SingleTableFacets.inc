@@ -166,14 +166,14 @@ class SingleTableFacets {
             $boolean = 'OR';
             continue;
           }
-          if (empty($current_quoted_phrase) && '"' == substr($keyword, 0, 1)) {
+          if (empty($current_quoted_phrase) && '\"' == substr($keyword, 0, 2)) {
             $current_quoted_phrase = $keyword;
             continue;
           }
           if (!empty($current_quoted_phrase)) {
-            if ('"' == substr($keyword, -1)) {
+            if ('\"' == substr($keyword, -2)) {
               $current_quoted_phrase .= ' ' . $keyword;
-              $keyword = str_replace('"', '', $current_quoted_phrase);
+              $keyword = str_replace('\"', '', $current_quoted_phrase);
               $current_quoted_phrase = '';
             }
             else {
@@ -187,21 +187,21 @@ class SingleTableFacets {
           $keyword = str_replace('%', '', $keyword);
           $parsed_keywords[] = trim($keyword);
         }
-        $keyword_wheres = array();
-        foreach ($parsed_keywords as $keyword) {
-          $operator = 'LIKE';
-          if ('-' == substr($keyword, 0, 1)) {
-            $operator = 'NOT LIKE';
-            $keyword = substr($keyword, 1);
-          }
-          foreach ($this->keyword_columns as $keyword_column) {
+        $keyword_column_wheres = array();
+        foreach ($this->keyword_columns as $keyword_column) {
+          $keyword_wheres = array();
+          foreach ($parsed_keywords as $keyword) {
+            $operator = 'LIKE';
+            if ('-' == substr($keyword, 0, 1)) {
+              $operator = 'NOT LIKE';
+              $keyword = substr($keyword, 1);
+            }
             $keyword_wheres[] = "LOWER($keyword_column) $operator LOWER('%$keyword%')";
           }
+          $keyword_glue = ') ' . $boolean . '(';
+          $keyword_column_wheres[] = '(' . implode($keyword_glue, $keyword_wheres) . ')';
         }
-        $keyword_where = '((';
-        $keyword_glue = ') ' . $boolean . '(';
-        $keyword_where .= implode($keyword_glue, $keyword_wheres);
-        $keyword_where .= '))';
+        $keyword_where = '(' . implode(') OR (', $keyword_column_wheres) . ')';
 
         // Finally, add the big WHERE to the query.
         $wheres[] = $keyword_where;
@@ -426,7 +426,7 @@ class SingleTableFacets {
   public function getKeywordWidget() {
     $value = '';
     if (!empty($this->current_query['keys'])) {
-      $value = $this->current_query['keys'];
+      $value = htmlentities(stripslashes($this->current_query['keys']));
     }
     $widget = <<<FORM
 <form method="get">
