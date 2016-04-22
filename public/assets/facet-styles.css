@@ -17,6 +17,9 @@
 .doj-facet-label {
   font-size: 18px;
 }
+.doj-facet-search-results {
+  width: 100%;
+}
 .doj-facet-search-results tbody tr:nth-child(odd) {
    background-color: #ddd;
 }
