@@ -294,6 +294,19 @@ class SingleTableFacets {
   }
 
   /**
+   * Get the output-friendly version of getCurrentQuery().
+   * @return array Array of facet/filter keys to facet/filter item values.
+   */
+  protected function getCurrentQueryForOutput() {
+    $query = $this->current_query;
+    if (!empty($query['keys'])) {
+      $query['keys'] = str_replace('\"', '"', $query['keys']);
+    }
+    return $query;
+  }
+
+
+  /**
    * Checks to see if a facet can be displayed.
    * @param  string $facet Machine name of facet.
    * @return boolean        TRUE if the facet can be displayed.
@@ -325,7 +338,7 @@ class SingleTableFacets {
    */
   protected function constructFacetLink($facet, $item, $count) {
 
-    $query = $this->current_query;
+    $query = $this->getCurrentQueryForOutput();
     $class = 'doj-facet-item-inactive';
     $prefix = '';
 
@@ -642,7 +655,7 @@ FORM;
       return FALSE;
     }
 
-    $query = $this->current_query;
+    $query = $this->getCurrentQueryForOutput();
     if ($page > 0) {
       $query['page'] = $page;
     }
@@ -673,7 +686,7 @@ FORM;
    */
   protected function constructSortingLink($sort_field, $label) {
 
-    $query = $this->current_query;
+    $query = $this->getCurrentQueryForOutput();
     $query['sort'] = $sort_field;
     $class = 'doj-facet-sort-link';
     // If this is the currently sorted field, then make the direction the
