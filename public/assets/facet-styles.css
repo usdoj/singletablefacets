@@ -19,6 +19,8 @@
 }
 .doj-facet-search-results {
   width: 100%;
+  margin-top: 10px;
+  border: 1px solid #bbb;
 }
 .doj-facet-search-results tbody tr:nth-child(odd) {
    background-color: #ddd;
