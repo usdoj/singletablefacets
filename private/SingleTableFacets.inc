@@ -147,11 +147,55 @@ class SingleTableFacets {
     unset($current_query['sort']);
     unset($current_query['sort_direction']);
     $wheres = array();
-    // Keywords are a special case.
+    /*
+     * Keywords are a special case. Here are the requirements for keyword
+     * search behavior:
+     * 1. Defaults to an "AND" query.
+     *    Eg, a search for 'foo bar' would result in:
+     *    SELECT * FROM tbl WHERE col LIKE '%foo%' AND col LIKE '%bar%'
+     *
+     * 2. User can specify "OR" instead.
+     *
+     *    Eg, a search for 'foo OR bar' would result in:
+     *    SELECT * FROM tbl WHERE col LIKE '%foo%' OR col LIKE '%bar%'
+     *
+     * 3. User can enter "-" to exclude a keyword.
+     *
+     *    Eg, a search for 'foo -bar' would result in:
+     *    SELECT * FROM tbl WHERE col LIKE '%foo%' AND col NOT LIKE '%bar%'
+     *
+     * 4. User can put double-quotes around phrases to treat it as a single word
+     *
+     *    Eg, a search for '"foo bar"' would result in:
+     *    SELECT * FROM tbl WHERE col LIKE '%foo bar%'
+     *
+     * 5. All of the above can be applied to multiple columns...
+     *
+     *    Here is how requirement #5 might affect requirement #1:
+     *    SELECT * FROM tbl
+     *    WHERE ( (col1 LIKE '%foo%' OR col2 LIKE '%foo%')
+     *    AND     (col1 LIKE '%bar%' OR col2 LIKE '%bar%') )
+     *
+     *    Here is how requirement #5 might affect requirement #2:
+     *    SELECT * FROM tbl
+     *    WHERE ( (col1 LIKE '%foo%' OR col2 LIKE '%foo%')
+     *    OR     (col1 LIKE '%bar%' OR col2 LIKE '%bar%') )
+     *
+     *    Here is how requirement #5 might affect requirement #3:
+     *    SELECT * FROM tbl
+     *    WHERE ( (col1 LIKE '%foo%' OR col2 LIKE '%foo'%')
+     *    AND     (col1 NOT LIKE '%bar%' AND col2 NOT LIKE '%bar%') )
+     *
+     *    Here is how requirement #5 might affect requirement #4:
+     *    SELECT * FROM tbl
+     *    WHERE ( (col1 LIKE '%foo bar%' OR col2 LIKE '%foo bar%') )
+     */
     if (!empty($current_query['keys'])) {
       $keywords = $current_query['keys'];
       $boolean = $this->options['default_keyword_logic'];
       if (!empty($keywords) && !empty($this->keyword_columns)) {
+
+        // First parse out the keywords we need to search for.
         $parsed_keywords = array();
         $current_quoted_phrase = '';
         foreach (explode(' ', $keywords) as $keyword) {
@@ -195,21 +239,26 @@ class SingleTableFacets {
           $keyword = str_replace('%', '', $keyword);
           $parsed_keywords[] = trim($keyword);
         }
-        $keyword_column_wheres = array();
-        foreach ($this->keyword_columns as $keyword_column) {
-          $keyword_wheres = array();
-          foreach ($parsed_keywords as $keyword) {
-            $operator = 'LIKE';
-            if ('-' == substr($keyword, 0, 1)) {
-              $operator = 'NOT LIKE';
-              $keyword = substr($keyword, 1);
-            }
-            $keyword_wheres[] = "LOWER($keyword_column) $operator LOWER('%$keyword%')";
+
+        // Next, loop through the keywords (outer loop) and the columsn (inner).
+        $keyword_wheres = array();
+        foreach ($parsed_keywords as $keyword) {
+          $operator = 'LIKE';
+          $keyword_column_boolean = 'OR';
+          if ('-' == substr($keyword, 0, 1)) {
+            $operator = 'NOT LIKE';
+            $keyword_column_boolean = 'AND';
+            $keyword = substr($keyword, 1);
           }
-          $keyword_glue = ') ' . $boolean . '(';
-          $keyword_column_wheres[] = '(' . implode($keyword_glue, $keyword_wheres) . ')';
+          $keyword_column_wheres = array();
+          foreach ($this->keyword_columns as $keyword_column) {
+            $keyword_column_wheres[] = "LOWER($keyword_column) $operator LOWER('%$keyword%')";
+          }
+          $keyword_column_glue = ') ' . $keyword_column_boolean . ' (';
+          $keyword_wheres[] = '(' . implode($keyword_column_glue, $keyword_column_wheres) . ')';
         }
-        $keyword_where = '(' . implode(') OR (', $keyword_column_wheres) . ')';
+        $keyword_glue = ') ' . $boolean . '(';
+        $keyword_where = '(' . implode($keyword_glue, $keyword_wheres) . ')';
 
         // Finally, add the big WHERE to the query.
         $wheres[] = $keyword_where;
