@@ -64,6 +64,7 @@ class SingleTableFacets {
    *            override this.
    *          - keyword_help: If specified, will display expandable help
    *            text beneath the keyword search box.
+   *          - keyword_help_label: The label for the above help text.
    *          - collapse_facets: If specified, will collapsed certain facets
    *            after the indicated number. Must be an array in the form of
    *            column machine name => number of items to before collapsing.
@@ -109,8 +110,8 @@ class SingleTableFacets {
   <li>Use the checkboxes on the left to refine your search, or enter new keywords to start over.</li>
   <li>Enter multiple keywords to get fewer results, eg: cat dogs</li>
   <li>Use OR to get more results, eg: cats OR dogs</li>
-  <li>Use - (dash) to exclude keywords, eg: dogs -lazy</li>
-  <li>Use "" (double-quotes) to search specific phrases, eg: "the brown fox"</li>
+  <li>Put a dash (-) before a keyword to exclude it, eg: dogs -lazy</li>
+  <li>Use "" (double-quotes) to match specific phrases, eg: "the brown fox"</li>
 </ul>
 HELP;
     $defaults = array(
@@ -129,8 +130,10 @@ HELP;
       'nested_dependents' => FALSE,
       'default_keyword_logic' => 'AND',
       'keyword_help' => $default_help,
+      'keyword_help_label' => 'Need help searching?',
       'collapse_facets' => array(),
       'optional_keyword_columns' => array(),
+      'unique_column_for_row_merging' => '',
     );
     $this->options = array();
     foreach ($defaults as $option => $default) {
@@ -587,7 +590,7 @@ HELP;
     if (!empty($this->options['keyword_help'])) {
       $help = <<<HELP
 <div class="doj-facet-help doj-facet-collapse">
-  <span class="doj-facet-collapse-trigger">Keyword search help</span>
+  <span class="doj-facet-collapse-trigger">{$this->options['keyword_help_label']}</span>
   <div class="doj-facet-collapse-inner">
     {$this->options['keyword_help']}
   </div>

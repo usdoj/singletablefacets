@@ -35,7 +35,7 @@ $(document).ready(function() {
       labelOn = 'Show filters';
       labelOff = 'Hide filters';
     }
-    var trigger = $('<span>' + labelOn + '</span>')
+    var trigger = $('<div>' + labelOn + '</div>')
       .addClass('doj-facet-collapse-trigger')
       .click(function() {
         $(this).parent().find('.doj-facet-item-collapsed').slideToggle();

@@ -38,3 +38,6 @@
 .doj-facet-collapse-trigger {
   cursor: pointer;
 }
+.facet-items .doj-facet-collapse-trigger {
+  margin-top: 5px;
+}
