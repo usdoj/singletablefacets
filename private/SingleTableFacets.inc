@@ -64,19 +64,19 @@ class SingleTableFacets {
    *            override this.
    *          - keyword_help: If specified, will display expandable help
    *            text beneath the keyword search box.
-   *          - keyword_help_label: The label for the above help text.
+   *          - keyword_help_label: The label for the above option.
    *          - collapse_facets: If specified, will collapsed certain facets
    *            after the indicated number. Must be an array in the form of
    *            column machine name => number of items to before collapsing.
    *            If 0 is specified, the facet label itself will expand the items.
    *            Otherwise, a "Show more" link serves that purpose.
-   *          - optional_keyword_columns: This gives the user the option to
-   *            include additional columns in the keyword search. The intended
+   *          - optional_keyword_column: This gives the user the option to
+   *            include one additional column in the keyword search. The main
    *            use of this is if one column contains a massive amount of data
    *            and you don't want searches to include it by default, but still
-   *            want to allow the option to search it. This must be in the form
-   *            of column machine name => text to display by the checkbox. For
-   *            example: 'full_body_text' => 'Include full text in searches'.
+   *            want to allow the option to search it. This should be the
+   *            machine name of the column.
+   *          - optional_keyword_column_label: The label for the above option.
    *          - unique_column_for_row_merging: This specifies an optional column
    *            that is guaranteed to be unique, and allows for multiple rows
    *            to refer to the same document. This is the only way that a row
@@ -132,7 +132,8 @@ HELP;
       'keyword_help' => $default_help,
       'keyword_help_label' => 'Need help searching?',
       'collapse_facets' => array(),
-      'optional_keyword_columns' => array(),
+      'optional_keyword_column' => '',
+      'optional_keyword_column_label' => '',
       'unique_column_for_row_merging' => '',
     );
     $this->options = array();
@@ -142,6 +143,13 @@ HELP;
       }
       else {
         $this->options[$option] = $default;
+      }
+    }
+
+    // Do we need to search an extra keyword column?
+    if (!empty($this->getParameter('full_keys')) && !empty($this->options['optional_keyword_column'])) {
+      if (!in_array($this->options['optional_keyword_column'], $this->keyword_columns)) {
+        $this->keyword_columns[] = $this->options['optional_keyword_column'];
       }
     }
   }
@@ -311,6 +319,7 @@ HELP;
         $wheres[] = $keyword_where;
       }
       unset($current_query['keys']);
+      unset($current_query['full_keys']);
     }
     // Adjust the query as needed given the current request.
     if (!empty($current_query)) {
@@ -382,6 +391,7 @@ HELP;
     $allowed_params[] = 'keys';
     $allowed_params[] = 'sort';
     $allowed_params[] = 'sort_direction';
+    $allowed_params[] = 'full_keys';
     foreach ($allowed_params as $allowed_param) {
       if (!empty($params[$allowed_param])) {
         if (is_array($params[$allowed_param])) {
@@ -597,10 +607,20 @@ HELP;
 </div>
 HELP;
     }
+    $extra_column = '';
+    if (!empty($this->options['optional_keyword_column']) &&
+        !empty($this->options['optional_keyword_column_label'])) {
+      $checked = (!empty($this->getParameter('full_keys'))) ? 'checked="checked"' : '';
+      $extra_column = <<<EXTRA
+  <input type="checkbox" id="doj-extra-col" name="full_keys" value="1" {$checked}>
+  <label for="doj-extra-col">{$this->options['optional_keyword_column_label']}</label>
+EXTRA;
+    }
     $widget = <<<FORM
 <form method="get">
   <label for="doj-facet-keys">Keywords</label>
   <input type="text" name="keys" id="doj-facet-keys" value="$value" size="50" />
+  {$extra_column}
   <input type="submit" value="{$this->options['search_button_text']}" />
   <input type="button" onclick="location.href='{$this->base_url}';" value="Reset" />
 </form>
