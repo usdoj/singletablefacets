@@ -28,6 +28,12 @@ $options = array(
   'facet_dependencies' => array('coauthor' => 'author'),
   'nested_dependents' => TRUE,
 );
+$table_columns = array(
+  'title' => 'Title',
+  'author' => 'Author',
+  'date' => 'Date',
+  'teaser' => 'Description',
+);
 
 $facets = new SingleTableFacets($table, $facet_columns, $keyword_columns, $sort_columns, $options);
 ?>
@@ -35,33 +41,32 @@ $facets = new SingleTableFacets($table, $facet_columns, $keyword_columns, $sort_
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <?php print $facets->getStyles(); ?>
+    <style>
+      .my-facet-blocks { float: left; width: 33%; }
+      .my-search-results { float: right; }
+      .my-pager { clear: right; }
+    </style>
   </head>
   <body>
     <!-- Keyword search widget -->
-    <div>
+    <div class="my-search-widget">
       <?php print $facets->getKeywordWidget(); ?>
     </div>
 
     <!-- Facet blocks -->
-    <div>
+    <div class="my-facet-blocks">
       <?php print $facets->getFacets(); ?>
     </div>
 
     <!-- Search results as a table. -->
-    <div>
+    <div class="my-search-results">
       <?php
-      $table_columns = array(
-        'title' => 'Title',
-        'author' => 'Author',
-        'date' => 'Date',
-        'teaser' => 'Description',
-      );
       print $facets->getRowsAsTable($table_columns);
       ?>
     </div>
 
     <!-- Pager -->
-    <div>
+    <div class="my-pager">
       <?php print $facets->getPager(); ?>
     </div>
 

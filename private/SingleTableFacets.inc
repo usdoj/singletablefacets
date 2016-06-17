@@ -7,6 +7,7 @@
 include_once dirname(__FILE__) . '/Db.inc';
 
 class SingleTableFacets {
+
   protected $db;
   protected $table;
   protected $facet_columns;
@@ -61,6 +62,37 @@ class SingleTableFacets {
    *            default logic that will be used for multiple keywords. Users
    *            will be able to specify 'OR' or 'AND' in their searches to
    *            override this.
+   *          - keyword_help: If specified, will display expandable help
+   *            text beneath the keyword search box.
+   *          - collapse_facets: If specified, will collapsed certain facets
+   *            after the indicated number. Must be an array in the form of
+   *            column machine name => number of items to before collapsing.
+   *            If 0 is specified, the facet label itself will expand the items.
+   *            Otherwise, a "Show more" link serves that purpose.
+   *          - optional_keyword_columns: This gives the user the option to
+   *            include additional columns in the keyword search. The intended
+   *            use of this is if one column contains a massive amount of data
+   *            and you don't want searches to include it by default, but still
+   *            want to allow the option to search it. This must be in the form
+   *            of column machine name => text to display by the checkbox. For
+   *            example: 'full_body_text' => 'Include full text in searches'.
+   *          - unique_column_for_row_merging: This specifies an optional column
+   *            that is guaranteed to be unique, and allows for multiple rows
+   *            to refer to the same document. This is the only way that a row
+   *            could have multiple values for the same column. For example, if
+   *            there were a "tag" column, and a document needed to have 2 tags,
+   *            this would be the only way to do that. The first row would have
+   *            all the columns filled out, and the second row would have only
+   *            the unique column and "tag" filled out. To illustrate this, the
+   *            table would look something like this:
+   *            ---------------------------------------------------------------
+   *            | unique_id | tag     | title     | author       | other_data |
+   *            | 1         | foo     | My Title  | John Doe     | 1234       |
+   *            | 1         | bar     |           |              |            |
+   *            ---------------------------------------------------------------
+   *            In this way, document "1" could have 2 tags, "foo" and "bar".
+   *            Note that this carries a performance cost, so should only be
+   *            used if absolutely necessary.
    */
   public function __construct($table, $facet_columns, $keyword_columns = NULL, $sort_columns = NULL, $options = NULL) {
     $this->db = new Db();
@@ -72,6 +104,15 @@ class SingleTableFacets {
     $uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
     $this->base_url = $uri_parts[0];
     // Read the optional options, or use defaults.
+    $default_help = <<<HELP
+<ul>
+  <li>Use the checkboxes on the left to refine your search, or enter new keywords to start over.</li>
+  <li>Enter multiple keywords to get fewer results, eg: cat dogs</li>
+  <li>Use OR to get more results, eg: cats OR dogs</li>
+  <li>Use - (dash) to exclude keywords, eg: dogs -lazy</li>
+  <li>Use "" (double-quotes) to search specific phrases, eg: "the brown fox"</li>
+</ul>
+HELP;
     $defaults = array(
       'minimum_keyword_length' => 3,
       'facet_dependencies' => array(),
@@ -87,6 +128,9 @@ class SingleTableFacets {
       'pager_radius' => 2,
       'nested_dependents' => FALSE,
       'default_keyword_logic' => 'AND',
+      'keyword_help' => $default_help,
+      'collapse_facets' => array(),
+      'optional_keyword_columns' => array(),
     );
     $this->options = array();
     foreach ($defaults as $option => $default) {
@@ -427,6 +471,30 @@ class SingleTableFacets {
   }
 
   /**
+   * Helper function to get the facet collapsing rules for a facet.
+   * @param string $facet
+   *   Machine name for facet.
+   * @param int $num_items
+   *   Number of items for this facet.
+   * @return int
+   *   -1 if no collapsing, 0 if collapse everything, 1 or more otherwise.
+   */
+  protected function getFacetCollapse($facet, $num_items) {
+
+    // Decide on collapsing. Since 0 has a meaning, use -1 to indicate that no
+    // collapsing should happen.
+    $collapse_after = -1;
+    if (isset($this->options['collapse_facets'][$facet])) {
+      $collapse_after = $this->options['collapse_facets'][$facet];
+    }
+    if ($collapse_after >= $num_items) {
+      // No need for collapsing if the number is lower.
+      $collapse_after = -1;
+    }
+    return $collapse_after;
+  }
+
+  /**
    * Get all facet links for a facet in an unordered HTML list.
    * @param  string $facet Machine name for facet.
    * @return string        Unordered list of facet links.
@@ -436,10 +504,26 @@ class SingleTableFacets {
     if (empty($items)) {
       return '';
     }
-    $output = '  <ul class="facet-items">' . PHP_EOL;
+
+    $collapse_after = $this->getFacetCollapse($facet, count($items));
+    $class = 'facet-items';
+    if ($collapse_after > -1) {
+      $class .= ' doj-facet-collapse-outer';
+    }
+    if ($collapse_after === 0) {
+      $class .= ' doj-facet-collapse-all';
+    }
+    $output = '  <ul class="' . $class . '">' . PHP_EOL;
+
+    $num_displayed = 0;
     foreach ($items as $item => $count) {
       $link = $this->constructFacetLink($facet, $item, $count);
-      $output .= '    <li>' . $link . '</li>' . PHP_EOL;
+      $item_class = '';
+      $num_displayed += 1;
+      if ($collapse_after > -1 && $num_displayed > $collapse_after) {
+        $item_class .= ' class="doj-facet-item-collapsed"';
+      }
+      $output .= '    <li' . $item_class . '>' . $link . '</li>' . PHP_EOL;
     }
     $output .= '  </ul>' . PHP_EOL;
     return $output;
@@ -467,6 +551,7 @@ class SingleTableFacets {
     if (empty($links)) {
       return '';
     }
+
     $output = '<div class="' . $class . '">' . PHP_EOL;
     if ($show_label) {
       $labels = $this->getFacetLabels();
@@ -498,6 +583,17 @@ class SingleTableFacets {
     if (!empty($this->current_query['keys'])) {
       $value = htmlentities(stripslashes($this->current_query['keys']));
     }
+    $help = '';
+    if (!empty($this->options['keyword_help'])) {
+      $help = <<<HELP
+<div class="doj-facet-help doj-facet-collapse">
+  <span class="doj-facet-collapse-trigger">Keyword search help</span>
+  <div class="doj-facet-collapse-inner">
+    {$this->options['keyword_help']}
+  </div>
+</div>
+HELP;
+    }
     $widget = <<<FORM
 <form method="get">
   <label for="doj-facet-keys">Keywords</label>
@@ -506,7 +602,7 @@ class SingleTableFacets {
   <input type="button" onclick="location.href='{$this->base_url}';" value="Reset" />
 </form>
 FORM;
-    return $widget . PHP_EOL;
+    return $widget . PHP_EOL . $help . PHP_EOL;
   }
 
   /**
@@ -553,18 +649,29 @@ FORM;
 
   /**
    * Get the database rows in table form, using specified columns.
-   * @param  array $columns Associative array of machine-readable columns names
-   *                        keyed to human-readable column headers.
+   * @param  array $columns
+   *   Associative array of machine-readable column names keyed to
+   *   human-readable column headers.
+   * @param  array $min_widths
+   *   Associative array of machine-readable column names keyed to integers
+   *   representing the number of pixels.
+   *
    * @return string          HTML of table.
    */
-  public function getRowsAsTable($columns) {
+  public function getRowsAsTable($columns, $min_widths = array()) {
     $total_rows = 0;
     $output = '<table class="doj-facet-search-results">' . PHP_EOL;
     $output .= '  <thead>' . PHP_EOL;
     $output .= '    <tr>' . PHP_EOL;
     foreach ($columns as $column_name => $column_label) {
       $label = $this->getTableHeaderLabel($column_name, $column_label);
-      $output .= '      <th>' . $label . '</th>' . PHP_EOL;
+      if (!empty($min_widths[$column_name])) {
+        $min_width = ' style="min-width:' . $min_widths[$column_name] . ';"';
+      }
+      else {
+        $min_width = '';
+      }
+      $output .= '      <th' . $min_width . '>' . $label . '</th>' . PHP_EOL;
     }
     $output .= '    </tr>' . PHP_EOL . '  </thead>' . PHP_EOL . '  <tbody>' . PHP_EOL;
     foreach ($this->getRows() as $row) {
@@ -613,6 +720,7 @@ FORM;
     if ($this->options['checkboxes']) {
       $output .= '<script type="text/javascript" src="assets/facet-checkboxes.js"></script>' . PHP_EOL;
     }
+    $output .= '<script type="text/javascript" src="assets/facet-collapsing.js"></script>' . PHP_EOL;
     return $output;
   }
 

@@ -19,7 +19,7 @@ class Db {
     // Try and connect to the database
     if(!isset(self::$connection)) {
       // Load configuration as an array. Use the actual location of your configuration file
-      $config = parse_ini_file('./config.ini');
+      $config = parse_ini_file(dirname(__FILE__) . '/config.ini');
       self::$connection = new mysqli($config['dbhost'],$config['username'],$config['password'],$config['dbname']);
     }
 
@@ -28,7 +28,6 @@ class Db {
       // Handle error - notify administrator, log to a file, show an error screen, etc.
       return false;
     }
-    //@mysqli_select_db(self::$connection,$config['dbname']) or die( "Cannot open database");
     return self::$connection;
   }
 

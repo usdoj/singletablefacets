@@ -35,3 +35,6 @@
 .doj-facet-dependent .facet-items {
   margin-top: 0;
 }
+.doj-facet-collapse-trigger {
+  cursor: pointer;
+}
