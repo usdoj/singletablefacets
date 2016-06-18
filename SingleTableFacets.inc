@@ -4,7 +4,7 @@
  * Class for creating facets using a single database table.
  */
 
-include_once dirname(__FILE__) . '/Db.inc';
+require __DIR__ . '/vendor/autoload.php';
 
 class SingleTableFacets {
 
@@ -96,7 +96,21 @@ class SingleTableFacets {
    *            used if absolutely necessary.
    */
   public function __construct($table, $facet_columns, $keyword_columns = NULL, $sort_columns = NULL, $options = NULL) {
-    $this->db = new Db();
+
+    // Set up the database.
+    $db_info = parse_ini_file(dirname(__FILE__) . '/config.ini');
+    $config = new \Doctrine\DBAL\Configuration();
+    $connection_params = array(
+      'dbname' => $db_info['dbname'],
+      'user' => $db_info['username'],
+      'password' => $db_info['password'],
+      'host' => $db_info['dbhost'],
+      'port' => 3306,
+      'charset' => 'utf8',
+      'driver' => 'pdo_mysql',
+    );
+    $this->db = \Doctrine\DBAL\DriverManager::getConnection($connection_params, $config);
+
     $this->table = $table;
     $this->facet_columns = $facet_columns;
     $this->keyword_columns = $keyword_columns;
