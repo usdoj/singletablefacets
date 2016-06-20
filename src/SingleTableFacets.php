@@ -19,97 +19,90 @@ class SingleTableFacets {
 
   /**
    * Constructor function for singleTableFacets.
+   * @param \Doctrine\DBAL\Connection $db
+   *   The connection to the database, using the Doctrine library.
    * @param string $table
-   *        The name of the database table.
+   *   The database table to get data from.
    * @param array $facet_columns
-   *        Array of column names to treat as facets. MUST be an associative
-   *        array of column name keyed to human-readable name.
+   *   Array of column names to treat as facets. MUST be an associative
+   *   array of column name keyed to human-readable name.
    * @param array $keyword_columns
-   *        Array of column names to treat as keywords.
+   *   Array of column names to treat as keywords.
    * @param array $sort_column
-   *        Array of column names to allow sorting by. MUST be an associative
-   *        array of column name keyed to a default direction, ASC or DESC.
+   *   Array of column names to allow sorting by. MUST be an associative
+   *   array of column name keyed to a default direction, ASC or DESC.
    * @param array $options
-   *        Associative array of optional options. Options include:
-   *        	- minumum_keyword_length: Minimum number of characters a keyword
-   *        		must have to be considered.
-   *        	- facet_dependencies: An associative array of facets that depend
-   *        		on other facets before they are displayed. Eg:
-   *        		array('child_category' => 'parent_category')
-   *        	- active_prefix: A string to prepend to all active facet items.
-   *        	- show_counts: Whether to display the counts of facet items.
-   *        	- search_button_text: A string to use for the search button text.
-   *        	- hide_single_item_facets: Hide non-active facets with <2 items.
-   *        	- no_results_message: Message to display when no results are found.
-   *        	- checkboxes: Whether to use checkboxes or ordinary links.
-   *        	- pager_limit: The number items per page, or 0 to disable paging.
-   *        	- href_columns: A mapping of columns for if some columns need to
-   *        		be treated as hrefs in links, where another column is the label.
-   *        		MUST be an associative array of $label_column => $href_column.
-   *          - required_columns: An array of columns which cannot be NULL.
-   *          - pager_radius: The maximum number of pager pages to show on each
-   *            side of the current page. If there are more pager pages than
-   *            this max, then the extra pages will be replaced with a "...".
-   *            Use 0 to display all pages.
-   *          - nested_dependents: Whether to hide the labels of the facet
-   *            blocks for dependents and indent them slightly to make them
-   *            look "nested". Note that this may appear confusing if the parent
-   *            facet has multiple items in it. (The child facets will appear
-   *            to be nested from the last parent item.) This also assumes that
-   *            the child facet is directly after the parent facet in the
-   *            $facet_columns parameter.
-   *          - default_keyword_logic: Can be 'OR' or 'AND'. Determines the
-   *            default logic that will be used for multiple keywords. Users
-   *            will be able to specify 'OR' or 'AND' in their searches to
-   *            override this.
-   *          - keyword_help: If specified, will display expandable help
-   *            text beneath the keyword search box.
-   *          - keyword_help_label: The label for the above option.
-   *          - collapse_facets: If specified, will collapsed certain facets
-   *            after the indicated number. Must be an array in the form of
-   *            column machine name => number of items to before collapsing.
-   *            If 0 is specified, the facet label itself will expand the items.
-   *            Otherwise, a "Show more" link serves that purpose.
-   *          - optional_keyword_column: This gives the user the option to
-   *            include one additional column in the keyword search. The main
-   *            use of this is if one column contains a massive amount of data
-   *            and you don't want searches to include it by default, but still
-   *            want to allow the option to search it. This should be the
-   *            machine name of the column.
-   *          - optional_keyword_column_label: The label for the above option.
-   *          - unique_column_for_row_merging: This specifies an optional column
-   *            that is guaranteed to be unique, and allows for multiple rows
-   *            to refer to the same document. This is the only way that a row
-   *            could have multiple values for the same column. For example, if
-   *            there were a "tag" column, and a document needed to have 2 tags,
-   *            this would be the only way to do that. The first row would have
-   *            all the columns filled out, and the second row would have only
-   *            the unique column and "tag" filled out. To illustrate this, the
-   *            table would look something like this:
-   *            ---------------------------------------------------------------
-   *            | unique_id | tag     | title     | author       | other_data |
-   *            | 1         | foo     | My Title  | John Doe     | 1234       |
-   *            | 1         | bar     |           |              |            |
-   *            ---------------------------------------------------------------
-   *            In this way, document "1" could have 2 tags, "foo" and "bar".
-   *            Note that this carries a performance cost, so should only be
-   *            used if absolutely necessary.
+   *   Associative array of optional options. Options include:
+   *     - minumum_keyword_length: Minimum number of characters a keyword
+   *       must have to be considered.
+   *     - facet_dependencies: An associative array of facets that depend
+   *       on other facets before they are displayed. Eg:
+   *       array('child_category' => 'parent_category')
+   *     - active_prefix: A string to prepend to all active facet items.
+   *     - show_counts: Whether to display the counts of facet items.
+   *     - search_button_text: A string to use for the search button text.
+   *     - hide_single_item_facets: Hide non-active facets with <2 items.
+   *     - no_results_message: Message to display when no results are found.
+   *     - checkboxes: Whether to use checkboxes or ordinary links.
+   *     - pager_limit: The number items per page, or 0 to disable paging.
+   *     - href_columns: A mapping of columns for if some columns need to
+   *       be treated as hrefs in links, where another column is the label.
+   *       MUST be an associative array of $label_column => $href_column.
+   *     - required_columns: An array of columns which cannot be NULL.
+   *     - pager_radius: The maximum number of pager pages to show on each
+   *       side of the current page. If there are more pager pages than
+   *       this max, then the extra pages will be replaced with a "...".
+   *       Use 0 to display all pages.
+   *     - nested_dependents: Whether to hide the labels of the facet
+   *       blocks for dependents and indent them slightly to make them
+   *       look "nested". Note that this may appear confusing if the parent
+   *       facet has multiple items in it. (The child facets will appear
+   *       to be nested from the last parent item.) This also assumes that
+   *       the child facet is directly after the parent facet in the
+   *       $facet_columns parameter.
+   *     - default_keyword_logic: Can be 'OR' or 'AND'. Determines the
+   *       default logic that will be used for multiple keywords. Users
+   *       will be able to specify 'OR' or 'AND' in their searches to
+   *       override this.
+   *     - keyword_help: If specified, will display expandable help
+   *       text beneath the keyword search box.
+   *     - keyword_help_label: The label for the above option.
+   *     - collapse_facets: If specified, will collapsed certain facets
+   *       after the indicated number. Must be an array in the form of
+   *       column machine name => number of items to before collapsing.
+   *       If 0 is specified, the facet label itself will expand the items.
+   *       Otherwise, a "Show more" link serves that purpose.
+   *     - optional_keyword_column: This gives the user the option to
+   *       include one additional column in the keyword search. The main
+   *       use of this is if one column contains a massive amount of data
+   *       and you don't want searches to include it by default, but still
+   *       want to allow the option to search it. This should be the
+   *       machine name of the column.
+   *     - optional_keyword_column_label: The label for the above option.
+   *     @TODO: Implement the below if needed...
+   *     - unique_column_for_row_merging: This specifies an optional column
+   *       that is guaranteed to be unique, and allows for multiple rows
+   *       to refer to the same document. This is the only way that a row
+   *       could have multiple values for the same column. For example, if
+   *       there were a "tag" column, and a document needed to have 2 tags,
+   *       this would be the only way to do that. The first row would have
+   *       all the columns filled out, and the second row would have only
+   *       the unique column and "tag" filled out. To illustrate this, the
+   *       table would look something like this:
+   *       ---------------------------------------------------------------
+   *       | unique_id | tag     | title     | author       | other_data |
+   *       | 1         | foo     | My Title  | John Doe     | 1234       |
+   *       | 1         | bar     |           |              |            |
+   *       ---------------------------------------------------------------
+   *       In this way, document "1" could have 2 tags, "foo" and "bar".
+   *       Note that this carries a performance cost, so should only be
+   *       used if absolutely necessary.
+   *       NOTE: The unique_column_for_row_merging is not implemented yet!
    */
-  public function __construct($table, $facet_columns, $keyword_columns = NULL, $sort_columns = NULL, $options = NULL) {
+  public function __construct($db, $table, $facet_columns, $keyword_columns = NULL, $sort_columns = NULL, $options = NULL) {
 
     // Set up the database.
-    $db_info = parse_ini_file(dirname(__FILE__) . '/config.ini');
-    $config = new \Doctrine\DBAL\Configuration();
-    $connection_params = array(
-      'dbname' => $db_info['dbname'],
-      'user' => $db_info['username'],
-      'password' => $db_info['password'],
-      'host' => $db_info['dbhost'],
-      'port' => 3306,
-      'charset' => 'utf8',
-      'driver' => 'pdo_mysql',
-    );
-    $this->db = \Doctrine\DBAL\DriverManager::getConnection($connection_params, $config);
+    $this->db = $db;
 
     $this->table = $table;
     $this->facet_columns = $facet_columns;
@@ -207,15 +200,50 @@ HELP;
   }
 
   /**
-   * Get a MYSQL where statement for this page.
-   * @return string The WHERE statement for inclusion in a MYSQL query.
+   * Helper function to get a base QueryBuilder query.
    */
-  protected function getWhereStatement() {
+  protected function getBaseQuery() {
+    $query = $this->db->createQueryBuilder();
+    $query->from($this->table);
+    $this->addWhereStatement($query);
+    return $query;
+  }
+
+  /**
+   * Internal function to split a string into an array of space-delimited tokens
+   * taking double-quoted and single-quoted strings into account.
+   */
+  protected function tokenizeQuoted($string, $quotationMarks='"\'') {
+    $tokens = array();
+    for ($nextToken=strtok($string, ' '); $nextToken!==false; $nextToken=strtok(' ')) {
+      if (strpos($quotationMarks, $nextToken[0]) !== false) {
+        if (strpos($quotationMarks, $nextToken[strlen($nextToken)-1]) !== false) {
+          $tokens[] = substr($nextToken, 1, -1);
+        }
+        else {
+          $tokens[] = substr($nextToken, 1) . ' ' . strtok($nextToken[0]);
+        }
+      }
+      else {
+        $tokens[] = $nextToken;
+      }
+    }
+    return $tokens;
+  }
+
+  /**
+   * Add a MYSQL where statement for this page to a query object.
+   */
+  protected function addWhereStatement($query) {
     $current_query = $this->current_query;
     // For the purposes of the WHERE statement, we don't care about sorting.
     unset($current_query['sort']);
     unset($current_query['sort_direction']);
-    $wheres = array();
+
+    // Keep track of the parameters. We'll compile them throughout this function
+    // and addiing them onto the query at the end of the function.
+    $parameters = array();
+
     /*
      * Keywords are a special case. Here are the requirements for keyword
      * search behavior:
@@ -265,98 +293,77 @@ HELP;
       if (!empty($keywords) && !empty($this->keyword_columns)) {
 
         // First parse out the keywords we need to search for.
+        $keywords = $this->tokenizeQuoted($keywords);
         $parsed_keywords = array();
-        $current_quoted_phrase = '';
-        foreach (explode(' ', $keywords) as $keyword) {
-          if (empty($keyword)) {
-            continue;
-          }
-          if ('AND' == $keyword) {
-            $boolean = 'AND';
-            continue;
-          }
-          if ('OR' == $keyword) {
-            $boolean = 'OR';
-            continue;
-          }
-          if (empty($current_quoted_phrase) && '\"' == substr($keyword, 0, 2)) {
-            // If this is a single word double-quoted, treat it as a regular
-            // keyword.
-            if ('\"' == substr($keyword, -2)) {
-              $keyword = str_replace('\"', '', $keyword);
-            }
-            // Otherwise start a quoted phrase and continue.
-            else {
-              $current_quoted_phrase = $keyword;
+        foreach ($keywords as $keyword) {
+          // Ignore the keywords "OR", "AND", and anything shorter than minimum.
+          if (!empty($keyword)) {
+            $keyword = trim($keyword);
+            if ('AND' == $keyword) {
+              $boolean = 'AND';
               continue;
             }
-          }
-          if (!empty($current_quoted_phrase)) {
-            if ('\"' == substr($keyword, -2)) {
-              $current_quoted_phrase .= ' ' . $keyword;
-              $keyword = str_replace('\"', '', $current_quoted_phrase);
-              $current_quoted_phrase = '';
-            }
-            else {
-              $current_quoted_phrase .= ' ' . $keyword;
+            elseif ('OR' == $keyword) {
+              $boolean = 'OR';
               continue;
             }
+            elseif (strlen($keyword) < $this->options['minimum_keyword_length']) {
+              continue;
+            }
+            $parsed_keywords[] = $keyword;
           }
-          if (strlen($keyword) < $this->options['minimum_keyword_length']) {
-            continue;
-          }
-          $keyword = str_replace('%', '', $keyword);
-          $parsed_keywords[] = trim($keyword);
         }
 
-        // Next, loop through the keywords (outer loop) and the columsn (inner).
-        $keyword_wheres = array();
-        foreach ($parsed_keywords as $keyword) {
-          $operator = 'LIKE';
-          $keyword_column_boolean = 'OR';
-          if ('-' == substr($keyword, 0, 1)) {
-            $operator = 'NOT LIKE';
-            $keyword_column_boolean = 'AND';
-            $keyword = substr($keyword, 1);
-          }
-          $keyword_column_wheres = array();
-          foreach ($this->keyword_columns as $keyword_column) {
-            $keyword_column_wheres[] = "LOWER($keyword_column) $operator LOWER('%$keyword%')";
-          }
-          $keyword_column_glue = ') ' . $keyword_column_boolean . ' (';
-          $keyword_wheres[] = '(' . implode($keyword_column_glue, $keyword_column_wheres) . ')';
+        // Next, loop through the keywords (outer loop) and the columns (inner).
+        if ('AND' == $boolean) {
+          $keyword_where = $query->expr()->andX();
         }
-        $keyword_glue = ') ' . $boolean . '(';
-        $keyword_where = '(' . implode($keyword_glue, $keyword_wheres) . ')';
+        else {
+          $keyword_where = $query->expr()->orX();
+        }
 
-        // Finally, add the big WHERE to the query.
-        $wheres[] = $keyword_where;
+        if (!empty($parsed_keywords)) {
+          foreach ($parsed_keywords as $keyword) {
+
+            if ('-' == substr($keyword, 0, 1)) {
+              $operator = 'NOT LIKE';
+              $keyword = substr($keyword, 1);
+              $keyword_column_where = $query->expr()->andX();
+            }
+            else {
+              $operator = 'LIKE';
+              $keyword_column_where = $query->expr()->orX();
+            }
+            foreach ($this->keyword_columns as $keyword_column) {
+              $keyword_column_where->add("LOWER($keyword_column) $operator LOWER('%$keyword%')");
+            }
+            $keyword_where->add($keyword_column_where);
+          }
+          // Finally, add the big WHERE to the query.
+          $query->andWhere($keyword_where);
+        }
       }
       unset($current_query['keys']);
       unset($current_query['full_keys']);
     }
-    // Adjust the query as needed given the current request.
+    // Add conditions for the facets.
     if (!empty($current_query)) {
       foreach ($current_query as $current_facet => $current_items) {
-        $item_array = '"';
-        $item_array .= implode('","', $current_items);
-        $item_array .= '"';
-        $wheres[] = "$current_facet IN ($item_array)";
+        $in = str_repeat('?,', count($current_items) - 1) . '?';
+        foreach ($current_items as $current_item) {
+          $parameters[] = $current_item;
+        }
+        $query->andWhere("$current_facet IN ($in)");
       }
     }
     // Add conditions for any required columns.
     if (!empty($this->options['required_columns'])) {
       foreach ($this->options['required_columns'] as $required_column) {
-        $wheres[] = "($required_column <> '' AND $required_column IS NOT NULL)";
+        $query->andWhere("($required_column <> '' AND $required_column IS NOT NULL)");
       }
     }
-    $ret = '';
-    if (!empty($wheres)) {
-      $ret .= ' WHERE (';
-      $ret .= implode(') AND (', $wheres);
-      $ret .= ')';
-    }
-    return $ret;
+
+    $query->setParameters($parameters);
   }
 
   /**
@@ -369,10 +376,12 @@ HELP;
       return array();
     }
     $facet_items = array();
-    $query = "SELECT $facet AS item, COUNT($facet) AS count FROM `$this->table`";
-    $where = $this->getWhereStatement();
-    $group = " GROUP BY $facet";
-    $result = $this->db->query($query . $where . $group);
+
+    $query = $this->getBaseQuery();
+    $query->addSelect("$facet AS item, COUNT($facet) AS count");
+    $query->groupBy($facet);
+    $result = $query->execute();
+
     foreach ($result as $row) {
       if (!empty($row['item'])) {
         $facet_items[$row['item']] = $row['count'];
@@ -410,11 +419,11 @@ HELP;
       if (!empty($params[$allowed_param])) {
         if (is_array($params[$allowed_param])) {
           foreach ($params[$allowed_param] as $param) {
-            $current_query[$allowed_param][] = $this->db->escape($param);
+            $current_query[$allowed_param][] = $param;
           }
         }
         elseif (is_string($params[$allowed_param])) {
-          $current_query[$allowed_param] = $this->db->escape($params[$allowed_param]);
+          $current_query[$allowed_param] = $params[$allowed_param];
         }
       }
     }
@@ -666,22 +675,21 @@ FORM;
    * @return array Array of row arrays.
    */
   public function getRows() {
-    $query = "SELECT * FROM $this->table";
-    $where = $this->getWhereStatement();
+    $query = $this->getBaseQuery();
+    $query->select('*');
     $limit = '';
     if ($this->options['pager_limit'] !== 0) {
       $page = $this->getPage();
-      $limit = ' LIMIT ' . $this->options['pager_limit'];
-      $limit .= ' OFFSET ' . $this->options['pager_limit'] * $page;
+      $query->setMaxResults($this->options['pager_limit']);
+      $query->setFirstResult($this->options['pager_limit'] * $page);
     }
     $sort_field = $this->getSortField();
     $sort_direction = $this->getSortDirection();
     $order = '';
     if (!empty($sort_field) && !empty($sort_direction)) {
-      $order = ' ORDER BY ' . $sort_field . ' ' . $sort_direction;
+      $query->orderBy($sort_field, $sort_direction);
     }
-    $result = $this->db->query($query . $where . $order . $limit);
-    return $result;
+    return $query->execute();
   }
 
   /**
@@ -832,9 +840,9 @@ FORM;
    * @return int Number of matching rows.
    */
   protected function getRowCount() {
-    $query = "SELECT COUNT(*) as count FROM $this->table";
-    $where = $this->getWhereStatement();
-    $result = $this->db->query($query . $where);
+    $query = $this->getBaseQuery();
+    $query->select("COUNT(*) as count");
+    $result = $query->execute();
     foreach ($result as $row) {
       return $row['count'];
     }
