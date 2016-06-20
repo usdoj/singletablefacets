@@ -1,4 +1,5 @@
 {
+    "name": "usdoj/singletablefacets",
     "require": {
         "doctrine/dbal": "2.5.4"
     }
