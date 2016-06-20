@@ -4,6 +4,8 @@
         "doctrine/dbal": "2.5.4"
     },
     "autoload": {
-        "psr-4": {"USDOJ\\SingleTableFacets\\": "src/"}
+        "psr-4": {
+	    "USDOJ\\": "src/"
+        }
     }
 }
