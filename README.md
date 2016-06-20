@@ -6,13 +6,46 @@ This class is intended as a simple faceted search solution for PHP applications 
 
 * PHP/MySQL
 * jQuery (for checkbox-style facets)
+* Composer
+
+## Installation
+
+Use composer to bring this into your PHP project. The composer.json should look like this:
+
+```
+{
+    "require": {
+        "usdoj/singletablefacets": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/usdoj/singletablefacets.git"
+        }
+    ]
+}
+```
 
 ## Usage
 
-See example.php for a more detailed example, but here is the basic idea:
+See docs/example.index.php for a more detailed example, but here is the basic idea:
 
 ```
 // First you instantiate the object using array-based parameters and options.
+
+// Connect to the database.
+// Get database connection.
+$config = new \Doctrine\DBAL\Configuration();
+$connectionParams = array(
+    'dbname' => 'mydatabase',
+    'user' => 'myuser',
+    'password' => 'mypassword',
+    'host' => 'localhost',
+    'port' => 3306,
+    'charset' => 'utf8',
+    'driver' => 'pdo_mysql',
+);
+$db = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
 
 // Pick a database table.
 $table = 'mytable';
@@ -44,7 +77,7 @@ $sort_columns = array(
 $options = array();
 
 // Instantiate the object.
-$facets = new SingleTableFacets($table, $facet_columns, $keyword_columns, $sort_columns, $options);
+$facets = new SingleTableFacets($db, $table, $facet_columns, $keyword_columns, $sort_columns, $options);
 
 // Now you can use these methods on the object to output the markup on your
 // search page, wherever you would like.
