@@ -4,7 +4,7 @@
  * Class for creating facets using a single database table.
  */
 
-namespace USODJ;
+namespace USDOJ;
 
 class SingleTableFacets {
 
