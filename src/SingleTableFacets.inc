@@ -4,7 +4,7 @@
  * Class for creating facets using a single database table.
  */
 
-require __DIR__ . '/vendor/autoload.php';
+namespace USODJ\SingleTableFacets;
 
 class SingleTableFacets {
 
