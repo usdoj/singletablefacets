@@ -1,3 +1,4 @@
 /config.ini
 /public/index.php
 /vendor
+/composer.lock
