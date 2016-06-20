@@ -79,6 +79,9 @@ class SingleTableFacets {
    *       want to allow the option to search it. This should be the
    *       machine name of the column.
    *     - optional_keyword_column_label: The label for the above option.
+   *     - sort_facet_items_by_popularity: The facets will be sorted by how
+   *       many items they have. Defaults to TRUE. If FALSE, they will be sorted
+   *       alphabetically by the value.
    *     @TODO: Implement the below if needed...
    *     - unique_column_for_row_merging: This specifies an optional column
    *       that is guaranteed to be unique, and allows for multiple rows
@@ -142,6 +145,7 @@ HELP;
       'optional_keyword_column' => '',
       'optional_keyword_column_label' => '',
       'unique_column_for_row_merging' => '',
+      'sort_facet_items_by_popularity' => TRUE,
     );
     $this->options = array();
     foreach ($defaults as $option => $default) {
@@ -380,6 +384,12 @@ HELP;
     $query = $this->getBaseQuery();
     $query->addSelect("$facet AS item, COUNT($facet) AS count");
     $query->groupBy($facet);
+    if ($this->options['sort_facet_items_by_popularity']) {
+      $query->orderBy('count', 'DESC');
+    }
+    else {
+      $query->orderBy('item', 'ASC');
+    }
     $result = $query->execute();
 
     foreach ($result as $row) {

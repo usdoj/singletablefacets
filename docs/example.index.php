@@ -1,49 +1,91 @@
 <?php
 /**
- * @file
- * Proof of concept for a single-table faceted search.
+ * This is an example of how you might use implement this class.
  */
 
-include_once dirname(__FILE__) . '/../private/SingleTableFacets.inc';
+// Include the autoload file so that you can use the class.
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Get database connection.
+$config = new \Doctrine\DBAL\Configuration();
+$connectionParams = array(
+    'dbname' => 'mydatabase',
+    'user' => 'myuser',
+    'password' => 'mypassword',
+    'host' => 'localhost',
+    'port' => 3306,
+    'charset' => 'utf8',
+    'driver' => 'pdo_mysql',
+);
+$db = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
 
 // This is just an example. It can be customized depending on needs.
-$table = 'mytable';
+$table = 'mytablename';
+
+// This determines which database columns will show up as facets.
 $facet_columns = array(
-  'tag' => 'Filter by tag',
-  'author' => 'Filter by author',
-  'coauthor' => 'Filter by coauthor',
-);
-$keyword_columns = array(
-  'title',
-  'teaser',
-  'body',
-);
-$sort_columns = array(
-  'title' => 'ASC',
-  'author' => 'ASC',
-  'date' => 'DESC',
-);
-$options = array(
-  'checkboxes' => TRUE,
-  'facet_dependencies' => array('coauthor' => 'author'),
-  'nested_dependents' => TRUE,
-);
-$table_columns = array(
-  'title' => 'Title',
-  'author' => 'Author',
-  'date' => 'Date',
-  'teaser' => 'Description',
+  'DocumentType' => 'Filter by document type',
+  'SubdocumentType' => 'Filter by subdocument type',
+  'Category' => 'Filter by category',
+  'Circuit' => 'Filter by circuit',
+  'District' => 'Filter by district',
 );
 
-$facets = new SingleTableFacets($table, $facet_columns, $keyword_columns, $sort_columns, $options);
+// This determines which database columns will be consulted during keyword
+// searches.
+$keyword_columns = array(
+  'Title',
+  'Statute',
+  'Keyword',
+  'DocumentType',
+  'SubdocumentType',
+);
+
+// This determines the default sort, and the options for sorting when using the
+// table display.
+$sort_columns = array(
+  'Title' => 'ASC',
+  'Statute' => 'ASC',
+);
+
+// These are a variety of optional settings. For the full list, see the comments
+// at the top of the class.
+$options = array(
+  'checkboxes' => TRUE,
+  'facet_dependencies' => array('SubdocumentType' => 'DocumentType'),
+  'nested_dependents' => TRUE,
+  'pager_limit' => 20,
+  'required_columns' => array('Title'),
+  'href_columns' => array('Title' => 'FileUrl'),
+  'collapse_facets' => array('District' => 5, 'Circuit' => 5),
+);
+
+// This determines which columns show up in the table-style results.
+$table_columns = array(
+  'Title' => 'Title',
+  'Statute' => 'Statute',
+  'DocumentType' => 'Document Type',
+);
+
+// Finally, instantiate the object.
+$facets = new \USDOJ\SingleTableFacets($db, $table, $facet_columns, $keyword_columns, $sort_columns, $options);
+
+// Now all that is left is to display the various bits. In the HTML below, note
+// these scattered PHP snippets:
+// $facets->getStyles();
+// $facets->getKeywordWidget();
+// $facets->getFacets();
+// $facets->getResultsAsTable();
+// $facets->getPager();
+// $facets->getJavascript();
 ?>
 <html>
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <?php print $facets->getStyles(); ?>
     <style>
-      .my-facet-blocks { float: left; width: 33%; }
-      .my-search-results { float: right; }
+      .my-facet-blocks { float: left; width: 20%; }
+      .my-search-results { float: right; width: 80%; }
       .my-pager { clear: right; }
     </style>
   </head>
