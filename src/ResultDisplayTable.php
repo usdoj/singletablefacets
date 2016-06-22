@@ -10,7 +10,7 @@ use USDOJ\SingleTableFacets\ResultDisplayBase;
 
 class ResultDisplayTable extends ResultDisplayBase {
 
-  public function renderResults($columns, $minWidths = array()) {
+  public function render($columns, $minWidths = array()) {
     $totalRows = 0;
     $hrefColumns = $this->getApp()->getOption('href_columns');
     $output = '<table class="doj-facet-search-results">' . PHP_EOL;
@@ -75,6 +75,7 @@ class ResultDisplayTable extends ResultDisplayBase {
         $class .= ' doj-facet-sort-link-desc';
       }
     }
+    $query['sort_direction'] = $direction;
     return Link::getHtml($this->getApp()->getBaseUrl(), $columnLabel, $query, $class);
   }
 }

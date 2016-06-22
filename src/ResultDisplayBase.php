@@ -13,8 +13,6 @@ abstract class ResultDisplayBase {
 
   private $app;
 
-  abstract public function renderResults();
-
   public function getApp() {
     return $this->app;
   }
@@ -35,7 +33,11 @@ abstract class ResultDisplayBase {
   }
 
   protected function getPage() {
-    return $this->getApp()->getParameter('page');
+    $page = $this->getApp()->getParameter('page');
+    if (empty($page)) {
+      $page = 1;
+    }
+    return $page;
   }
 
   protected function getSortField() {
@@ -80,7 +82,7 @@ abstract class ResultDisplayBase {
     $query->select('*');
     $limit = $this->getApp()->getOption('pager_limit');
     if ($limit !== 0) {
-      $page = $this->getPage();
+      $page = intval($this->getPage()) - 1;
       $query->setMaxResults($limit);
       $query->setFirstResult($limit * $page);
     }
@@ -101,13 +103,24 @@ abstract class ResultDisplayBase {
     }
 
     $totalItems = $this->getRowCount();
-    $currentPage = $this->getPage();
+    $currentPage = intval($this->getPage());
 
     $parameters = $this->getApp()->getParameters();
+
     // Set overwrite the page parameter with a token for Paginator to replace.
-    $parameters['page'] = '(:num)';
+    if (empty($parameters['page'])) {
+      $parameters['page'] = $currentPage;
+    }
     $urlPattern = Link::getHref($this->getApp()->getBaseUrl(), $parameters);
 
-    return new Paginator($totalItems, $itemsPerPage, $currentPage, $urlPattern);
+    // We need to get Paginator's token into the URLs.
+    $search = 'page=' . $currentPage;
+    $replace = 'page=(:num)';
+    $urlPattern = str_replace($search, $replace, $urlPattern);
+
+    $paginator = new Paginator($totalItems, $itemsPerPage, $currentPage, $urlPattern);
+    $paginator->setMaxPagesToShow($this->getApp()->getOption('max_pages_in_pager'));
+
+    return '<div class="doj-facet-pager">' . $paginator->toHtml() . '</div>';
   }
 }

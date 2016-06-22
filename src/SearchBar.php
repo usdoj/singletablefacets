@@ -44,7 +44,7 @@ class SearchBar {
     $widget = '
       <form method="get">
         <label for="doj-facet-keys">Keywords</label>
-        <input type="text" name="keys" id="doj-facet-keys" value="$value" size="50" />
+        <input type="text" name="keys" id="doj-facet-keys" value="' . $keys . '" size="50" />
         ' . $optional . '
         <input type="submit" value="' . $app->getOption('search_button_text') . '" />
         <input type="button" onclick="location.href=\'' . $app->getBaseUrl() . '\';" value="Reset" />

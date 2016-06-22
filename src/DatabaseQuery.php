@@ -129,7 +129,7 @@ class DatabaseQuery {
       foreach ($parsedQueryString as $facetName => $facetItemValues) {
         $in = str_repeat('?,', count($facetItemValues) - 1) . '?';
         foreach ($facetItemValues as $facetItem) {
-          $parameters[] = $cu;
+          $parameters[] = $facetItem;
         }
         $query->andWhere("$facetName IN ($in)");
       }
@@ -142,7 +142,9 @@ class DatabaseQuery {
       }
     }
 
-    $query->setParameters($parameters);
+    if (!empty($parameters)) {
+      $query->setParameters($parameters);
+    }
     return $query;
   }
 }

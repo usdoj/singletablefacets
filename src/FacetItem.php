@@ -64,7 +64,7 @@ class FacetItem {
     }
     // Otherwise we need to add it to the current query.
     else {
-      $parameters[$facet][] = $item;
+      $parameters[$facet][] = $value;
     }
 
     // Add the item count if necessary.

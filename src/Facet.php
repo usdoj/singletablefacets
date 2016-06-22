@@ -49,7 +49,7 @@ class Facet {
 
     foreach ($result as $row) {
       if (!empty($row['item'])) {
-        $this->items[] = new FacetItem($name, $row['item'], $row['count']);
+        $this->items[] = new FacetItem($name, $row['item'], $row['count'], $app);
       }
     }
   }
@@ -141,11 +141,6 @@ class Facet {
 
     // If the facet does not meet its dependencies, do not display it.
     if (!$this->meetsDependencies()) {
-      return '';
-    }
-
-    // First check for dependencies.
-    if (!$this->facetDependencyMet($facet)) {
       return '';
     }
 

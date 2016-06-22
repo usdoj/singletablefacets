@@ -8,7 +8,8 @@ namespace USDOJ\SingleTableFacets;
 
 use USDOJ\SingleTableFacets\Facet,
     USDOJ\SingleTableFacets\SearchBar,
-    USDOJ\SingleTableFacets\Link;
+    USDOJ\SingleTableFacets\Link,
+    USDOJ\SingleTableFacets\ResultDisplayTable;
 
 class App {
 
@@ -20,6 +21,7 @@ class App {
   private $options;
   private $parameters;
   private $facets;
+  private $display;
 
   // When the app is instantiated, we can do all of the expensive things once
   // and then store them on the object.
@@ -35,6 +37,20 @@ class App {
 
     $uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
     $this->baseUrl = $uri_parts[0];
+
+    // For now, there is only one type of display, but in the future we may
+    // want to make this configurable.
+    $this->display = new ResultDisplayTable($this);
+
+    // Add the optional keyword column if necessary.
+    $optionalKeywordColumn = $this->getOption('optional_keyword_column');
+    if (!empty($optionalKeywordColumn)) {
+      if ($this->getParameter('full_keys')) {
+        if (!in_array($optionalKeywordColumn, $keywordColumns)) {
+          $this->keywordColumns[] = $optionalKeywordColumn;
+        }
+      }
+    }
   }
 
   private function getDefaultOptions() {
@@ -49,7 +65,7 @@ class App {
       'pager_limit' => 20,
       'href_columns' => array(),
       'required_columns' => array(),
-      'pager_radius' => 2,
+      'max_pages_in_pager' => 5,
       'nested_dependents' => FALSE,
       'keyword_help' => '
         <ul>
@@ -69,6 +85,10 @@ class App {
 
   public function getDb() {
     return $this->db;
+  }
+
+  public function getDisplay() {
+    return $this->display;
   }
 
   public function getBaseUrl() {
@@ -91,8 +111,12 @@ class App {
     return $this->keywordColumns;
   }
 
+  public function getSortColumns() {
+    return $this->sortColumns;
+  }
+
   public function getExtraParameters() {
-    return array('keys', 'sort', 'sort_direction', 'full_keys');
+    return array('keys', 'sort', 'sort_direction', 'full_keys', 'page');
   }
 
   private function getAllowedParameters() {
@@ -102,8 +126,8 @@ class App {
   }
 
   public function getParameter($param) {
-    if (!empty($this->currentQuery[$param])) {
-      return $this->currentQuery[$param];
+    if (!empty($this->parameters[$param])) {
+      return $this->parameters[$param];
     }
     return FALSE;
   }
@@ -145,6 +169,14 @@ class App {
     return $output;
   }
 
+  public function renderResultsAsTable($columns, $minWidths = array()) {
+    return $this->getDisplay()->render($columns, $minWidths);
+  }
+
+  public function renderPager() {
+    return $this->getDisplay()->renderPager();
+  }
+
   /**
    * Helper function to split a string into an array of space-delimited tokens
    * taking double-quoted and single-quoted strings into account.
@@ -167,11 +199,11 @@ class App {
     return $tokens;
   }
 
-  public function getJavascript() {
+  public function renderJavascript() {
     return '<script type="text/javascript" src="assets/singletablefacets.js"></script>';
   }
 
-  public function getStyles() {
+  public function renderStyles() {
     return '<link rel="stylesheet" href="assets/singletablefacets.css" />';
   }
 }
