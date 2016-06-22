@@ -1,7 +1,11 @@
 {
     "name": "usdoj/singletablefacets",
     "require": {
-        "doctrine/dbal": "2.5.4"
+        "doctrine/dbal": "2.5.4",
+        "jasongrimes/paginator": "1.0.2",
+        "crodas/text-rank": "dev-master",
+        "asika/pdf2text": "1.0.3",
+        "html2text/html2text": "4.0.1"
     },
     "autoload": {
         "psr-4": {
