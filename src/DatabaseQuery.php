@@ -9,7 +9,7 @@ namespace USDOJ\SingleTableFacets;
 class DatabaseQuery {
 
   public static function start($app) {
-    $query = $app->db->createQueryBuilder();
+    $query = $app->getDb()->createQueryBuilder();
     $query->from($app->getTable());
 
     /*

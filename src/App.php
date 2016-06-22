@@ -67,11 +67,8 @@ class App {
     );
   }
 
-  public function startDatabaseQuery() {
-    $query = $this->db->createQueryBuilder();
-    $query->from($this->table);
-    $this->addWhereStatement($query);
-    return $query;
+  public function getDb() {
+    return $this->db;
   }
 
   public function getBaseUrl() {
