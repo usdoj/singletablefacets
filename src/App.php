@@ -7,7 +7,6 @@
 namespace USDOJ\SingleTableFacets;
 
 use USDOJ\SingleTableFacets\Facet,
-    USDOJ\SingleTableFacets\FacetItem,
     USDOJ\SingleTableFacets\SearchBar,
     USDOJ\SingleTableFacets\Link;
 
@@ -169,5 +168,13 @@ class App {
       }
     }
     return $tokens;
+  }
+
+  public function getJavascript() {
+    return '<script type="text/javascript" src="assets/singletablefacets.js"></script>';
+  }
+
+  public function getStyles() {
+    return '<link rel="stylesheet" href="assets/singletablefacets.css" />';
   }
 }
