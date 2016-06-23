@@ -108,7 +108,7 @@ class DatabaseQuery {
             $keywordColumnWhere = $query->expr()->orX();
           }
           foreach ($app->getKeywordColumns() as $keywordColumn) {
-            $keywordColumnWhere->add("$keywordColumn $operator ?)");
+            $keywordColumnWhere->add("$keywordColumn $operator ?");
             $anonymous_parameters[] = "%$keyword%";
           }
           $keywordWhere->add($keywordColumnWhere);
@@ -128,7 +128,7 @@ class DatabaseQuery {
       foreach ($parsedQueryString as $facetName => $facetItemValues) {
         $in = str_repeat('?,', count($facetItemValues) - 1) . '?';
         foreach ($facetItemValues as $facetItem) {
-          $parameters[] = $facetItem;
+          $anonymous_parameters[] = $facetItem;
         }
         $query->andWhere("$facetName IN ($in)");
       }
@@ -141,8 +141,8 @@ class DatabaseQuery {
       }
     }
 
-    if (!empty($parameters)) {
-      $query->setParameters($parameters);
+    if (!empty($anonymous_parameters)) {
+      $query->setParameters($anonymous_parameters);
     }
     return $query;
   }
