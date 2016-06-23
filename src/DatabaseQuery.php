@@ -12,6 +12,10 @@ class DatabaseQuery {
     $query = $app->getDb()->createQueryBuilder();
     $query->from($app->getTable());
 
+    // Keep track of the parameters. We'll compile them below and then we
+    // be adding them onto the query at the end of the function.
+    $anonymous_parameters = array();
+
     /*
      * Keywords are a special case. Here are the requirements for keyword
      * search behavior:
@@ -104,7 +108,8 @@ class DatabaseQuery {
             $keywordColumnWhere = $query->expr()->orX();
           }
           foreach ($app->getKeywordColumns() as $keywordColumn) {
-            $keywordColumnWhere->add("LOWER($keywordColumn) $operator LOWER('%$keyword%')");
+            $keywordColumnWhere->add("$keywordColumn $operator ?)");
+            $anonymous_parameters[] = "%$keyword%";
           }
           $keywordWhere->add($keywordColumnWhere);
         }
@@ -112,12 +117,6 @@ class DatabaseQuery {
         $query->andWhere($keywordWhere);
       }
     }
-
-
-
-    // Keep track of the parameters. We'll compile them below and then we
-    // be adding them onto the query at the end of the function.
-    $anonymous_parameters = array();
 
     // Add conditions for the facets. At this point, we consult the full query
     // string, minus any of our "extra" params.
