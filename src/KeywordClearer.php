@@ -36,7 +36,8 @@ class KeywordClearer {
   public function clearKeywords() {
     $affected = $this->getDb()->createQueryBuilder()
       ->update($this->getTable(), $this->getTable())
-      ->set($this->getKeywordColumn(), '')
+      ->set($this->getKeywordColumn(), ':empty')
+      ->setParameter(':empty', '')
       ->execute();
     if (!empty($affected)) {
       print sprintf('Cleared keywords from %s rows.', $affected);
