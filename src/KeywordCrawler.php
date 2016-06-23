@@ -1,94 +1,80 @@
 <?php
 /**
  * @file
- * Class for crawling a document and returning keyword text.
+ * Class for crawling documents for keywords for SingleTableFacets.
  */
 
 namespace USDOJ\SingleTableFacets;
 
-use \Asika\Pdf2text,
-    \crodas\TextRank\Config,
-    \crodas\TextRank\TextRank,
-    \crodas\TextRank\Stopword;
-
+use \USDOJ\SingletableFacets\Document;
 
 class KeywordCrawler {
 
-  private $documents;
+  private $db;
+  private $table;
+  private $urlColumn;
+  private $keywordColumn;
   private $relativePrefix;
   private $tempPath;
-  private $text;
 
-  public function __construct($document, $relativePrefix, $tempPath = '/tmp/keywordcrawler') {
+  // When the app is instantiated, we can do all of the expensive things once
+  // and then store them on the object.
+  public function __construct($db, $table, $urlColumn, $keywordColumn, $relativePrefix, $tempPath = '') {
 
-    $this->document = $document;
+    $this->db = $db;
+    $this->table = $table;
+    $this->urlColumn = $urlColumn;
+    $this->keywordColumn = $keywordColumn;
     $this->relativePrefix = $relativePrefix;
     $this->tempPath = $tempPath;
-
-    // Spoof a browser so that we can download from certain servers.
-    $options  = array(
-      'http' => array(
-        'user_agent' => 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
-      ),
-    );
-    $context  = stream_context_create($options);
-
-    // Add an http prefix if the document is only a relative link.
-    if (strpos($document, 'http') !== 0) {
-      $document = $this->relativePrefix . $document;
-    }
-    $response = file_get_contents($document, false, $context);
-
-    // Save the file locally to make it easier to do the other things.
-    file_put_contents($this->tempPath, $response);
   }
 
-  private function getText() {
-
-    if ($this->isText()) {
-      // Assume text files are .html, since it also works OK for .txt.
-      $text = file_get_contents($this->tempPath);
-      $domDocument = new \DOMDocument();
-      try {
-        @$domDocument->loadHTML($text);
-        $this->text = $domDocument->textContent;
-      }
-      catch (\Exception $e) {
-        $this->text = $text;
-      }
-    }
-    else {
-      // Assume binary files are .pdf, since that's all we support.
-      try {
-        $reader = new Pdf2text;
-        $reader->setFilename($this->tempPath);
-        $reader->decodePDF();
-        $this->text = $reader->output();
-      }
-      catch (\Exception $e) {
-
-      }
-    }
+  public function getDb() {
+    return $this->db;
   }
 
-  public function getKeywords() {
-    $keywords = array();
-    $this->getText();
-    try {
-      $config = new Config;
-      $config->addListener(new Stopword);
-      $textrank = new TextRank($config);
-      $keywords = $textrank->getKeywords($this->text, -1);
-      $keywords = implode(' ', array_keys($keywords));
-    }
-    catch (\Exception $e) {
-
-    }
-    return $keywords;
+  public function getTable() {
+    return $this->table;
   }
 
-  private function isText() {
-    $finfo = finfo_open(FILEINFO_MIME);
-    return (substr(finfo_file($finfo, $this->tempPath), 0, 4) == 'text');
+  public function getUrlColumn() {
+    return $this->urlColumn;
+  }
+
+  public function getKeywordColumn() {
+    return $this->keywordColumn;
+  }
+
+  public function getRelativePrefix() {
+    return $this->relativePrefix;
+  }
+
+  public function getTempPath() {
+    return $this->tempPath;
+  }
+
+  public function crawlDocuments($limit = 20, $offset = 0) {
+    $query = $this->getDb()->createQueryBuilder();
+    $query->from($this->getTable());
+    $query->select($this->getUrlColumn());
+    if ($limit != -1) {
+      $query->setMaxResults($limit);
+      $query->setFirstResult($offset);
+    }
+    $result = $query->execute();
+    foreach ($result as $row) {
+      $url = $row[$this->getUrlColumn()];
+      if (!empty($url)) {
+        $document = new Document($url, $this->getRelativePrefix(), $this->getTempPath());
+        $keywords = $document->getKeywords();
+        if (!empty($keywords)) {
+          $update = $this->getDb()->createQueryBuilder();
+          $update->update($this->getTable(), $this->getTable())
+            ->set($this->getKeywordColumn(), $keywords)
+            ->where("{$this->getUrlColumn()} = $url");
+          $affected = $update->execute();
+        }
+      }
+    }
   }
 }
