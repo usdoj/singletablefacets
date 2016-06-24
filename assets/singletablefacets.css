@@ -1,46 +1,58 @@
 .doj-facet-pager {
-  padding: 0;
-  margin: 1em 0;
-  text-align: center;
+    padding: 0;
+    margin: 1em 0;
+    text-align: center;
 }
+
 .doj-facet-pager li {
-  display: inline;
-  padding: 0.5em;
-  list-style-type: none;
+    display: inline;
+    padding: 0.5em;
+    list-style-type: none;
 }
+
 .doj-facet-pager li.active {
-  font-weight: bold;
+    font-weight: bold;
 }
+
 .doj-facet-sort-link-desc:before {
-  content: "\25BC";
+    content: "\25BC";
 }
+
 .doj-facet-sort-link-asc:before {
-  content: "\25B2";
+    content: "\25B2";
 }
+
 .doj-facet-label {
-  font-size: 18px;
+    font-size: 18px;
 }
+
 .doj-facet-search-results {
-  width: 100%;
-  margin-top: 10px;
-  border: 1px solid #bbb;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid #bbb;
 }
+
 .doj-facet-search-results tbody tr:nth-child(odd) {
-   background-color: #ddd;
+    background-color: #ddd;
 }
+
 .doj-facet-dependent {
-  margin-left: 20px;
+    margin-left: 20px;
 }
+
 .doj-facet .facet-items {
-  margin-bottom: 0;
-  max-width: 100%;
+    margin-bottom: 0;
+    max-width: 100%;
 }
+
 .doj-facet-dependent .facet-items {
-  margin-top: 0;
+    margin-top: 0;
 }
+
 .doj-facet-collapse-trigger {
-  cursor: pointer;
+    cursor: pointer;
 }
+
 .facet-items .doj-facet-collapse-trigger {
-  margin-top: 5px;
+    margin-top: 5px;
 }
