@@ -1,0 +1,112 @@
+# Configuration file for SingleTableFacets.
+#
+# This should be copied somewhere OUTSIDE of the publicly available files. Ie,
+# if the docroot is /var/www/htdocs, this file should be somewhere above that,
+# such as /var/www, or adjacent, such as /var/www/libraries/singletablefacets.
+#
+# You can have any number of these files, named differently, to set up multiple
+# instances of SingleTableFacets. Each time you invoke SingleTableFacets, either
+# on a web page or on the command line (for refreshing the data) you reference
+# this configuration file.
+#
+# Because this is a YAML file, remember that whitespace is important.
+
+# Database credentials
+database name: myDatabase
+database user: myUser
+database password: myPassword
+database host: localhost
+
+# Per the name of this library, we look at only a single table.
+database table: myTable
+
+# Provide information about the database columns here. In this example file,
+# all options are shown for one database column.
+database columns:
+
+    myDatabaseColumn1:
+        # Do not display results unless they have data in this column.
+        required: false
+        # This column should show up as a facet.
+        facet: true
+        # Above the facet, show this label.
+        label for facet: Filter by something
+        # The label to display when displaying search results.
+        label for search results: Something
+        # Only show this many items and then display a "show more" button.
+        collapse facet items after: 5
+        # This facet is dependent on the another facet. Ie, it will not show up
+        # unless the other facet is also active.
+        facet dependency: myDatabaseColumn2
+        # Data in this column should be consulted during keyword searches.
+        keywords in database: true
+        # This columns has URLs pointing to files (PDF, HTML) with keyword data.
+        keywords in files: false
+        # This column should be used for sorting.
+        sort: true
+        # The default direction, ASC or DESC, when used for sorting.
+        sort direction: ASC
+
+    myDatabaseColumn2:
+        # etc....
+
+# Choose the single column to use as a default for sorting.
+default sort column: myDatabaseColumn1
+
+# Choose the order that you would like the columns to show in the facet list.
+order for displaying facets:
+    - myDatabaseColumn1
+    - myDatabaseColumn2
+
+# Choose the order that you would like the fields to show in search results.
+order for displaying results:
+    - myDatabaseColumn2
+    - myDatabaseColumn1
+
+# Additional options
+
+# Do not consider keywords shorter than this number.
+minimum valid keyword length: 3
+
+# Next to facet items, show the totals in parenthesis.
+show counts next to facet items: true
+
+# Choose the text for the keyword search button.
+search button text: Search
+
+# Choose the text for the message that shows when there are no results.
+no results message: |
+    <p>
+        Sorry, no results could be found for those keywords.
+    </p>
+
+# Display the facet items as checkboxes instead of links.
+use checkboxes for facets instead of links: true
+
+# For each page of results, show this many results.
+number of items per page: 20
+
+# In the pager, show direct links to this many pages. (Besides the normal
+# "Next" and "Previous" buttons.)
+number of pager links to show: 5
+
+# Indent dependents to the right and hide their titles. This gives the effect
+# that they are being shown in a hierarchical way.
+show dependents indented to the right: true
+
+# Show this blurb in an expandable section beneath the keyword search.
+keyword help: |
+    <ul>
+        <li>Use the checkboxes on the left to refine your search, or enter new keywords to start over.</li>
+        <li>Enter multiple keywords to get fewer results, eg: cat dogs</li>
+        <li>Use OR to get more results, eg: cats OR dogs</li>
+        <li>Put a dash (-) before a keyword to exclude it, eg: dogs -lazy</li>
+        <li>Use "" (double-quotes) to match specific phrases, eg: "the brown fox"</li>
+    </ul>
+
+# Users will click this label to expand the help text above.
+keyword help label: "Need help searching?"
+
+# The items within a given facet are normally sorted alphabetically, but setting
+# this to true will sort them by their counts, in descending order.
+sort facet items by popularity: false
