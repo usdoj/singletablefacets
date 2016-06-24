@@ -1,2 +1,4 @@
+#!/usr/bin/env php
 <?php
-echo 'Hello world'
+echo 'Hello world';
+print_r($argv);
