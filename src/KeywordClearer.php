@@ -6,42 +6,28 @@
 
 namespace USDOJ\SingleTableFacets;
 
-class KeywordClearer {
+class KeywordClearer
+{
 
-  private $db;
-  private $table;
-  private $keywordColumn;
+    private $app;
 
-  // When the app is instantiated, we can do all of the expensive things once
-  // and then store them on the object.
-  public function __construct($db, $table, $keywordColumn) {
+    public function __construct($app) {
 
-    $this->db = $db;
-    $this->table = $table;
-    $this->keywordColumn = $keywordColumn;
-  }
-
-  public function getDb() {
-    return $this->db;
-  }
-
-  public function getTable() {
-    return $this->table;
-  }
-
-  public function getKeywordColumn() {
-    return $this->keywordColumn;
-  }
-
-  public function clearKeywords() {
-    $affected = $this->getDb()->createQueryBuilder()
-      ->update($this->getTable(), $this->getTable())
-      ->set($this->getKeywordColumn(), ':empty')
-      ->setParameter(':empty', '')
-      ->execute();
-    if (!empty($affected)) {
-      print sprintf('Cleared keywords from %s rows.', $affected);
-      print PHP_EOL;
+        $this->app = $app;
     }
-  }
+
+    public function clearKeywords() {
+        $table = $this->app->getConfig()->get('database table');
+        $column = $this->app->getKeywordColumn();
+
+        $affected = $this->app->getDb()->createQueryBuilder()
+            ->update($table, $table)
+            ->set($column, ':empty')
+            ->setParameter(':empty', '')
+            ->execute();
+        if (!empty($affected)) {
+            print sprintf('Cleared keywords from %s rows.', $affected);
+            print PHP_EOL;
+        }
+    }
 }
