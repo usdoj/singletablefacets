@@ -26,9 +26,9 @@ database columns:
 
     myDatabaseColumn1:
         # Do not display results unless they have data in this column.
-        required: false
+        is required: false
         # This column should show up as a facet.
-        facet: true
+        is a facet: true
         # Above the facet, show this label.
         label for facet: Filter by something
         # The label to display when displaying search results.
@@ -37,15 +37,19 @@ database columns:
         collapse facet items after: 5
         # This facet is dependent on the another facet. Ie, it will not show up
         # unless the other facet is also active.
-        facet dependency: myDatabaseColumn2
+        depends on: myDatabaseColumn2
         # Data in this column should be consulted during keyword searches.
-        keywords in database: true
+        consult during keyword searches: true
         # This columns has URLs pointing to files (PDF, HTML) with keyword data.
-        keywords in files: false
+        contains URLs to files for indexing keywords: false
         # This column should be used for sorting.
-        sort: true
+        use for sorting: true
         # The default direction, ASC or DESC, when used for sorting.
         sort direction: ASC
+        # Specify another column that this column has additional values for.
+        # This allows for one row to have multiple values for a facet, since
+        # each column can only have one value per row.
+        contains additional values for: MyDatabaseColumn2
 
     myDatabaseColumn2:
         # etc....
@@ -110,3 +114,8 @@ keyword help label: "Need help searching?"
 # The items within a given facet are normally sorted alphabetically, but setting
 # this to true will sort them by their counts, in descending order.
 sort facet items by popularity: false
+
+# When crawling remote URLs for keywords, add this prefix to any relative URLs.
+# For example, if this is set to: "http://example.com/files/", then a relative
+# URL of "mydoc.pdf" will be fetched from "http://example.com/files/mydoc.pdf".
+prefix for relative keyword URLs: http://example.com/files/

@@ -9,7 +9,7 @@ namespace USDOJ\SingleTableFacets;
 use USDOJ\SingleTableFacets\DatabaseQuery,
     JasonGrimes\Paginator;
 
-abstract class ResultDisplayBase {
+abstract class ResultDisplay {
 
   private $app;
 

@@ -6,9 +6,9 @@
 
 namespace USDOJ\SingleTableFacets;
 
-use USDOJ\SingleTableFacets\ResultDisplayBase;
+use USDOJ\SingleTableFacets\ResultDisplay;
 
-class ResultDisplayTable extends ResultDisplayBase {
+class ResultDisplayTable extends ResultDisplay {
 
   public function render($columns, $minWidths = array()) {
     $totalRows = 0;
