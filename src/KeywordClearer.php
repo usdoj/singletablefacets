@@ -16,7 +16,7 @@ class KeywordClearer
         $this->app = $app;
     }
 
-    public function clearKeywords() {
+    public function run() {
         $table = $this->app->getConfig()->get('database table');
         $column = $this->app->getKeywordColumn();
 

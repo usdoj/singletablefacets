@@ -15,7 +15,7 @@ class KeywordCrawler {
         $this->app = $app;
     }
 
-    public function crawlDocuments() {
+    public function run() {
 
         $limit = 20;
         $processed = 0;

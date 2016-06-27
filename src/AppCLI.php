@@ -61,7 +61,15 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
 
     private function crawl() {
         $crawler = new \USDOJ\SingleTableFacets\KeywordCrawler($this);
-        $crawler->crawlKeywords();
+        $crawler->run();
+    }
+
+    private function refresh() {
+
+        $cleared = new \USDOJ\SingleTableFacets\KeywordClearer($this);
+        $clearer->run();
+
+        print_r($argv);
     }
 
     private function getUsage() {
