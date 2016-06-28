@@ -21,53 +21,39 @@ class KeywordCrawler {
 
     public function run() {
 
-        $limit = 20;
-        $processed = 0;
+        print 'Fetching keywords from files...' . PHP_EOL;
+
         $prefix = $this->getApp()->settings('prefix for relative keyword URLs');
         $table = $this->getApp()->settings('database table');
         $keywordColumn = $this->getApp()->getKeywordColumn();
-        $successes = $failures = array();
+        $idColumn = $this->getApp()->getUniqueColumn();
+        $total = 0;
 
-        foreach ($this->getApp()->settings('database columns') as $column => $info) {
+        foreach ($this->getApp()->settings('database columns') as $urlColumn => $info) {
+            if (empty($info['contains URLs to files for indexing keywords'])) {
+                continue;
+            }
 
             $query = $this->getApp()->query();
-            $results = $query
+            $rows = $query
                 ->from($table)
-                ->select($column)
-                ->where($keywordColumn . ' IS NULL')
-                ->execute();
-            foreach ($results as $row) {
+                ->addSelect($urlColumn)
+                ->addSelect($keywordColumn)
+                ->addSelect($idColumn)
+                ->execute()
+                ->fetchAll();
+            foreach ($rows as $row) {
 
-                $processed += 1;
-                if ($processed > $limit) {
-                    break 2;
-                }
+                $url = $row[$urlColumn];
+                $newValue = $row[$keywordColumn];
+                $id = $row[$idColumn];
 
-                $url = $row[$column];
-                $newValue = '';
                 if (!empty($url)) {
-                    $document = new Document($url, $prefix);
+                    $document = new \USDOJ\SingleTableFacets\Document($this->getApp(), $url);
                     $keywords = $document->getKeywords();
-                    $errors = $document->getErrorMessages();
-                    if (empty($errors) && !empty($keywords)) {
-                        $newValue = $keywords;
-                        $successes[] = sprintf('-- Updated keywords for %s.', $document->getAbsolutePath());
-                    }
-                    else {
-                        $failure = '-- ' . $document->getAbsolutePath();
-                        if (!empty($errors)) {
-                            foreach ($errors as $error) {
-                                if (!empty($error)) {
-                                    $failure .= PHP_EOL . '   ' . $error;
-                                }
-                            }
-                        }
-                        $failures[] = $failure;
-
-                        // So that we don't keep trying to do these, we save a
-                        // value in the column. But we keep it consistent so we
-                        // can search it intentionally.
-                        $newValue = 'crawling error';
+                    if (!empty($keywords)) {
+                        $newValue .= ' ' . $keywords;
+                        $total += 1;
                     }
 
                     // Update the database.
@@ -76,25 +62,14 @@ class KeywordCrawler {
                         $affected = $update
                             ->update($table, $table)
                             ->set($keywordColumn, ':keywords')
-                            ->where($update->expr()->eq($column, ':url'))
+                            ->where($update->expr()->eq($idColumn, ':id'))
                             ->setParameter(':keywords', $newValue)
-                            ->setParameter(':url', $url)
+                            ->setParameter(':id', $id)
                             ->execute();
                     }
                 }
             }
         }
-
-        //print sprintf('Crawling keywords: %d successes, %d failuers', count($successes), count($failures));
-
-        // If $processed is the same as limit, we assume that this needs to be
-        // run again.
-        if ($processed == $limit) {
-            print '-1';
-        }
-        // Otherwise assume it is complete.
-        else {
-            print '0';
-        }
+        print sprintf('Fetched keywords from %s URLs.', $total) . PHP_EOL;
     }
 }

@@ -8,77 +8,35 @@ namespace USDOJ\SingleTableFacets;
 
 class AppCLI extends \USDOJ\SingleTableFacets\App
 {
-    private $action;
     private $sourceFile;
-    private $configFile;
-    private $args;
 
     public function __construct($args) {
 
         $configFile = empty($args[1]) ? '' : $args[1];
         $sourceFile = empty($args[2]) ? '' : $args[2];
-        $action = empty($args[3]) ? '' : $args[3];
-        $this->args = $args;
 
-        if (empty($configFile) || empty($sourceFile) || empty($action)) {
-            throw new \Exception($this->getUsage());
+        if (empty($configFile) || empty($sourceFile)) {
+            die($this->getUsage());
         }
 
         if (!is_file($configFile)) {
-            throw new \Exception(sprintf('Config file not found at %s', $configFile));
+            die(sprintf('Config file not found at %s', $configFile));
         }
 
         if (!is_file($sourceFile)) {
-            throw new \Exception(sprintf('Source data not found at %s', $sourceFile));
+            die(sprintf('Source data not found at %s', $sourceFile));
         }
 
-        if (!in_array($action, $this->getAllowedActions())) {
-            throw new \Exception(sprintf('Invalid action: %s. Allowed actions: %s', $action, implode(' ', $allowedActions)));
-        }
-
-        $this->action = $action;
-        $this->sourceFile = realpath($sourceFile);
-        $this->configFile = realpath($configFile);
-
+        $this->sourceFile = $sourceFile;
         $config = new \USDOJ\SingleTableFacets\Config($configFile);
         parent::__construct($config);
-    }
-
-    private function getAction() {
-        return $this->action;
     }
 
     private function getSourceFile() {
         return $this->sourceFile;
     }
 
-    private function getArgs() {
-        return $this->args;
-    }
-
-    private function getConfigFile() {
-        return $this->configFile;
-    }
-
     public function run() {
-
-        if ('crawl' == $this->getAction()) {
-            $this->crawl();
-        }
-
-        else {
-            $this->refresh();
-        }
-    }
-
-    private function crawl() {
-        print 'ARG!!!' . PHP_EOL;
-        return;
-        $crawler = new \USDOJ\SingleTableFacets\KeywordCrawler($this);
-        $crawler->run();
-    }
-
-    private function refresh() {
 
         // First import the source data.
         $importer = new \USDOJ\SingleTableFacets\Importer($this, $this->getSourceFile());
@@ -88,24 +46,9 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         $clearer = new \USDOJ\SingleTableFacets\KeywordClearer($this);
         $clearer->run();
 
-        // Next repeatedly crawl in new threads.
-        $args = $this->getArgs();
-        $execArgs = array(PHP_BINDIR . '/php', $args[0], $this->getConfigFile(), $this->getSourceFile(), 'crawl');
-        $command = implode(' ', $execArgs);
-        // As a safety check, don't do more than the number of rows in the db,
-        // divided by 10. (The row limit per run is 20, so this is plenty).
-        $maxRuns = $this->query()
-            ->select('COUNT(*)')
-            ->from($this->settings('database table'))
-            ->execute()
-            ->fetchColumn();
-        $maxRuns = $maxRuns / 10;
-        $crawlResult = exec($command);
-        while ($crawlResult == 0 && $maxRuns >= 0) {
-            print $crawlResult . PHP_EOL;
-            $maxRuns -= 1;
-            $crawlResult = exec($command);
-        }
+        // Now crawl for remote keywords.
+        $crawler = new \USDOJ\SingleTableFacets\KeywordCrawler($this);
+        $crawler->run();
 
         // Finally consolidate keywords from other columns into our main column.
         $consolidator = new \USDOJ\SingleTableFacets\KeywordConsolidator($this);
@@ -113,16 +56,9 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
     }
 
     private function getUsage() {
-        $ret = 'Usage: singletablefacets [config file] [source file] [action]' . PHP_EOL;
+        $ret = 'Usage: singletablefacets [config file] [source file]' . PHP_EOL;
         $ret .= '  config file: Path to .yml configuration file' . PHP_EOL;
-        $ret .= '  source file: Path to source data, .csv or .xlsx' . PHP_EOL;
-        $ret .= '  action: Allowed choices:' . PHP_EOL;
-        $ret .= '    - refresh: Refresh all data from source' . PHP_EOL;
-        $ret .= '    - crawl: Perform one batch of crawling of remote keyword files' . PHP_EOL;
+        $ret .= '  source file: Path to source data (must be a csv file with a header matching the database columns)' . PHP_EOL;
         return $ret;
-    }
-
-    private function getAllowedActions() {
-        return array('refresh', 'crawl');
     }
 }

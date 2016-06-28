@@ -73,7 +73,13 @@ class Importer {
         $csvFile = new \Keboola\Csv\CsvFile($filePath);
         $header = $csvFile->getHeader();
         $data = array();
+        // Skip the first row since it is the headers.
+        $skip = TRUE;
         foreach($csvFile as $row) {
+            if ($skip) {
+                $skip = FALSE;
+                continue;
+            }
             $data[] = array_combine($header, $row);
         }
         return $data;

@@ -55,7 +55,7 @@ class App
         $this->db = $db;
 
         // One requirement is that the table has at least one unique column.
-        $statement = $this->getDb()->query('DESCRIBE ' . $this->getTable());
+        $statement = $this->getDb()->query('DESCRIBE ' . $this->settings('database table'));
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         foreach ($result as $column) {
             if (!empty($column['Key'])) {
