@@ -52,9 +52,15 @@ class App
 
         // One requirement is that the table has at least one unique column.
         $statement = $this->getDb()->query('DESCRIBE ' . $this->getTable());
-        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         foreach ($result as $column) {
-            print_r($column);
+            if (!empty($column['Key'])) {
+                $this->uniqueColumn = $column['Field'];
+                break;
+            }
+        }
+        if (empty($this->uniqueColumn)) {
+            throw new \Exception('The database table does not contain a unique index.');
         }
     }
 }

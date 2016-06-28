@@ -78,6 +78,7 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         $command = 'something';
         // As a safety check, don't do more than the number of rows in the db,
         // divided by 10. (The row limit per run is 20, so this is plenty).
+        /*
         $maxRuns = $this->getDb()->createQueryBuilder()
             ->select('COUNT(*)')
             ->from($this->getTable())
@@ -89,6 +90,7 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
             $maxRuns -= 1;
             $crawlResult = exec($command);
         }
+        */
 
         // Finally consolidate keywords from other columns into our main column.
         $consolidator = new \USDOJ\SingleTableFacets\KeywordConsolidator($this);

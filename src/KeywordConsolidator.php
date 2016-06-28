@@ -31,12 +31,13 @@ class KeywordConsolidator {
         }
 
         $result = $this->getApp()->getDb()->createQueryBuilder()
-            ->from($this->getTable())
+            ->from($this->getApp()->getTable())
             ->select('*')
             ->execute();
 
         $changed = 0;
         $destinationColumn = $this->getApp()->getKeywordColumn();
+        $uniqueColumn = $this->getApp()->getUniqueColumn();
         foreach ($result as $row) {
             // Build a concatenation of all the keywords.
             $after = $before = $row[$destinationColumn];
@@ -44,29 +45,34 @@ class KeywordConsolidator {
                 $part = $row[$sourceColumn];
                 // Only concatenate if it's not already there.
                 if (!empty($part)) {
-                if (strpos($after, $part) === FALSE) {
-                    $after .= ' ' . $part;
+                    if (strpos($after, $part) === FALSE) {
+                        $after .= ' ' . $part;
+                    }
+                }
+            }
+            if ($before != $after && !empty($after)) {
+
+                // Run the keywords through the filter thingy.
+                try {
+                    $ranker = new \USDOJ\SingleTableFacets\KeywordRanker($this->getApp(), $after);
+                    $after = $ranker->run();
+                } catch(\Exception $e) {
+                    print $e->getMessage() . PHP_EOL;
+                }
+
+                $update = $this->getApp()->getDb()->createQueryBuilder();
+                $affected = $update
+                    ->update($this->getApp()->getTable())
+                    ->set($destinationColumn, ':after')
+                    ->where($update->expr()->eq($uniqueColumn, ':id'))
+                    ->setParameter(':after', $after)
+                    ->setParameter(':id', $row[$uniqueColumn])
+                    ->execute();
+                if (!empty($affected)) {
+                    $changed += 1;
                 }
             }
         }
-// Make the update if something changed.
-if ($before != $after) {
-$update = $this->getDb()->createQueryBuilder();
-$update->update($this->getTable(), $this->getTable())
-->set($this->getDestinationColumn(), ':after')
-->where($update->expr()->eq($this->getIdColumn(), ':id'))
-->setParameter(':after', $after)
-->setParameter(':id', $row[$this->getIdColumn()]);
-$affected = $update->execute();
-if (!empty($affected)) {
-$changed += 1;
-print sprintf('Consolidated keywords in %s.', $row[$this->getIdColumn()]);
-print PHP_EOL;
-}
-}
-}
-
-print PHP_EOL . 'Totals:' . PHP_EOL;
-print $changed . ' rows updated.' . PHP_EOL;
+        print sprintf('Consolidated keywords in %s rows.', $changed) . PHP_EOL;
     }
 }

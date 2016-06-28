@@ -116,11 +116,8 @@ class Document {
     $keywords = '';
     $this->getText();
     try {
-      $config = new Config;
-      $config->addListener(new Stopword);
-      $textrank = new TextRank($config);
-      $keywords = $textrank->getKeywords($this->text, -1);
-      $keywords = implode(' ', array_keys($keywords));
+        $ranker = new \USDOJ\SingleTableFacets\KeywordRanker($this->getApp(), $this->text);
+        $keywords = $ranker->run();
     }
     catch (\Exception $e) {
       $this->addErrorMessage($e->getMessage());

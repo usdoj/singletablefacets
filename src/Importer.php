@@ -39,12 +39,20 @@ class Importer {
             $rows = $this->dataToArray($inputFileName);
 
             $table = $this->getApp()->getTable();
+            $numInserted = 0;
             foreach ($rows as $row) {
-                $this->getApp()->getDb()->createQueryBuilder()
-                    ->insert($table)
-                    ->values($row)
+                $anonymousParameters = array();
+                $insert = $this->getApp()->getDb()->createQueryBuilder()
+                    ->insert($table);
+                foreach ($row as $column => $value) {
+                    $insert->setValue($column, '?');
+                    $anonymousParameters[] = $value;
+                }
+                $numInserted += $insert
+                    ->setParameters($anonymousParameters)
                     ->execute();
             }
+            print sprintf('Imported %s rows.', $numInserted) . PHP_EOL;
         } catch (Exception $e) {
             $pathInfo = pathinfo($inputFileName, PATHINFO_BASENAME);
             throw new \Exception(sprintf('Error loading file %s: %s', $pathInfo, $e->getMessage()));
@@ -57,14 +65,16 @@ class Importer {
         $this->getApp()->getDb()->createQueryBuilder()
             ->delete($table)
             ->execute();
+        print 'Deleted all rows.' . PHP_EOL;
     }
 
     private function dataToArray($filePath) {
 
         $csvFile = new \Keboola\Csv\CsvFile($filePath);
+        $header = $csvFile->getHeader();
         $data = array();
         foreach($csvFile as $row) {
-            $data[] = $row;
+            $data[] = array_combine($header, $row);
         }
         return $data;
     }
