@@ -10,6 +10,7 @@ class App
 {
     private $db;
     private $config;
+    private $uniqueColumn;
 
     public function getDb() {
         return $this->db;
@@ -21,6 +22,14 @@ class App
 
     public function getKeywordColumn() {
         return 'stf_keywords';
+    }
+
+    public function getTable() {
+        return $this->getConfig()->get('database table');
+    }
+
+    public function getUniqueColumn() {
+        return $this->uniqueColumn;
     }
 
     public function __construct($config) {
@@ -40,5 +49,12 @@ class App
         );
         $db = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $dbConfig);
         $this->db = $db;
+
+        // One requirement is that the table has at least one unique column.
+        $statement = $this->getDb()->query('DESCRIBE ' . $this->getTable());
+        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($result as $column) {
+            print_r($column);
+        }
     }
 }

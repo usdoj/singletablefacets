@@ -15,10 +15,5 @@ if ((!$loader = includeIfExists(__DIR__.'/../vendor/autoload.php')) && (!$loader
     );
 }
 
-if (empty($argv[1]) || !is_file($argv[1])) {
-    throw new Exception('You must pass the path to a configuration file (.yml) to this command.');
-}
-
-$config = new \USDOJ\SingleTableFacets\Config($argv[1]);
-$app = new \USDOJ\SingleTableFacets\AppCLI($config);
+$app = new \USDOJ\SingleTableFacets\AppCLI($argv);
 $app->run();

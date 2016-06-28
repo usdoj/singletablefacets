@@ -11,26 +11,26 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
     private $action;
     private $sourceFile;
 
-    public function __construct() {
+    public function __construct($args) {
 
-        $configFile = $argv[1];
-        $sourceFile = $argv[2];
-        $action = $argv[3];
+        $configFile = empty($args[1]) ? '' : $args[1];
+        $sourceFile = empty($args[2]) ? '' : $args[2];
+        $action = empty($args[3]) ? '' : $args[3];
 
         if (empty($configFile) || empty($sourceFile) || empty($action)) {
-            throw new Exception($this->getUsage());
+            throw new \Exception($this->getUsage());
         }
 
         if (!is_file($configFile)) {
-            throw new Exception(sprintf('Config file not found at %s', $configFile));
+            throw new \Exception(sprintf('Config file not found at %s', $configFile));
         }
 
         if (!is_file($sourceFile)) {
-            throw new Exception(sprintf('Source data not found at %s', $sourceFile));
+            throw new \Exception(sprintf('Source data not found at %s', $sourceFile));
         }
 
         if (!in_array($action, $this->getAllowedActions())) {
-            throw new Exception(sprintf('Invalid action: %s. Allowed actions: %s', $action, implode(' ', $allowedActions)));
+            throw new \Exception(sprintf('Invalid action: %s. Allowed actions: %s', $action, implode(' ', $allowedActions)));
         }
 
         $this->action = $action;
@@ -66,10 +66,33 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
 
     private function refresh() {
 
-        $cleared = new \USDOJ\SingleTableFacets\KeywordClearer($this);
+        // First import the source data.
+        $importer = new \USDOJ\SingleTableFacets\Importer($this, $this->getSourceFile());
+        $importer->run();
+
+        // Next make sure there is nothing left in our special keyword column.
+        $clearer = new \USDOJ\SingleTableFacets\KeywordClearer($this);
         $clearer->run();
 
-        print_r($argv);
+        // Next repeatedly crawl in new threads.
+        $command = 'something';
+        // As a safety check, don't do more than the number of rows in the db,
+        // divided by 10. (The row limit per run is 20, so this is plenty).
+        $maxRuns = $this->getDb()->createQueryBuilder()
+            ->select('COUNT(*)')
+            ->from($this->getTable())
+            ->execute()
+            ->fetchColumn();
+        $maxRuns = $maxRuns / 10;
+        $crawlResult = exec($command);
+        while ($crawlResult == 0 && $maxRuns >= 0) {
+            $maxRuns -= 1;
+            $crawlResult = exec($command);
+        }
+
+        // Finally consolidate keywords from other columns into our main column.
+        $consolidator = new \USDOJ\SingleTableFacets\KeywordConsolidator($this);
+        $consolidator->run();
     }
 
     private function getUsage() {

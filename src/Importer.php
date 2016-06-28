@@ -8,42 +8,64 @@ namespace USDOJ\SingleTableFacets;
 
 class Importer {
 
-    private $fileName;
+    private $app;
+    private $sourceFile;
 
-    public function getFileName() {
-
-        return $this->fileName;
+    public function getSourceFile() {
+        return $this->sourceFile;
     }
 
-    public function __construct($fileName) {
-
-        $this->fileName = $fileName;
+    public function getApp() {
+        return $this->app;
     }
 
-    public function import() {
+    public function __construct($app, $sourceFile) {
 
-        $inputFileName = $this->getFileName();
+        $this->app = $app;
+        $this->sourceFile = $sourceFile;
+    }
 
-        // Read your Excel workbook
+    public function run() {
+
+        $this->delete();
+        $this->insert();
+    }
+
+    private function insert() {
+
+        $inputFileName = $this->getSourceFile();
+
         try {
-            $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
-            $objReader = PHPExcel_IOFactory::createReader($inputFileType);
-            $objPHPExcel = $objReader->load($inputFileName);
+            $rows = $this->dataToArray($inputFileName);
+
+            $table = $this->getApp()->getTable();
+            foreach ($rows as $row) {
+                $this->getApp()->getDb()->createQueryBuilder()
+                    ->insert($table)
+                    ->values($row)
+                    ->execute();
+            }
         } catch (Exception $e) {
             $pathInfo = pathinfo($inputFileName, PATHINFO_BASENAME);
-            throw new Exception(sprintf('Error loading file %s: %s', $pathInfo, $e->getMessage()));
+            throw new \Exception(sprintf('Error loading file %s: %s', $pathInfo, $e->getMessage()));
         }
+    }
 
-        // Get worksheet dimensions
-        $sheet = $objPHPExcel->getSheet(0);
-        $highestRow = $sheet->getHighestRow();
-        $highestColumn = $sheet->getHighestColumn();
+    private function delete() {
 
-        // Loop through each row of the worksheet in turn
-        for ($row = 1; $row <= $highestRow; $row++) {
-            // Read a row of data into an array
-            $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
-            print_r($rowData);
+        $table = $this->getApp()->getTable();
+        $this->getApp()->getDb()->createQueryBuilder()
+            ->delete($table)
+            ->execute();
+    }
+
+    private function dataToArray($filePath) {
+
+        $csvFile = new \Keboola\Csv\CsvFile($filePath);
+        $data = array();
+        foreach($csvFile as $row) {
+            $data[] = $row;
         }
+        return $data;
     }
 }

@@ -16,12 +16,16 @@ class KeywordClearer
         $this->app = $app;
     }
 
-    public function run() {
-        $table = $this->app->getConfig()->get('database table');
-        $column = $this->app->getKeywordColumn();
+    public function getApp() {
+        return $this->app;
+    }
 
-        $affected = $this->app->getDb()->createQueryBuilder()
-            ->update($table, $table)
+    public function run() {
+        $table = $this->getApp()->getConfig()->get('database table');
+        $column = $this->getApp()->getKeywordColumn();
+
+        $affected = $this->getApp()->getDb()->createQueryBuilder()
+            ->update($table)
             ->set($column, ':empty')
             ->setParameter(':empty', '')
             ->execute();
