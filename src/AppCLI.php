@@ -10,12 +10,15 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
 {
     private $action;
     private $sourceFile;
+    private $configFile;
+    private $args;
 
     public function __construct($args) {
 
         $configFile = empty($args[1]) ? '' : $args[1];
         $sourceFile = empty($args[2]) ? '' : $args[2];
         $action = empty($args[3]) ? '' : $args[3];
+        $this->args = $args;
 
         if (empty($configFile) || empty($sourceFile) || empty($action)) {
             throw new \Exception($this->getUsage());
@@ -34,7 +37,8 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         }
 
         $this->action = $action;
-        $this->sourceFile = $sourceFile;
+        $this->sourceFile = realpath($sourceFile);
+        $this->configFile = realpath($configFile);
 
         $config = new \USDOJ\SingleTableFacets\Config($configFile);
         parent::__construct($config);
@@ -46,6 +50,14 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
 
     private function getSourceFile() {
         return $this->sourceFile;
+    }
+
+    private function getArgs() {
+        return $this->args;
+    }
+
+    private function getConfigFile() {
+        return $this->configFile;
     }
 
     public function run() {
@@ -60,6 +72,8 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
     }
 
     private function crawl() {
+        print 'ARG!!!' . PHP_EOL;
+        return;
         $crawler = new \USDOJ\SingleTableFacets\KeywordCrawler($this);
         $crawler->run();
     }
@@ -75,10 +89,11 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         $clearer->run();
 
         // Next repeatedly crawl in new threads.
-        $command = 'something';
+        $args = $this->getArgs();
+        $execArgs = array(PHP_BINDIR . '/php', $args[0], $this->getConfigFile(), $this->getSourceFile(), 'crawl');
+        $command = implode(' ', $execArgs);
         // As a safety check, don't do more than the number of rows in the db,
         // divided by 10. (The row limit per run is 20, so this is plenty).
-        /*
         $maxRuns = $this->getDb()->createQueryBuilder()
             ->select('COUNT(*)')
             ->from($this->getTable())
@@ -87,10 +102,10 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         $maxRuns = $maxRuns / 10;
         $crawlResult = exec($command);
         while ($crawlResult == 0 && $maxRuns >= 0) {
+            print $crawlResult . PHP_EOL;
             $maxRuns -= 1;
             $crawlResult = exec($command);
         }
-        */
 
         // Finally consolidate keywords from other columns into our main column.
         $consolidator = new \USDOJ\SingleTableFacets\KeywordConsolidator($this);

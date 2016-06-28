@@ -15,22 +15,26 @@ class KeywordCrawler {
         $this->app = $app;
     }
 
+    public function getApp() {
+        return $this->app;
+    }
+
     public function run() {
 
         $limit = 20;
         $processed = 0;
-        $prefix = $this->app->getConfig()->get('prefix for relative keyword URLs');
-        $table = $this->app->getConfig()->get('database table');
-        $keywordColumn = $this->app->getKeywordColumn();
+        $prefix = $this->getApp()->getConfig()->get('prefix for relative keyword URLs');
+        $table = $this->getApp()->getConfig()->get('database table');
+        $keywordColumn = $this->getApp()->getKeywordColumn();
         $successes = $failures = array();
 
-        foreach ($this->app->getConfig('database columns') as $column => $info) {
+        foreach ($this->getApp()->getConfig()->get('database columns') as $column => $info) {
 
-            $query = $this->app->getDb()->createQueryBuilder();
+            $query = $this->getApp()->getDb()->createQueryBuilder();
             $results = $query
                 ->from($table)
                 ->select($column)
-                ->where($query->expr()->lte('LENGTH(' . $keywordColumn . ')', 0))
+                ->where($keywordColumn . ' IS NULL')
                 ->execute();
             foreach ($results as $row) {
 
@@ -68,7 +72,7 @@ class KeywordCrawler {
 
                     // Update the database.
                     if (!empty($newValue)) {
-                        $update = $this->app->getDb()->createQueryBuilder();
+                        $update = $this->getApp()->getDb()->createQueryBuilder();
                         $affected = $update
                             ->update($table, $table)
                             ->set($keywordColumn, ':keywords')
