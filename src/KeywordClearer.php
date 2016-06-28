@@ -21,7 +21,7 @@ class KeywordClearer
     }
 
     public function run() {
-        $table = $this->getApp()->getConfig()->get('database table');
+        $table = $this->getApp()->settings('database table');
         $column = $this->getApp()->getKeywordColumn();
 
         $affected = $this->getApp()->getDb()->createQueryBuilder()

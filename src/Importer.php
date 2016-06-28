@@ -38,7 +38,7 @@ class Importer {
         try {
             $rows = $this->dataToArray($inputFileName);
 
-            $table = $this->getApp()->getTable();
+            $table = $this->getApp()->settings('database table');
             $numInserted = 0;
             foreach ($rows as $row) {
                 $anonymousParameters = array();
@@ -61,7 +61,7 @@ class Importer {
 
     private function delete() {
 
-        $table = $this->getApp()->getTable();
+        $table = $this->getApp()->settings('database table');
         $this->getApp()->getDb()->createQueryBuilder()
             ->delete($table)
             ->execute();

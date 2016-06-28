@@ -37,7 +37,7 @@ class KeywordRanker
     public function run() {
 
         $text = '';
-        if ($this->getApp()->getConfig()->get('remove common keywords')) {
+        if ($this->getApp()->settings('remove common keywords')) {
             $config = new \crodas\TextRank\Config;
             $config->addListener(new \crodas\TextRank\Stopword);
             $textrank = new \crodas\TextRank\TextRank($config);

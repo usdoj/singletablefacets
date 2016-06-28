@@ -24,12 +24,16 @@ class App
         return 'stf_keywords';
     }
 
-    public function getTable() {
-        return $this->getConfig()->get('database table');
-    }
-
     public function getUniqueColumn() {
         return $this->uniqueColumn;
+    }
+
+    public function settings($key) {
+        return $this->getConfig()->get($key);
+    }
+
+    public function query() {
+        return $this->getDb()->createQueryBuilder();
     }
 
     public function __construct($config) {
@@ -39,10 +43,10 @@ class App
         // Start the database connection.
         $dbConfig = new \Doctrine\DBAL\Configuration();
         $connectionParams = array(
-            'dbname' => $config->get('database name'),
-            'user' => $config->get('database user'),
-            'password' => $config->get('database password'),
-            'host' => $config->get('database host'),
+            'dbname' => $this->settings('database name'),
+            'user' => $this->settings('database user'),
+            'password' => $this->settings('database password'),
+            'host' => $this->settings('database host'),
             'port' => 3306,
             'charset' => 'utf8',
             'driver' => 'pdo_mysql',

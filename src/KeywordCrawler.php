@@ -23,14 +23,14 @@ class KeywordCrawler {
 
         $limit = 20;
         $processed = 0;
-        $prefix = $this->getApp()->getConfig()->get('prefix for relative keyword URLs');
-        $table = $this->getApp()->getConfig()->get('database table');
+        $prefix = $this->getApp()->settings('prefix for relative keyword URLs');
+        $table = $this->getApp()->settings('database table');
         $keywordColumn = $this->getApp()->getKeywordColumn();
         $successes = $failures = array();
 
-        foreach ($this->getApp()->getConfig()->get('database columns') as $column => $info) {
+        foreach ($this->getApp()->settings('database columns') as $column => $info) {
 
-            $query = $this->getApp()->getDb()->createQueryBuilder();
+            $query = $this->getApp()->query();
             $results = $query
                 ->from($table)
                 ->select($column)
@@ -72,7 +72,7 @@ class KeywordCrawler {
 
                     // Update the database.
                     if (!empty($newValue)) {
-                        $update = $this->getApp()->getDb()->createQueryBuilder();
+                        $update = $this->getApp()->query();
                         $affected = $update
                             ->update($table, $table)
                             ->set($keywordColumn, ':keywords')
@@ -85,16 +85,16 @@ class KeywordCrawler {
             }
         }
 
-        print sprintf('Crawling keywords: %d successes, %d failuers', count($successes), count($failures));
+        //print sprintf('Crawling keywords: %d successes, %d failuers', count($successes), count($failures));
 
         // If $processed is the same as limit, we assume that this needs to be
         // run again.
         if ($processed == $limit) {
-            return -1;
+            print '-1';
         }
         // Otherwise assume it is complete.
         else {
-            return 0;
+            print '0';
         }
     }
 }

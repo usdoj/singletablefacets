@@ -94,9 +94,9 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         $command = implode(' ', $execArgs);
         // As a safety check, don't do more than the number of rows in the db,
         // divided by 10. (The row limit per run is 20, so this is plenty).
-        $maxRuns = $this->getDb()->createQueryBuilder()
+        $maxRuns = $this->query()
             ->select('COUNT(*)')
-            ->from($this->getTable())
+            ->from($this->settings('database table'))
             ->execute()
             ->fetchColumn();
         $maxRuns = $maxRuns / 10;

@@ -24,14 +24,14 @@ class KeywordConsolidator {
     public function run() {
 
         $sourceColumns = array();
-        foreach ($this->getApp()->getConfig()->get('database columns') as $column => $info) {
+        foreach ($this->getApp()->settings('database columns') as $column => $info) {
             if (!empty($info['consult during keyword searches'])) {
                 $sourceColumns[] = $column;
             }
         }
 
         $result = $this->getApp()->getDb()->createQueryBuilder()
-            ->from($this->getApp()->getTable())
+            ->from($this->getApp()->settings('database table'))
             ->select('*')
             ->execute();
 
@@ -62,7 +62,7 @@ class KeywordConsolidator {
 
                 $update = $this->getApp()->getDb()->createQueryBuilder();
                 $affected = $update
-                    ->update($this->getApp()->getTable())
+                    ->update($this->getApp()->settings('database table'))
                     ->set($destinationColumn, ':after')
                     ->where($update->expr()->eq($uniqueColumn, ':id'))
                     ->setParameter(':after', $after)
