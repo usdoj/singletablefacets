@@ -91,7 +91,18 @@ abstract class ResultDisplay {
             $query->orderBy($sortField, $sortDirection);
         }
 
-        return $query->execute();
+        $results = $query->execute()->fetchAll();
+
+        // Do we need to consolidate any "additional" values?
+        $additionalColumns = $this->getApp()->settings('columns for additional values');
+        if (!empty($additionalColumns)) {
+            foreach ($additionalColumns as $additional => $main) {
+                foreach ($results as &$row) {
+                    $row[$main] .= ', ' . $row[$additional];
+                }
+            }
+        }
+        return $results;
     }
 
     public function renderPager() {
