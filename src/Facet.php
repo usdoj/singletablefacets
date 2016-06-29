@@ -39,27 +39,64 @@ class Facet {
         $columns = $app->settings('database columns');
         $this->label = $columns[$name]['label for facet'];
 
-        $query = $app->query();
-        $query->addSelect("$name AS item, COUNT($name) AS count");
-        $query->groupBy($name);
+        // Check to see if this facet needs to compile values from additional
+        // columns.
+        $additionalColumns = array();
+        foreach ($columns as $column => $info) {
+            if (!empty($info['contains additional values for'])) {
+                if ($name == $info['contains additional values for']) {
+                    $additionalColumns[] = $column;
+                }
+            }
+        }
+
+        $items = $this->queryFacetItems($name);
+        foreach ($additionalColumns as $additional) {
+            $items = array_merge($items, $this->queryFacetItems($additional));
+        }
+
+        // First make add all the duplicates. This is necessary because the same
+        // item may be in more than one of the "additional" columns.
+        $keyedByName = array();
+        foreach ($items as $item) {
+            if (empty($item['item'])) {
+                continue;
+            }
+            if (empty($keyedByName[$item['item']])) {
+                $keyedByName[$item['item']] = $item['count'];
+                continue;
+            }
+            else {
+                $newCount = $keyedByName[$item['item']] + $item['count'];
+                $keyedByName[$item['item']] = $newCount;
+            }
+        }
+
+        // Sort by name;
+        ksort($keyedByName);
         if ($app->settings('sort facet items by popularity')) {
-            $query->orderBy('count', 'DESC');
+            arsort($keyedByName);
         }
-        else {
-            $query->orderBy('item', 'ASC');
-        }
-        $result = $query->execute();
 
         $this->active = FALSE;
-        foreach ($result as $row) {
-            if (!empty($row['item'])) {
-                $item = new FacetItem($app, $name, $row['item'], $row['count']);
+        foreach ($keyedByName as $itemName => $itemCount) {
+            if (!empty($itemCount)) {
+                $item = new FacetItem($app, $name, $itemName, $itemCount);
                 if ($item->isActive()) {
                     $this->active = TRUE;
                 }
                 $this->items[] = $item;
             }
         }
+    }
+
+    private function queryFacetItems($name) {
+
+        $query = $this->getApp()->query();
+        $query->addSelect("$name as item");
+        $query->addSelect("COUNT(*) AS count");
+        $query->addGroupBy($name);
+        return $query->execute()->fetchAll();
     }
 
     private function meetsDependencies() {

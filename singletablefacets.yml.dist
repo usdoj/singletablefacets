@@ -108,7 +108,7 @@ keyword help: |
         <li>Enter multiple keywords to get fewer results, eg: cat dogs</li>
         <li>Use OR to get more results, eg: cats OR dogs</li>
         <li>Put a dash (-) before a keyword to exclude it, eg: dogs -lazy</li>
-        <li>Use "" (double-quotes) to match specific phrases, eg: "the brown fox"</li>
+        <li>Use "" (double-quotes) to match specific phrases, eg: "the quick brown fox"</li>
     </ul>
 
 # Users will click this label to expand the help text above.

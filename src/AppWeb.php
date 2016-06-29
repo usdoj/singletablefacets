@@ -229,12 +229,28 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             unset($parsedQueryString[$extraParameter]);
         }
         if (!empty($parsedQueryString)) {
+            $columns = $this->settings('database columns');
             foreach ($parsedQueryString as $facetName => $facetItemValues) {
+                // Create our sequences of question marks for the anon params.
                 $in = str_repeat('?,', count($facetItemValues) - 1) . '?';
-                foreach ($facetItemValues as $facetItem) {
-                    $anonymous_parameters[] = $facetItem;
+                $columnsToCheck = array($facetName);
+                // Check to see if we need to include additional columns.
+                foreach ($columns as $column => $info) {
+                    if (!empty($info['contains additional values for'])) {
+                        if ($facetName == $info['contains additional values for']) {
+                            $columnsToCheck[] = $column;
+                        }
+                    }
                 }
-                $query->andWhere("$facetName IN ($in)");
+                // Build the "where" for the facet.
+                $facetWhere = $query->expr()->orX();
+                foreach ($columnsToCheck as $columnToCheck) {
+                    foreach ($facetItemValues as $facetItem) {
+                        $anonymous_parameters[] = $facetItem;
+                    }
+                    $facetWhere->add("$columnToCheck IN ($in)");
+                }
+                $query->andWhere($facetWhere);
             }
         }
         // Add conditions for any required columns.

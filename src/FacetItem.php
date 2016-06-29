@@ -66,7 +66,7 @@ class FacetItem {
 
         // Add the item count if necessary.
         $label = $this->getValue();
-        if ($this->getApp()->settings('show facet counts')) {
+        if ($this->getApp()->settings('show counts next to facet items')) {
             $label .= sprintf(' (%s)', $this->getCount());
         }
 
