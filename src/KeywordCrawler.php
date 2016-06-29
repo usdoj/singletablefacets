@@ -29,10 +29,8 @@ class KeywordCrawler {
         $idColumn = $this->getApp()->getUniqueColumn();
         $total = 0;
 
-        foreach ($this->getApp()->settings('database columns') as $urlColumn => $info) {
-            if (empty($info['contains URLs to files for indexing keywords'])) {
-                continue;
-            }
+        $urlColumns = $this->getApp()->settings('keywords in files');
+        foreach ($urlColumns as $urlColumn) {
 
             $query = $this->getApp()->query();
             $rows = $query

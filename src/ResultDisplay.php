@@ -39,29 +39,25 @@ abstract class ResultDisplay {
 
     protected function getSortField() {
         $field = $this->getApp()->getParameter('sort');
-        $allowedSorts = array();
-        foreach ($this->getApp()->settings('database columns') as $column => $info) {
-            if (!empty($info['use for sorting'])) {
-                $allowedSorts[] = $column;
-            }
-        }
+        $sortDirections = $this->getApp()->settings('sort directions');
+        $allowedSorts = array_keys($sortDirections);
         if (in_array($field, $allowedSorts)) {
             return $field;
         }
-        // Otherwise default to the global default sort.
-        return $this->getApp()->settings('default sort column');
+        // Otherwise default to first one.
+        return $allowedSorts[0];
     }
 
     protected function getSortDirection($sortField = NULL) {
 
-        $columns = $this->getApp()->settings('database columns');
+        $sortDirections = $this->getApp()->settings('sort directions');
 
         // If $sortField was specified, that means that we want the sort direction
         // of that specific field. Ie, if that is not the current sort, we should
         // return the default sort for that field.
         if (!empty($sortField) && $sortField != $this->getSortField()) {
-            if (!empty($columns[$sortField]['sort direction'])) {
-                return $columns[$sortField]['sort direction'];
+            if (!empty($sortDirections[$sortField])) {
+                return $sortDirections[$sortField];
             }
             return 'ASC';
         }
@@ -73,8 +69,8 @@ abstract class ResultDisplay {
         }
         // Otherwise return the default for the current sort.
         $currentSort = $this->getSortField();
-        if (!empty($currentSort) && !empty($columns[$currentSort]['sort direction'])) {
-            return $columns[$currentSort]['sort direction'];
+        if (!empty($currentSort) && !empty($sortDirections[$currentSort])) {
+            return $sortDirections[$currentSort];
         }
         return FALSE;
     }

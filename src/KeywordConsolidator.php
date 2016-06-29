@@ -23,12 +23,7 @@ class KeywordConsolidator {
 
     public function run() {
 
-        $sourceColumns = array();
-        foreach ($this->getApp()->settings('database columns') as $column => $info) {
-            if (!empty($info['consult during keyword searches'])) {
-                $sourceColumns[] = $column;
-            }
-        }
+        $sourceColumns = $this->getApp()->settings('keywords in database');
 
         $result = $this->getApp()->getDb()->createQueryBuilder()
             ->from($this->getApp()->settings('database table'))

@@ -36,16 +36,17 @@ class Facet {
         $this->app = $app;
         $this->items = array();
 
-        $columns = $app->settings('database columns');
-        $this->label = $columns[$name]['label for facet'];
+        $labels = $this->getApp()->settings('facet labels');
+        $this->label = $labels[$name];
 
         // Check to see if this facet needs to compile values from additional
         // columns.
         $additionalColumns = array();
-        foreach ($columns as $column => $info) {
-            if (!empty($info['contains additional values for'])) {
-                if ($name == $info['contains additional values for']) {
-                    $additionalColumns[] = $column;
+        $columns = $this->getApp()->settings('columns for additional values');
+        if (!empty($columns)) {
+            foreach ($columns as $additionalColumn => $mainColumn) {
+                if ($name == $mainColumn) {
+                    $additionalColumns[] = $additionalColumn;
                 }
             }
         }
@@ -101,9 +102,9 @@ class Facet {
 
     private function meetsDependencies() {
 
-        $columns = $this->getApp()->settings('database columns');
-        if (!empty($columns[$this->getName()]['depends on'])) {
-            $parent = $columns[$this->getName()]['depends on'];
+        $dependentColumns = $this->getApp()->settings('dependent columns');
+        if (!empty($dependentColumns[$this->getName()])) {
+            $parent = $dependentColumns[$this->getName()];
             $parameter = $this->getApp()->getParameter($this->getName());
 
             // If there are no facet dependencies, this will always be TRUE.
@@ -125,13 +126,13 @@ class Facet {
 
     private function getCollapse() {
 
-        $columns = $this->getApp()->settings('database columns');
+        $collapseColumns = $this->getApp()->settings('collapse facet items');
 
         // Decide on collapsing. Since 0 has a meaning, use -1 to indicate that no
         // collapsing should happen.
         $collapseAfter = -1;
-        if (!empty($columns[$this->getName()]['collapse facet items after'])) {
-            $collapseAfter = $columns[$this->getName()]['collapse facet items after'];
+        if (isset($collapseColumns[$this->getName()])) {
+            $collapseAfter = $collapseColumns[$this->getName()];
         }
         if ($collapseAfter >= count($this->getItems())) {
             // No need for collapsing if the number is lower.
@@ -185,8 +186,8 @@ class Facet {
         }
 
         // Check to see if this facet is a dependent.
-        $columns = $this->getApp()->settings('database columns');
-        $dependent = (!empty($columns[$this->getName()]['depends on']));
+        $dependentColumns = $this->getApp()->settings('dependent columns');
+        $dependent = (!empty($dependentColumns[$this->getName()]));
 
         $class = 'doj-facet';
         $showLabel = TRUE;
@@ -203,7 +204,7 @@ class Facet {
 
         $output = '<div class="' . $class . '">' . PHP_EOL;
         if ($showLabel) {
-            $output .= '  <h2 class="doj-facet-label">' . $columns[$this->getName()]['label for facet'] . '</h2>' . PHP_EOL;
+            $output .= '  <h2 class="doj-facet-label">' . $this->getLabel() . '</h2>' . PHP_EOL;
         }
         $output .= $list;
         $output .= '</div>' . PHP_EOL;

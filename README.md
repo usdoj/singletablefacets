@@ -68,57 +68,67 @@ database host: localhost
 # Per the name of this library, we look at only a single table.
 database table: myTable
 
-# Provide information about the database columns here. In this example file,
-# all options are shown for one database column.
-database columns:
-
-    myDatabaseColumn1:
-        # Do not display results unless they have data in this column.
-        is required: false
-        # This column should show up as a facet.
-        is a facet: true
-        # Above the facet, show this label.
-        label for facet: Filter by something
-        # The label to display when displaying search results.
-        label for search results: Something
-        # Only show this many items and then display a "show more" button.
-        collapse facet items after: 5
-        # This facet is dependent on the another facet. Ie, it will not show up
-        # unless the other facet is also active.
-        depends on: myDatabaseColumn2
-        # Data in this column should be consulted during keyword searches.
-        consult during keyword searches: true
-        # This columns has URLs pointing to files (PDF, HTML) with keyword data.
-        contains URLs to files for indexing keywords: false
-        # This column should be used for sorting.
-        use for sorting: true
-        # The default direction, ASC or DESC, when used for sorting.
-        sort direction: ASC
-        # Specify another column that this column has additional values for.
-        # This allows for one row to have multiple values for a facet, since
-        # each column can only have one value per row.
-        contains additional values for: myDatabaseColumn2
-        # When data from this column is rendered, try to format it as a link
-        # pointing to a URL from another column.
-        output as link to URL from: myDatabaseColumn2
-
-    myDatabaseColumn2:
-        # etc....
-
-# Choose the single column to use as a default for sorting.
-default sort column: myDatabaseColumn1
-
-# Choose the order that you would like the columns to show in the facet list.
-order for displaying facets:
-    - myDatabaseColumn1
-    - myDatabaseColumn2
-
-# Choose the order that you would like the fields to show in search results.
-order for displaying results:
-    - myDatabaseColumn2
+# Indicate the columns that are required to appear in search results.
+required columns:
     - myDatabaseColumn1
 
-# Additional options
+# Choose the order that you would like the columns to show in the facet list,
+# and indicate the human-readable labels to display above each one.
+facet labels:
+    myDatabaseColumn1: Filter by something
+    myDatabaseColumn2: Filter by something else
+
+# Choose the order that you would like the fields to show in search results,
+# and indicate the human-readable labels to display above each one.
+search result labels:
+    myDatabaseColumn2: Something
+    myDatabaseColumn1: Something Else
+
+# Choose the priority (order) and default direction for the sortable columns.
+# ASC = ascending, DESC = descending
+sort directions:
+    myDatabaseColumn1: ASC
+    myDatabaseColumn2: DESC
+
+# List the columns that contain keywords in the database.
+keywords in database:
+    - myDatabaseColumn1
+
+# List the columns that contain URLs pointing to files with keywords.
+keywords in files:
+    - myDatabaseColumn2
+
+# List the columns that should be output as links, using another columns to
+# get the destination URLs.
+output as links:
+    # Link label : Link URL
+    myDatabaseColumn1: myDatabaseColumn2
+
+# List the facet columns that should be collapsed at a certain point. Use 0 to
+# collapse all items, or for example, 5 to collapse items in excess of 5.
+collapse facet items:
+    myDatabaseColumn1: 0
+    myDatabaseColumn2: 5
+
+# List the columns that should function as additional values for another facet.
+# For example, if you have a Tag and Tag2 column, you could indicate that Tag2
+# is just additional values for Tag, and they would both appear together.
+# This is the ONLY way to give one item multiple values in a single facet.
+columns for additional values:
+    # Extra column: Main column
+    myDatabaseColumn1: myDatabaseColumn2
+
+# List the facet columns that depend on other facets. For example, if you don't
+# want "Sub Category" to appear unless "Category" is active, you can set that
+# here. This is the only way to imitate a hierarchical setup, and works well
+# with "show dependents indented to the right" below.
+dependent columns:
+    # Child column: Main column
+    myDatabaseColumn1: myDatabaseColumn2
+
+# List in HTML table columns you would like to give a minimum width (CSS).
+minimum column widths:
+    myDatabaseColumn1: 75px
 
 # Do not consider keywords shorter than this number.
 minimum valid keyword length: 3
@@ -156,7 +166,7 @@ keyword help: |
         <li>Enter multiple keywords to get fewer results, eg: cat dogs</li>
         <li>Use OR to get more results, eg: cats OR dogs</li>
         <li>Put a dash (-) before a keyword to exclude it, eg: dogs -lazy</li>
-        <li>Use "" (double-quotes) to match specific phrases, eg: "the brown fox"</li>
+        <li>Use "" (double-quotes) to match specific phrases, eg: "the quick brown fox"</li>
     </ul>
 
 # Users will click this label to expand the help text above.
@@ -174,4 +184,10 @@ prefix for relative keyword URLs: http://example.com/files/
 # Normally keywords are processed to remove common words and such. If you would
 # like the search to be very precise, set this to false.
 remove common keywords: true
+
+# If the environment needs to use a proxy, uncomment and fill out this section.
+# proxy: 10.173.10.101:8080
+# To prevent the use of the proxy for certain URLs, enter partial patterns here.
+# proxy exceptions:
+#    - .doj.gov
 ```

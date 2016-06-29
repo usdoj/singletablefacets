@@ -11,16 +11,17 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
     public function render() {
 
         $totalRows = 0;
-        $allColumns = $this->getApp()->settings('database columns');
-        $tableColumns = $this->getApp()->settings('order for displaying results');
+        $tableColumns = array_keys($this->getApp()->settings('search result labels'));
+        $minimumWidths = $this->getApp()->settings('minimum column widths');
+        $hrefColumns = $this->getApp()->settings('output as links');
 
         $output = '<table class="doj-facet-search-results">' . PHP_EOL;
         $output .= '  <thead>' . PHP_EOL;
         $output .= '    <tr>' . PHP_EOL;
         foreach ($tableColumns as $columnName) {
             $label = $this->getTableHeaderLabel($columnName);
-            if (!empty($allColumns[$columnName]['minimum column width in pixels'])) {
-                $min_width = ' style="min-width:' . $allColumns[$columnName]['minimum column width in pixels'] . ';"';
+            if (!empty($minimumWidths[$columnName])) {
+                $min_width = ' style="min-width:' . $minimumWidths[$columnName] . ';"';
             }
             else {
                 $min_width = '';
@@ -32,8 +33,8 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
             $rowMarkup = '  <tr>' . PHP_EOL;
             foreach ($tableColumns as $column) {
                 $td = $row[$column];
-                if (!empty($allColumns[$column]['output as link to URL from'])) {
-                    $hrefColumn = $allColumns[$column]['output as link to URL from'];
+                if (!empty($hrefColumns[$column])) {
+                    $hrefColumn = $hrefColumns[$column];
                     if (!empty($row[$hrefColumn])) {
                         $td = '<a href="' . $row[$hrefColumn] . '">' . $row[$column] . '</a>';
                     }
@@ -54,9 +55,11 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
 
     protected function getTableHeaderLabel($columnName) {
 
-        $columns = $this->getApp()->settings('database columns');
-        $label = $columns[$columnName]['label for search results'];
-        if (empty($columns[$columnName]['use for sorting'])) {
+        $labels = $this->getApp()->settings('search result labels');
+        $label = $labels[$columnName];
+
+        $sortDirections = $this->getApp()->settings('sort directions');
+        if (empty($sortDirections[$columnName])) {
             return $label;
         }
 

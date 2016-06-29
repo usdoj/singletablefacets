@@ -40,7 +40,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     }
 
     private function getFacetColumns() {
-        return $this->settings('order for displaying facets');
+        $facets = $this->settings('facet labels');
+        return array_keys($facets);
     }
 
     private function getAllowedParameters() {
@@ -229,17 +230,15 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             unset($parsedQueryString[$extraParameter]);
         }
         if (!empty($parsedQueryString)) {
-            $columns = $this->settings('database columns');
+            $additionalColumns = $this->settings('columns for additional values');
             foreach ($parsedQueryString as $facetName => $facetItemValues) {
                 // Create our sequences of question marks for the anon params.
                 $in = str_repeat('?,', count($facetItemValues) - 1) . '?';
                 $columnsToCheck = array($facetName);
                 // Check to see if we need to include additional columns.
-                foreach ($columns as $column => $info) {
-                    if (!empty($info['contains additional values for'])) {
-                        if ($facetName == $info['contains additional values for']) {
-                            $columnsToCheck[] = $column;
-                        }
+                foreach ($additionalColumns as $additionalColumn => $mainColumn) {
+                    if ($facetName == $mainColumn) {
+                        $columnsToCheck[] = $additionalColumn;
                     }
                 }
                 // Build the "where" for the facet.
@@ -254,10 +253,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             }
         }
         // Add conditions for any required columns.
-        foreach ($this->settings('database columns') as $column => $info) {
-            if (!empty($info['is required'])) {
-                $query->andWhere("($column <> '' AND $column IS NOT NULL)");
-            }
+        foreach ($this->settings('required columns') as $column) {
+            $query->andWhere("($column <> '' AND $column IS NOT NULL)");
         }
 
         if (!empty($anonymous_parameters)) {
