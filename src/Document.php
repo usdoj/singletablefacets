@@ -61,10 +61,10 @@ class Document {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
 
-        if (!empty($this->getApp()->settings('proxy'))) {
-            $proxy = $this->getApp()->settings('proxy');
-            if (!empty($this->getApp()->settings('proxy exceptions'))) {
-                $exceptions = $this->getApp()->settings('proxy exceptions');
+        $proxy = $this->getApp()->settings('proxy');
+        if (!empty($proxy)) {
+            $exceptions = $this->getApp()->settings('proxy exceptions');
+            if (!empty($exceptions)) {
                 foreach ($exceptions as $exception) {
                     if (strpos($url, $exception) !== FALSE) {
                         $proxy = NULL;

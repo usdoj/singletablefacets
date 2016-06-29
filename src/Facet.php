@@ -116,7 +116,8 @@ class Facet {
                 return TRUE;
             }
             // Finally check for the actual dependency.
-            if (empty($this->getApp()->getParameter($parent))) {
+            $active = $this->getApp()->getParameter($parent);
+            if (empty($active)) {
                 return FALSE;
             }
         }
@@ -147,7 +148,8 @@ class Facet {
 
     protected function getList() {
 
-        if (empty($this->getItems())) {
+        $items = $this->getItems();
+        if (empty($items)) {
             return '';
         }
 
