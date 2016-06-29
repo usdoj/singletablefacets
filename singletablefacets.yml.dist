@@ -50,9 +50,9 @@ database columns:
         # This allows for one row to have multiple values for a facet, since
         # each column can only have one value per row.
         contains additional values for: myDatabaseColumn2
-        # One this data from this column is output, try to format it as a link
+        # When data from this column is rendered, try to format it as a link
         # pointing to a URL from another column.
-        output as links to URLs from: myDatabaseColumn2
+        output as link to URL from: myDatabaseColumn2
 
     myDatabaseColumn2:
         # etc....
