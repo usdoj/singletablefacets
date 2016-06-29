@@ -70,6 +70,6 @@ class KeywordCrawler {
                 }
             }
         }
-        print sprintf('Fetched keywords from %s URLs.', $total) . PHP_EOL;
+        print PHP_EOL . sprintf('Fetched keywords from %s URLs.', $total) . PHP_EOL;
     }
 }

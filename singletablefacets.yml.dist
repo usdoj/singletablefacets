@@ -126,3 +126,9 @@ prefix for relative keyword URLs: http://example.com/files/
 # Normally keywords are processed to remove common words and such. If you would
 # like the search to be very precise, set this to false.
 remove common keywords: true
+
+# If the environment needs to use a proxy, uncomment and fill out this section.
+# proxy: 10.173.10.101:8080
+# To prevent the use of the proxy for certain URLs, enter partial patterns here.
+# proxy exceptions:
+#    - .doj.gov

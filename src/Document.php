@@ -30,33 +30,60 @@ class Document {
         $this->document = $document;
         $this->app = $app;
 
-        // Spoof a browser so that we can download from certain servers.
-        $options  = array(
-            'http' => array(
-                'user_agent' => 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
-            ),
-        );
-        $context  = stream_context_create($options);
-
         // Add an http prefix if the document is only a relative link.
         if (strpos($document, 'http') !== 0) {
-            $prefix = $this->getApp()->settings('prefix for relative keyword URL');
+            $prefix = $this->getApp()->settings('prefix for relative keyword URLs');
             $document = $prefix . rawurlencode($document);
         }
 
         try {
-            $response = @file_get_contents($document, false, $context);
+            print 'Fetching ' . $document . PHP_EOL;
+            $response = @$this->file_get_contents_curl($document);
         }
         catch (\Exception $e) {
             // Error checking?
+            print '-- Failed: ' . $e->getMessage() . PHP_EOL;
         }
 
         // Save the file locally to make it easier to do the other things.
         file_put_contents($this->getTempPath(), $response);
     }
 
+    private function file_get_contents_curl($url) {
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_REFERER, $url);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_VERBOSE, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
+
+        if (!empty($this->getApp()->settings('proxy'))) {
+            $proxy = $this->getApp()->settings('proxy');
+            if (!empty($this->getApp()->settings('proxy exceptions'))) {
+                $exceptions = $this->getApp()->settings('proxy exceptions');
+                foreach ($exceptions as $exception) {
+                    if (strpos($url, $exception) !== FALSE) {
+                        $proxy = NULL;
+                        break;
+                    }
+                }
+            }
+            curl_setopt($ch, CURLOPT_PROXY, $proxy);
+        }
+
+        $data = curl_exec($ch);
+        curl_close($ch);
+
+        return $data;
+    }
+
     private function fetchText() {
 
+        $ret = '';
         if ($this->isText()) {
             // Assume text files are .html, since it also works OK for .txt.
             $text = file_get_contents($this->getTempPath());
@@ -80,11 +107,9 @@ class Document {
             catch (\Exception $e) {
                 // Anything?
             }
-            return $ret;
         }
         else {
             // Assume binary files are .pdf, since that's all we support.
-            $ret = '';
             try {
                 $reader = new \Asika\Pdf2text;
                 $reader->setFilename($this->getTempPath());
@@ -94,8 +119,12 @@ class Document {
             catch (\Exception $e) {
                 // Anything?
             }
-            return $ret;
         }
+        if (!empty($ret)) {
+            $words = explode(' ', $ret);
+            print sprintf('-- Success: %s keywords', count($words)) . PHP_EOL;
+        }
+        return $ret;
     }
 
     public function getKeywords() {
