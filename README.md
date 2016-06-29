@@ -5,7 +5,7 @@ This class is intended as a simple faceted search solution for PHP applications 
 ## Dependencies
 
 * PHP/MySQL
-* jQuery (for checkbox-style facets)
+* jQuery
 * Composer
 
 ## Installation
@@ -22,106 +22,156 @@ Use composer to bring this into your PHP project. The composer.json should look 
             "type": "vcs",
             "url": "https://github.com/usdoj/singletablefacets.git"
         }
-    ]
+    ],
+    "minimum-stability": "dev"
 }
 ```
 
+After creating a composer.json similar to the above, do a "composer install".
+
 ## Usage
 
-See docs/example.index.php for a more detailed example, but here is the basic idea:
+To use the library you need to include the autoloader. For an example of this, see docs/example.index.php. The various parts of the page can be rendered individually using these methods: renderStyles(), renderJavascript(), renderFacets(), renderKeywordSearch(), renderResults(), and renderPager().
+
+## Database table
+
+It is up to you to create the database table that you will be using. Note that at least one column MUST be a unique index. Further, you MUST have a blank column in the database called "stf_keywords", which should be able to hold a lot of text. (Recommend using the "blob" column type.) Make sure that the column names of the database are the same as the headers that you have in the Excel spreadsheet source.'
+
+## Importing source data
+
+The library includes a command-line tool for re-importing data from a CSV file. That tool can be run with: ./vendor/bin/singletablefacets [path-to-config-file] [path-to-source-data]. Note that the soure data feel must be a CSV file.
+
+## Configuration
+
+The library depends on configuration in a separate YAML file. See singletablefacets.yml.dist for an example. Here is that example config:
 
 ```
-// First you instantiate the object using array-based parameters and options.
+# Configuration file for SingleTableFacets.
+#
+# This should be copied somewhere OUTSIDE of the publicly available files. Ie,
+# if the docroot is /var/www/htdocs, this file should be somewhere above that,
+# such as /var/www, or adjacent, such as /var/www/libraries/singletablefacets.
+#
+# You can have any number of these files, named differently, to set up multiple
+# instances of SingleTableFacets. Each time you invoke SingleTableFacets, either
+# on a web page or on the command line (for refreshing the data) you reference
+# this configuration file.
+#
+# Because this is a YAML file, remember that whitespace is important.
 
-// Connect to the database.
-// Get database connection.
-$config = new \Doctrine\DBAL\Configuration();
-$connectionParams = array(
-    'dbname' => 'mydatabase',
-    'user' => 'myuser',
-    'password' => 'mypassword',
-    'host' => 'localhost',
-    'port' => 3306,
-    'charset' => 'utf8',
-    'driver' => 'pdo_mysql',
-);
-$db = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $config);
+# Database credentials
+database name: myDatabase
+database user: myUser
+database password: myPassword
+database host: localhost
 
-// Pick a database table.
-$table = 'mytable';
+# Per the name of this library, we look at only a single table.
+database table: myTable
 
-// Pick the columns from the database table that will act as facets. For each,
-// assign a human-readable label that will display above the facet block.
-$facet_columns = array(
-  'tag' => 'Filter by tag',
-  'author' => 'Filter by author',
-);
+# Provide information about the database columns here. In this example file,
+# all options are shown for one database column.
+database columns:
 
-// Pick the columns from the database table that will be consulted during
-// keyword searches.
-$keyword_columns = array(
-  'title',
-  'teaser',
-  'body',
-);
+    myDatabaseColumn1:
+        # Do not display results unless they have data in this column.
+        is required: false
+        # This column should show up as a facet.
+        is a facet: true
+        # Above the facet, show this label.
+        label for facet: Filter by something
+        # The label to display when displaying search results.
+        label for search results: Something
+        # Only show this many items and then display a "show more" button.
+        collapse facet items after: 5
+        # This facet is dependent on the another facet. Ie, it will not show up
+        # unless the other facet is also active.
+        depends on: myDatabaseColumn2
+        # Data in this column should be consulted during keyword searches.
+        consult during keyword searches: true
+        # This columns has URLs pointing to files (PDF, HTML) with keyword data.
+        contains URLs to files for indexing keywords: false
+        # This column should be used for sorting.
+        use for sorting: true
+        # The default direction, ASC or DESC, when used for sorting.
+        sort direction: ASC
+        # Specify another column that this column has additional values for.
+        # This allows for one row to have multiple values for a facet, since
+        # each column can only have one value per row.
+        contains additional values for: myDatabaseColumn2
+        # When data from this column is rendered, try to format it as a link
+        # pointing to a URL from another column.
+        output as link to URL from: myDatabaseColumn2
 
-// Pick the columns from the database table that should be allowed as sortable
-// fields. For each, choose a default direction, 'ASC' or 'DESC'.
-$sort_columns = array(
-  'title' => 'ASC',
-  'author' => 'ASC',
-  'date' => 'DESC',
-);
+    myDatabaseColumn2:
+        # etc....
 
-// Any number of optional settings go here. (See later in this README.)
-$options = array();
+# Choose the single column to use as a default for sorting.
+default sort column: myDatabaseColumn1
 
-// Instantiate the object.
-$facets = new SingleTableFacets($db, $table, $facet_columns, $keyword_columns, $sort_columns, $options);
+# Choose the order that you would like the columns to show in the facet list.
+order for displaying facets:
+    - myDatabaseColumn1
+    - myDatabaseColumn2
 
-// Now you can use these methods on the object to output the markup on your
-// search page, wherever you would like.
+# Choose the order that you would like the fields to show in search results.
+order for displaying results:
+    - myDatabaseColumn2
+    - myDatabaseColumn1
 
-// Output the CSS.
-print $facets->getStyles();
+# Additional options
 
-// Output the keyword search widget.
-print $facets->getKeywordWidget();
+# Do not consider keywords shorter than this number.
+minimum valid keyword length: 3
 
-// Output the facet blocks.
-print $facets->getFacets();
+# Next to facet items, show the totals in parenthesis.
+show counts next to facet items: true
 
-// Output the results as an HTML table. Pick the database columns you would
-// like displayed as HTML columns, and for each, assign a human-readable header.
-$table_columns = array(
-  'title' => 'Title',
-  'author' => 'Author',
-  'date' => 'Date',
-  'teaser' => 'Description',
-);
-print $facets->getRowsAsTable($table_columns);
+# Choose the text for the keyword search button.
+search button text: Search
 
-// Output the pager.
-print $facets->getPager();
+# Choose the text for the message that shows when there are no results.
+no results message: |
+    <p>
+        Sorry, no results could be found for those keywords.
+    </p>
 
-// Output the javascript.
-print $facets->getJavascript();
+# Display the facet items as checkboxes instead of links.
+use checkboxes for facets instead of links: true
+
+# For each page of results, show this many results.
+number of items per page: 20
+
+# In the pager, show direct links to this many pages. (Besides the normal
+# "Next" and "Previous" buttons.)
+number of pager links to show: 5
+
+# Indent dependents to the right and hide their titles. This gives the effect
+# that they are being shown in a hierarchical way.
+show dependents indented to the right: true
+
+# Show this blurb in an expandable section beneath the keyword search.
+keyword help: |
+    <ul>
+        <li>Use the checkboxes on the left to refine your search, or enter new keywords to start over.</li>
+        <li>Enter multiple keywords to get fewer results, eg: cat dogs</li>
+        <li>Use OR to get more results, eg: cats OR dogs</li>
+        <li>Put a dash (-) before a keyword to exclude it, eg: dogs -lazy</li>
+        <li>Use "" (double-quotes) to match specific phrases, eg: "the brown fox"</li>
+    </ul>
+
+# Users will click this label to expand the help text above.
+keyword help label: "Need help searching?"
+
+# The items within a given facet are normally sorted alphabetically, but setting
+# this to true will sort them by their counts, in descending order.
+sort facet items by popularity: false
+
+# When crawling remote URLs for keywords, add this prefix to any relative URLs.
+# For example, if this is set to: "http://example.com/files/", then a relative
+# URL of "mydoc.pdf" will be fetched from "http://example.com/files/mydoc.pdf".
+prefix for relative keyword URLs: http://example.com/files/
+
+# Normally keywords are processed to remove common words and such. If you would
+# like the search to be very precise, set this to false.
+remove common keywords: true
 ```
-
-## Options
-
-The `$options` parameter is an associative array which can have any number of the following options:
-
-* minumum_keyword_length: Minimum number of characters a keyword must have to be considered. Default: `3`
-* facet_dependencies: An associative array of facets that depend on other facets before they are displayed. Eg:	array('child_facet' => 'parent_facet'). Default: `array()`
-* active_prefix: A string to prepend to all active facet items. Default: `''`
-* show_counts: Whether to display the counts of facet items. Default: `TRUE`
-* search_button_text: A string to use for the search button text. Default: `'Search'`
-* hide_single_item_facets: Hide non-active facets with less than 2 items. Default: `FALSE`
-* no_results_message: Message to display when no results are found. Default: `'Sorry, no results could be found for those keywords'`
-* checkboxes: Whether to use javascript-powered checkboxes or stick with ordinary links. Default: `FALSE`
-* pager_limit: The number items per page, or 0 to disable paging. Default: `10`
-* href_columns: A mapping of columns for cases where some columns need to be treated as link hrefs, where another column is the link labels. Must be an associative array of $label_column => $href_column. Default: `array()`
-* required_columns: An array of columns which cannot be NULL or empty. Default: `array()`
-* pager_radius: The maximum number of pager pages to show on each side of the current page. If there are more pager pages than this max, then the extra pages will be replaced with a "...". Use 0 to display all pages. Default: `2`
-* nested_dependents: Whether to hide the labels of the facet blocks for dependents and indent them slightly to make them look "nested". Note that this may appear confusing if the parent facet still has multiple items in it. (The child facets will appear to be nested from the last parent item.) This also looks weird unless the child facet is directly after the parent facet in the $facet_columns parameter. Default: `array()`
