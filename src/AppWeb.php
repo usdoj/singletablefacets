@@ -236,9 +236,11 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                 $in = str_repeat('?,', count($facetItemValues) - 1) . '?';
                 $columnsToCheck = array($facetName);
                 // Check to see if we need to include additional columns.
-                foreach ($additionalColumns as $additionalColumn => $mainColumn) {
-                    if ($facetName == $mainColumn) {
-                        $columnsToCheck[] = $additionalColumn;
+                if (!empty($additionalColumns)) {
+                    foreach ($additionalColumns as $additionalColumn => $mainColumn) {
+                        if ($facetName == $mainColumn) {
+                            $columnsToCheck[] = $additionalColumn;
+                        }
                     }
                 }
                 // Build the "where" for the facet.
