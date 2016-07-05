@@ -82,8 +82,9 @@ class Importer {
             }
             // Do we need to filter any of the text?
             $filteredRow = $row;
-            if (!empty($this->getApp()->settings('text alterations'))) {
-                foreach ($this->getApp()->settings('text alterations') as $search => $replace) {
+            $textAlterations = $this->getApp()->settings('text alterations');
+            if (!empty($textAlterations)) {
+                foreach ($textAlterations as $search => $replace) {
                     $filteredRow = str_replace($search, $replace, $filteredRow);
                 }
             }
