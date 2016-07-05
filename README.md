@@ -201,5 +201,5 @@ remove common keywords: true
 # importing the data from the CSV file, indicate those here. For example, to
 # change all occurences of § with &#167; uncomment the lines below.
 # text alterations:
-#    §: &#167;
+#    "§": "&#167;"
 ```
