@@ -87,6 +87,10 @@ class Importer {
                     $filteredRow = str_replace($search, $replace, $filteredRow);
                 }
             }
+            // Skip invalid rows.
+            if (count($filteredRow) != count($header)) {
+                continue;
+            }
             $data[] = array_combine($header, $filteredRow);
         }
         return $data;

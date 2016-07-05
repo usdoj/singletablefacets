@@ -33,7 +33,13 @@ class Document {
         // Add an http prefix if the document is only a relative link.
         if (strpos($document, 'http') !== 0) {
             $prefix = $this->getApp()->settings('prefix for relative keyword URLs');
-            $document = $prefix . rawurlencode($document);
+            // We have to decide whether to encode the URL. Some URLs are
+            // already encoded, and some are not. We decide this by looking for
+            // common characters that would be encoded: spaces.
+            if (strpos($document, ' ') !== FALSE) {
+              $document = rawurlencode($document);
+            }
+            $document = $prefix . $document;
         }
 
         try {

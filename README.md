@@ -39,7 +39,13 @@ It is up to you to create the database table that you will be using. Note that a
 
 ## Importing source data
 
-The library includes a command-line tool for re-importing data from a CSV file. That tool can be run with: ./vendor/bin/singletablefacets [path-to-config-file] [path-to-source-data]. Note that the soure data feel must be a CSV file.
+The library includes a command-line tool for re-importing data from a CSV file. That tool can be run with: ./vendor/bin/singletablefacets [path-to-config-file] [path-to-source-data]. Note that the source data file must be a CSV file.
+
+Tip: You'll probably usually be getting the CSV file from an XLS file. Since Excel has a problem with special characters, a useful command-line tool is "xls2csv" from the "catdoc" library. To install:
+Linux: apt-get install catdoc
+Babun: pact install catdoc
+When using xls2csv, to ensure you don't get encoding issues, specify the destination encoding like so:
+xls2csv -d utf-8 file.xls > file-utf-8.csv
 
 ## Configuration
 
