@@ -190,4 +190,10 @@ remove common keywords: true
 # To prevent the use of the proxy for certain URLs, enter partial patterns here.
 # proxy exceptions:
 #    - .doj.gov
+
+# If there are any special characters or phrases that need to be altered when
+# importing the data from the CSV file, indicate those here. For example, to
+# change all occurences of § with &#167; uncomment the lines below.
+# text alterations:
+#    §: &#167;
 ```

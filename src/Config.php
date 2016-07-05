@@ -30,6 +30,7 @@ class Config extends \Noodlehaus\Config
             'keyword help label' => "Need help searching?",
             'sort facet items by popularity' =>  FALSE,
             'remove common keywords' => TRUE,
+            'text alterations' => array(),
         );
     }
 }

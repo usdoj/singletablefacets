@@ -80,7 +80,14 @@ class Importer {
                 $skip = FALSE;
                 continue;
             }
-            $data[] = array_combine($header, $row);
+            // Do we need to filter any of the text?
+            $filteredRow = $row;
+            if (!empty($this->getApp()->settings('text alterations'))) {
+                foreach ($this->getApp()->settings('text alterations') as $search => $replace) {
+                    $filteredRow = str_replace($search, $replace, $filteredRow);
+                }
+            }
+            $data[] = array_combine($header, $filteredRow);
         }
         return $data;
     }
