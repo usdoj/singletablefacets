@@ -70,6 +70,9 @@ class FacetItem {
             $label .= sprintf(' (%s)', $this->getCount());
         }
 
+        // Do not want page numbers to carry over into facets.
+        unset($parameters['page']);
+
         return $this->getApp()->getLink($this->getApp()->getBaseUrl(), $label, $parameters, $class);
     }
 }
