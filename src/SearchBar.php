@@ -28,6 +28,16 @@ class SearchBar {
             $keys = '';
         }
 
+        $showFullTextOption = $this->getApp()->settings('allow user to exclude full text from keyword search');
+        $fullTextOption = '';
+        if ($showFullTextOption) {
+            $checked = (!empty($this->getApp()->getParameter('full_text'))) ? 'checked="checked"' : '';
+            $fullTextOption = '
+                <input type="checkbox" id="doj-full-text" name="full_text" value="1" ' . $checked . '>
+                <label for="doj-full-text">Search contents of documents?</label>
+            ';
+        }
+
         $help = $this->getApp()->settings('keyword help');
         $labelHelp = $this->getApp()->settings('keyword help label');
         if (!empty($help)) {
@@ -43,6 +53,7 @@ class SearchBar {
         <form method="get">
             <label for="doj-facet-keys">Keywords</label>
             <input type="text" name="keys" id="doj-facet-keys" value="' . $keys . '" size="50" />
+            ' . $fullTextOption . '
             <input type="submit" value="' . $this->getApp()->settings('search button text') . '" />
             <input type="button" onclick="location.href=\'' . $this->getApp()->getBaseUrl() . '\';" value="Reset" />
         </form>

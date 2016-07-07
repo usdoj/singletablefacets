@@ -36,7 +36,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     }
 
     public function getExtraParameters() {
-        return array('keys', 'sort', 'sort_direction', 'page');
+        return array('keys', 'sort', 'sort_direction', 'page', 'full_text');
     }
 
     private function getFacetColumns() {

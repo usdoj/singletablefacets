@@ -137,6 +137,11 @@ prefix for relative keyword URLs: http://example.com/files/
 # like the search to be very precise, set this to false.
 remove common keywords: true
 
+# Normally when users do a keyword search, the full text (crawled) data is
+# included. However if you would like to exclude the full text by default, and
+# give the user the option to include it, set this to true.
+allow user to exclude full text from keyword search: false
+
 # If the environment needs to use a proxy, uncomment and fill out this section.
 # proxy: 10.173.10.101:8080
 # To prevent the use of the proxy for certain URLs, enter partial patterns here.
