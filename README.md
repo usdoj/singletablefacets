@@ -218,3 +218,10 @@ allow user to exclude full text from keyword search: false
 #text alterations:
 #    "§": "&#167;"
 ```
+
+## Scale limits
+
+Because this approach uses only a single table, it will not scale well. Eventually, as the number of rows increases, it will get too slow. I am not sure what that number is, but a general guess is about 5-10k. Future avenues for improvement in this area might be:
+
+* Require additional tables and joins to handle keywords (though then I might have to change the name...)
+* Require the keywords columns make use of MySQL's FULLTEXT index
