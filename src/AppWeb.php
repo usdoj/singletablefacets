@@ -172,13 +172,13 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             $excludeFullText &= empty($fullTextParam);
 
             if ($excludeFullText) {
-                $fullTextIndex = 'keywords_without_docs';
+                $fullTextIndex = 'stf_doc_keywords';
             }
             else {
-                $fullTextIndex = 'keywords_with_docs';
+                $fullTextIndex = 'stf_doc_keywords';
             }
 
-            $query->addWhere("MATCH($fullTextIndex) AGAINST(? IN BOOLEAN MODE)");
+            $query->andWhere("MATCH($fullTextIndex) AGAINST(? IN BOOLEAN MODE)");
             $anonymous_parameters[] = "%$keywords%";
         }
 
