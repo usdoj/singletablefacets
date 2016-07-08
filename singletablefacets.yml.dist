@@ -20,7 +20,9 @@ database host: localhost
 # Per the name of this library, we look at only a single table.
 database table: myTable
 
-# Indicate the columns that are required to appear in search results.
+# Indicate the columns that are required to have data in order for a row to
+# appear in the search results. For example, if you don't want any rows to show
+# up with titles, make your title column a required column here.
 required columns:
     - myDatabaseColumn1
 
@@ -78,7 +80,12 @@ dependent columns:
     # Child column: Main column
     myDatabaseColumn1: myDatabaseColumn2
 
-# List in HTML table columns you would like to give a minimum width (CSS).
+# Indent dependents to the right and hide their titles. This gives the effect
+# that they are being shown in a hierarchical way.
+show dependents indented to the right: true
+
+# List the HTML table columns you would like to give a minimum width (CSS).
+# This can be used to cut down on undesirable text wrapping.
 minimum column widths:
     myDatabaseColumn1: 75px
 
@@ -107,10 +114,6 @@ number of items per page: 20
 # "Next" and "Previous" buttons.)
 number of pager links to show: 5
 
-# Indent dependents to the right and hide their titles. This gives the effect
-# that they are being shown in a hierarchical way.
-show dependents indented to the right: true
-
 # Show this blurb in an expandable section beneath the keyword search.
 keyword help: |
     <ul>
@@ -133,8 +136,15 @@ sort facet items by popularity: false
 # URL of "mydoc.pdf" will be fetched from "http://example.com/files/mydoc.pdf".
 prefix for relative keyword URLs: http://example.com/files/
 
-# Normally keywords are processed to remove common words and such. If you would
-# like the search to be very precise, set this to false.
+# Normally keywords are processed to remove common words and such. This is a
+# good thing in general, but if you expect your users to be searching for
+# specific phrases/sentences that are in the documents, you might want to set
+# this to false. For example, if this is set to false, and you are indexing a
+# PDF that contains "The brown fox jumped over the lazy dog", it would have
+# keyword data that is saved in exactly the same way: "The brown fox jumped over
+# the lazy dog". However, if this is set to true, the keywords might be saved
+# as "brown fox jumped lazy dog". So if someone were searching for that exact
+# phrase, the desired result would not show up.
 remove common keywords: true
 
 # Normally when users do a keyword search, the full text (crawled) data is
@@ -143,10 +153,10 @@ remove common keywords: true
 allow user to exclude full text from keyword search: false
 
 # If the environment needs to use a proxy, uncomment and fill out this section.
-# proxy: 10.173.10.101:8080
+# proxy: 192.168.1.1:8080
 # To prevent the use of the proxy for certain URLs, enter partial patterns here.
 # proxy exceptions:
-#    - .doj.gov
+#    - .example.com
 
 # If there are any special characters or phrases that need to be altered when
 # importing the data from the CSV file, indicate those here. For example, to
