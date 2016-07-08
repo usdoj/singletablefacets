@@ -20,8 +20,12 @@ class App
         return $this->config;
     }
 
-    public function getKeywordColumn() {
-        return 'stf_keywords';
+    public function getDatabaseKeywordColumn() {
+        return 'stf_data_keywords';
+    }
+
+    public function getDocumentKeywordColumn() {
+        return 'stf_doc_keywords';
     }
 
     public function getUniqueColumn() {

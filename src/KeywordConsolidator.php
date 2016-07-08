@@ -31,7 +31,7 @@ class KeywordConsolidator {
             ->execute();
 
         $changed = 0;
-        $destinationColumn = $this->getApp()->getKeywordColumn();
+        $destinationColumn = $this->getApp()->getDatabaseKeywordColumn();
         $uniqueColumn = $this->getApp()->getUniqueColumn();
         foreach ($result as $row) {
             // Build a concatenation of all the keywords.

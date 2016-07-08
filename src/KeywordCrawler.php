@@ -25,7 +25,7 @@ class KeywordCrawler {
 
         $prefix = $this->getApp()->settings('prefix for relative keyword URLs');
         $table = $this->getApp()->settings('database table');
-        $keywordColumn = $this->getApp()->getKeywordColumn();
+        $keywordColumn = $this->getApp()->getDocumentKeywordColumn();
         $idColumn = $this->getApp()->getUniqueColumn();
         $total = 0;
 

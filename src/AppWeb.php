@@ -203,6 +203,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             if (!empty($parsedKeywords)) {
                 foreach ($parsedKeywords as $keyword) {
 
+                    // Our and/or logic depends on whether the user did a
+                    // negation (-) or not.
                     if ('-' == substr($keyword, 0, 1)) {
                         $operator = 'NOT LIKE';
                         $keyword = substr($keyword, 1);
@@ -212,11 +214,41 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                         $operator = 'LIKE';
                         $keywordColumnWhere = $query->expr()->orX();
                     }
-                    $keywordColumn = $this->getKeywordColumn();
-                    $keywordColumnWhere->add("$keywordColumn $operator ?");
-                    $anonymous_parameters[] = "%$keyword%";
 
-                    $keywordWhere->add($keywordColumnWhere);
+                    // Users choose to exclude the full-text documents in their
+                    // searches. If they do so, the logic is simpler because
+                    // we only have to consult 1 database column.
+                    $excludeFullText = $this->settings('allow user to exclude full text from keyword search');
+                    $excludeFullText &= empty($this->getParameter('full_text'));
+                    if ($excludeFullText) {
+                        $keywordColumn = $this->getDatabaseKeywordColumn();
+                        $keywordColumnWhere->add("$keywordColumn $operator ?");
+                        $anonymous_parameters[] = "%$keyword%";
+                        $keywordWhere->add($keywordColumnWhere);
+                    }
+                    // Otherwise we have to consult 2 database columns.
+                    else {
+                        // Again, or and/or logic depends on whether the user
+                        // did a negation (-) or not.
+                        if ('LIKE' == $operator) {
+                            $bothKeywordColumns = $query->expr()->orX();
+                        }
+                        else {
+                            $bothKeywordColumns = $query->expr()->andX();
+                        }
+
+                        // Consult both columns.
+                        $keywordColumn1 = $this->getDatabaseKeywordColumn();
+                        $bothKeywordColumns->add("$keywordColumn1 $operator ?");
+                        $anonymous_parameters[] = "%$keyword%";
+
+                        $keywordColumn2 = $this->getDocumentKeywordColumn();
+                        $bothKeywordColumns->add("$keywordColumn2 $operator ?");
+                        $anonymous_parameters[] = "%$keyword%";
+
+                        $keywordWhere->add($bothKeywordColumns);
+                    }
+
                 }
                 // Finally, add the big WHERE to the query.
                 $query->andWhere($keywordWhere);

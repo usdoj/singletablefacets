@@ -22,13 +22,14 @@ class KeywordClearer
 
     public function run() {
         $table = $this->getApp()->settings('database table');
-        $column = $this->getApp()->getKeywordColumn();
 
         $affected = $this->getApp()->getDb()->createQueryBuilder()
             ->update($table)
-            ->set($column, ':empty')
+            ->set($this->getApp()->getDatabaseKeywordColumn(), ':empty')
+            ->set($this->getApp()->getDocumentKeywordColumn(), ':empty')
             ->setParameter(':empty', '')
             ->execute();
+
         if (!empty($affected)) {
             print sprintf('Cleared keywords from %s rows.', $affected);
             print PHP_EOL;
