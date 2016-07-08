@@ -35,16 +35,26 @@ To use the library you need to include the autoloader. For an example of this, s
 
 ## Database table
 
-It is up to you to create the database table that you will be using. Note that at least one column MUST be a unique index. Further, you MUST have a blank column in the database called "stf_keywords", which should be able to hold a lot of text. (Recommend using the "blob" column type.) Make sure that the column names of the database are the same as the headers that you have in the Excel spreadsheet source.'
+It is up to you to create the database table that you will be using. Some notes:
+
+1. The column names of the database should be the same as the headers (first row) that will be in the Excel/CSV source file.
+2. At least one column must be set in MySQL as a unique index. If the data does not naturally have any unique columns, add an auto-increment column to the database and set it as a unique index.
+3. For keyword searches you must add 2 columns to the database. These columns should be able to hold a lot of text. (Recommend using the "longtext" column type.) The names of the columns must be:
+    * stf_doc_keywords
+    * stf_data_keywords
 
 ## Importing source data
 
-The library includes a command-line tool for re-importing data from a CSV file. That tool can be run with: ./vendor/bin/singletablefacets [path-to-config-file] [path-to-source-data]. Note that the source data file must be a CSV file.
+The library includes a command-line tool for re-importing data from a CSV file. That tool can be run with:
+```
+./vendor/bin/singletablefacets [path-to-config-file] [path-to-source-data]
+```
+Note that the source data file must be a CSV file.
 
 Tip: You'll probably usually be getting the CSV file from an XLS file. Since Excel has a problem with special characters, a useful command-line tool is "xls2csv" from the "catdoc" library. To install:
 
-* Linux: apt-get install catdoc
-* Babun: pact install catdoc
+* Linux: `apt-get install catdoc`
+* Babun: `pact install catdoc`
 
 When using xls2csv, to ensure you don't get encoding issues, specify the destination encoding like so:
 ```
@@ -54,7 +64,6 @@ xls2csv -d utf-8 file.xls > file-utf-8.csv
 ## Configuration
 
 The library depends on configuration in a separate YAML file. See singletablefacets.yml.dist for an example. Here is that example config:
-
 ```
 # Configuration file for SingleTableFacets.
 #
@@ -194,6 +203,11 @@ prefix for relative keyword URLs: http://example.com/files/
 # Normally keywords are processed to remove common words and such. If you would
 # like the search to be very precise, set this to false.
 remove common keywords: true
+
+# Normally when users do a keyword search, the full text (crawled) data is
+# included. However if you would like to exclude the full text by default, and
+# give the user the option to include it, set this to true.
+allow user to exclude full text from keyword search: false
 
 # If the environment needs to use a proxy, uncomment and fill out this section.
 # proxy: 10.173.10.101:8080
