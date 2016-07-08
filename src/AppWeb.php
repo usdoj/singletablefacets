@@ -219,7 +219,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                     // searches. If they do so, the logic is simpler because
                     // we only have to consult 1 database column.
                     $excludeFullText = $this->settings('allow user to exclude full text from keyword search');
-                    $excludeFullText &= empty($this->getParameter('full_text'));
+                    $fullTextParam = $this->getParameter('full_text');
+                    $excludeFullText &= empty($fullTextParam);
                     if ($excludeFullText) {
                         $keywordColumn = $this->getDatabaseKeywordColumn();
                         $keywordColumnWhere->add("$keywordColumn $operator ?");
