@@ -49,10 +49,6 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         // Now crawl for remote keywords.
         $crawler = new \USDOJ\SingleTableFacets\KeywordCrawler($this);
         $crawler->run();
-
-        // Finally consolidate keywords from other columns into our main column.
-        $consolidator = new \USDOJ\SingleTableFacets\KeywordConsolidator($this);
-        $consolidator->run();
     }
 
     private function getUsage() {

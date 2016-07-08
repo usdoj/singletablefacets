@@ -167,93 +167,19 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         $keywords = $this->getParameter('keys');
         if (!empty($keywords)) {
 
-            // Keywords default to "AND" logic.
-            $boolean = 'AND';
+            $excludeFullText = $this->settings('allow user to exclude full text from keyword search');
+            $fullTextParam = $this->getParameter('full_text');
+            $excludeFullText &= empty($fullTextParam);
 
-            // First parse out the keywords we need to search for.
-            $keywords = $this->tokenizeQuoted($keywords);
-            $parsedKeywords = array();
-            foreach ($keywords as $keyword) {
-                // Ignore the keywords "OR", "AND", and anything shorter than minimum.
-                if (!empty($keyword)) {
-                    $keyword = trim($keyword);
-                    if ('AND' == $keyword) {
-                        $boolean = 'AND';
-                        continue;
-                    }
-                    elseif ('OR' == $keyword) {
-                        $boolean = 'OR';
-                        continue;
-                    }
-                    elseif (strlen($keyword) < $this->settings('minimum valid keyword length')) {
-                        continue;
-                    }
-                    $parsedKeywords[] = $keyword;
-                }
-            }
-
-            // Next, loop through the keywords (outer loop) and the columns (inner).
-            if ('AND' == $boolean) {
-                $keywordWhere = $query->expr()->andX();
+            if ($excludeFullText) {
+                $fullTextIndex = 'keywords_without_docs';
             }
             else {
-                $keywordWhere = $query->expr()->orX();
+                $fullTextIndex = 'keywords_with_docs';
             }
 
-            if (!empty($parsedKeywords)) {
-                foreach ($parsedKeywords as $keyword) {
-
-                    // Our and/or logic depends on whether the user did a
-                    // negation (-) or not.
-                    if ('-' == substr($keyword, 0, 1)) {
-                        $operator = 'NOT LIKE';
-                        $keyword = substr($keyword, 1);
-                        $keywordColumnWhere = $query->expr()->andX();
-                    }
-                    else {
-                        $operator = 'LIKE';
-                        $keywordColumnWhere = $query->expr()->orX();
-                    }
-
-                    // Users choose to exclude the full-text documents in their
-                    // searches. If they do so, the logic is simpler because
-                    // we only have to consult 1 database column.
-                    $excludeFullText = $this->settings('allow user to exclude full text from keyword search');
-                    $fullTextParam = $this->getParameter('full_text');
-                    $excludeFullText &= empty($fullTextParam);
-                    if ($excludeFullText) {
-                        $keywordColumn = $this->getDatabaseKeywordColumn();
-                        $keywordColumnWhere->add("$keywordColumn $operator ?");
-                        $anonymous_parameters[] = "%$keyword%";
-                        $keywordWhere->add($keywordColumnWhere);
-                    }
-                    // Otherwise we have to consult 2 database columns.
-                    else {
-                        // Again, or and/or logic depends on whether the user
-                        // did a negation (-) or not.
-                        if ('LIKE' == $operator) {
-                            $bothKeywordColumns = $query->expr()->orX();
-                        }
-                        else {
-                            $bothKeywordColumns = $query->expr()->andX();
-                        }
-
-                        // Consult both columns.
-                        $keywordColumn1 = $this->getDatabaseKeywordColumn();
-                        $bothKeywordColumns->add("$keywordColumn1 $operator ?");
-                        $anonymous_parameters[] = "%$keyword%";
-
-                        $keywordColumn2 = $this->getDocumentKeywordColumn();
-                        $bothKeywordColumns->add("$keywordColumn2 $operator ?");
-                        $anonymous_parameters[] = "%$keyword%";
-
-                        $keywordWhere->add($bothKeywordColumns);
-                    }
-
-                }
-                // Finally, add the big WHERE to the query.
-                $query->andWhere($keywordWhere);
-            }
+            $query->addWhere("MATCH($fullTextIndex) AGAINST(? IN BOOLEAN MODE)");
+            $anonymous_parameters[] = "%$keywords%";
         }
 
         // Add conditions for the facets. At this point, we consult the full query

@@ -25,7 +25,6 @@ class KeywordClearer
 
         $affected = $this->getApp()->getDb()->createQueryBuilder()
             ->update($table)
-            ->set($this->getApp()->getDatabaseKeywordColumn(), ':empty')
             ->set($this->getApp()->getDocumentKeywordColumn(), ':empty')
             ->setParameter(':empty', '')
             ->execute();

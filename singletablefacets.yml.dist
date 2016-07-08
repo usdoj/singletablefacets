@@ -44,10 +44,6 @@ sort directions:
     myDatabaseColumn1: ASC
     myDatabaseColumn2: DESC
 
-# List the columns that contain keywords in the database.
-keywords in database:
-    - myDatabaseColumn1
-
 # List the columns that contain URLs pointing to files with keywords.
 keywords in files:
     - myDatabaseColumn2
