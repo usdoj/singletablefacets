@@ -31,7 +31,8 @@ class SearchBar {
         $showFullTextOption = $this->getApp()->settings('allow user to exclude full text from keyword search');
         $fullTextOption = '';
         if ($showFullTextOption) {
-            $checked = (!empty($this->getApp()->getParameter('full_text'))) ? 'checked="checked"' : '';
+            $fullTextParam = $this->getApp()->getParameter('full_text');
+            $checked = (!empty($fullTextParam)) ? 'checked="checked"' : '';
             $fullTextOption = '
                 <input type="checkbox" id="doj-full-text" name="full_text" value="1" ' . $checked . '>
                 <label for="doj-full-text">Search contents of documents?</label>
