@@ -22,7 +22,12 @@ abstract class ResultDisplay {
 
         $query = $this->getApp()->query();
         $query->addSelect("COUNT(*) as count");
-        $result = $query->execute();
+        try {
+            $result = $query->execute();
+        }
+        catch (\Exception $e) {
+            die('Database error. Please alert the site administrators.');
+        }
         foreach ($result as $row) {
             return $row['count'];
         }
@@ -40,17 +45,23 @@ abstract class ResultDisplay {
     protected function getSortField() {
         $field = $this->getApp()->getParameter('sort');
         $sortDirections = $this->getApp()->settings('sort directions');
-        // Special case, remote stf_score if there are no keywords searched.
+
+        // Special case, remove stf_score if there are no keywords searched.
         $keywords = $this->getApp()->getParameter('keys');
         if (empty($keywords)) {
             unset($sortDirections[$this->getApp()->getRelevanceColumn()]);
         }
+
         $allowedSorts = array_keys($sortDirections);
         if (in_array($field, $allowedSorts)) {
             return $field;
         }
         // Otherwise default to first one.
-        return $allowedSorts[0];
+        if (!empty($allowedSorts[0])) {
+            return $allowedSorts[0];
+        }
+        // Last resort, use the unique column.
+        return $this->getApp()->getUniqueColumn();
     }
 
     protected function getSortDirection($sortField = NULL) {
@@ -83,15 +94,25 @@ abstract class ResultDisplay {
     public function getRows() {
 
         $query = $this->getApp()->query();
+        $relevanceColumn = $this->getApp()->getRelevanceColumn();
         foreach ($this->getApp()->settings('search result labels') as $column => $label) {
-            // Special case for "stf_score".
-            if ($column == $this->getApp()->getRelevanceColumn()) {
+            // Special case for "stf_score", which gets a fancy MATCH
+            // expression later.
+            if ($column == $relevanceColumn) {
                 continue;
-                //$query->select($matchSQL . ' AS ' . $this->getRelevanceColumn());
-                //$anonymous_parameters[] = $keywords;
             }
+            // Otherwise do a normal SELECT.
             $query->addSelect($column);
         }
+
+        // Now make sure that the query gets relevance if needed.
+        $keywords = $this->getApp()->getParameter('keys');
+        if (!empty($keywords)) {
+            $matchSQL = $this->getApp()->getMatchSQL();
+            $query->setParameter('keywords', $keywords);
+            $query->addSelect($matchSQL . ' AS ' . $relevanceColumn);
+        }
+
         $limit = $this->getApp()->settings('number of items per page');
         if ($limit !== 0) {
             $page = intval($this->getPage()) - 1;
@@ -103,8 +124,12 @@ abstract class ResultDisplay {
             $sortDirection = $this->getSortDirection();
             $query->orderBy($sortField, $sortDirection);
         }
-
-        $results = $query->execute()->fetchAll();
+        try {
+            $results = $query->execute()->fetchAll();
+        }
+        catch (\Exception $e) {
+            die('Database error. Please alert the site administrators.');
+        }
 
         // Do we need to consolidate any "additional" values?
         $additionalColumns = $this->getApp()->settings('columns for additional values');
@@ -115,6 +140,22 @@ abstract class ResultDisplay {
                 }
             }
         }
+
+        // We need to make sense of the "Relevance" column if it is there.
+        if (!empty($results[0][$relevanceColumn])) {
+            $maxRelevance = 0;
+            foreach ($results as $result) {
+                if ($result[$relevanceColumn] > $maxRelevance) {
+                    $maxRelevance = $result[$relevanceColumn];
+                }
+            }
+            foreach ($results as &$result) {
+                $relevance = $result[$relevanceColumn] / $maxRelevance;
+                $relevance = floor($relevance * 100);
+                $result[$relevanceColumn] = $relevance . '%';
+            }
+        }
+
         return $results;
     }
 

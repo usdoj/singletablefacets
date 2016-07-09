@@ -61,6 +61,15 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return $this->parameters;
     }
 
+    /**
+     * Helper function to get the SQL for a full-text MATCH AGAINST query.
+     */
+    public function getMatchSQL() {
+        $keywordColumns = $this->getKeywordColumns();
+        $matchSQL = "MATCH($keywordColumns) AGAINST(:keywords IN BOOLEAN MODE)";
+        return $matchSQL;
+    }
+
     private function parseQueryString() {
         $params = $_GET;
         $currentQuery = array();
@@ -142,8 +151,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         $keywords = $this->getParameter('keys');
         if (!empty($keywords)) {
 
-            $keywordColumns = $this->getKeywordColumns();
-            $matchSQL = "MATCH($keywordColumns) AGAINST(:keywords IN BOOLEAN MODE)";
+            $matchSQL = $this->getMatchSQL();
             $query->andWhere($matchSQL);
             $query->setParameter('keywords', $keywords);
 
@@ -164,7 +172,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                 // Create our sequences of placeholders for the parameters.
                 $placeholders = array();
                 foreach ($facetItemValues as $facetItemValue) {
-                    $placeholder = $query->createNamedPlaceholder($facetItemValue);
+                    $placeholder = $query->createNamedParameter($facetItemValue);
                     $placeholders[$facetItemValue] = $placeholder;
                 }
                 $in = implode(',', array_values($placeholders));
@@ -189,10 +197,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         // Add conditions for any required columns.
         foreach ($this->settings('required columns') as $column) {
             $query->andWhere("($column <> '' AND $column IS NOT NULL)");
-        }
-
-        if (!empty($anonymous_parameters)) {
-            $query->setParameters($anonymous_parameters);
         }
 
         return $query;
