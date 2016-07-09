@@ -138,48 +138,18 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         $query = parent::query();
         $query->from($this->settings('database table'));
 
-        // Keep track of the parameters. We'll compile them below and then we
-        // be adding them onto the query at the end of the function.
-        $anonymous_parameters = array();
-
-        /*
-        * Keywords are a special case. Here are the requirements for keyword
-        * search behavior:
-        * 1. Defaults to an "AND" query.
-        *    Eg, a search for 'foo bar' would result in:
-        *    SELECT * FROM tbl WHERE col LIKE '%foo%' AND col LIKE '%bar%'
-        *
-        * 2. User can specify "OR" instead.
-        *
-        *    Eg, a search for 'foo OR bar' would result in:
-        *    SELECT * FROM tbl WHERE col LIKE '%foo%' OR col LIKE '%bar%'
-        *
-        * 3. User can enter "-" to exclude a keyword.
-        *
-        *    Eg, a search for 'foo -bar' would result in:
-        *    SELECT * FROM tbl WHERE col LIKE '%foo%' AND col NOT LIKE '%bar%'
-        *
-        * 4. User can put double-quotes around phrases to treat it as a single word
-        *
-        *    Eg, a search for '"foo bar"' would result in:
-        *    SELECT * FROM tbl WHERE col LIKE '%foo bar%'
-        */
+        // Keywords are handled by MySQL, mostly.
         $keywords = $this->getParameter('keys');
         if (!empty($keywords)) {
 
-            $excludeFullText = $this->settings('allow user to exclude full text from keyword search');
-            $fullTextParam = $this->getParameter('full_text');
-            $excludeFullText &= empty($fullTextParam);
+            $keywordColumns = $this->getKeywordColumns();
+            $matchSQL = "MATCH($keywordColumns) AGAINST(:keywords IN BOOLEAN MODE)";
+            $query->andWhere($matchSQL);
+            $query->setParameter('keywords', $keywords);
 
-            if ($excludeFullText) {
-                $fullTextIndex = 'stf_doc_keywords';
-            }
-            else {
-                $fullTextIndex = 'stf_doc_keywords';
-            }
-
-            $query->andWhere("MATCH($fullTextIndex) AGAINST(? IN BOOLEAN MODE)");
-            $anonymous_parameters[] = "%$keywords%";
+            // Since MySQL has its own set of operator logic, we need to massage
+            // the user-inputted keywords a bit to make it more user-friendly.
+            // @TODO: Massage the keywords a bit.
         }
 
         // Add conditions for the facets. At this point, we consult the full query
@@ -191,10 +161,16 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         if (!empty($parsedQueryString)) {
             $additionalColumns = $this->settings('columns for additional values');
             foreach ($parsedQueryString as $facetName => $facetItemValues) {
-                // Create our sequences of question marks for the anon params.
-                $in = str_repeat('?,', count($facetItemValues) - 1) . '?';
-                $columnsToCheck = array($facetName);
+                // Create our sequences of placeholders for the parameters.
+                $placeholders = array();
+                foreach ($facetItemValues as $facetItemValue) {
+                    $placeholder = $query->createNamedPlaceholder($facetItemValue);
+                    $placeholders[$facetItemValue] = $placeholder;
+                }
+                $in = implode(',', array_values($placeholders));
+
                 // Check to see if we need to include additional columns.
+                $columnsToCheck = array($facetName);
                 if (!empty($additionalColumns)) {
                     foreach ($additionalColumns as $additionalColumn => $mainColumn) {
                         if ($facetName == $mainColumn) {
@@ -205,9 +181,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                 // Build the "where" for the facet.
                 $facetWhere = $query->expr()->orX();
                 foreach ($columnsToCheck as $columnToCheck) {
-                    foreach ($facetItemValues as $facetItem) {
-                        $anonymous_parameters[] = $facetItem;
-                    }
                     $facetWhere->add("$columnToCheck IN ($in)");
                 }
                 $query->andWhere($facetWhere);

@@ -21,7 +21,7 @@ abstract class ResultDisplay {
     protected function getRowCount() {
 
         $query = $this->getApp()->query();
-        $query->select("COUNT(*) as count");
+        $query->addSelect("COUNT(*) as count");
         $result = $query->execute();
         foreach ($result as $row) {
             return $row['count'];
@@ -40,6 +40,11 @@ abstract class ResultDisplay {
     protected function getSortField() {
         $field = $this->getApp()->getParameter('sort');
         $sortDirections = $this->getApp()->settings('sort directions');
+        // Special case, remote stf_score if there are no keywords searched.
+        $keywords = $this->getApp()->getParameter('keys');
+        if (empty($keywords)) {
+            unset($sortDirections[$this->getApp()->getRelevanceColumn()]);
+        }
         $allowedSorts = array_keys($sortDirections);
         if (in_array($field, $allowedSorts)) {
             return $field;
@@ -78,7 +83,15 @@ abstract class ResultDisplay {
     public function getRows() {
 
         $query = $this->getApp()->query();
-        $query->select('*');
+        foreach ($this->getApp()->settings('search result labels') as $column => $label) {
+            // Special case for "stf_score".
+            if ($column == $this->getApp()->getRelevanceColumn()) {
+                continue;
+                //$query->select($matchSQL . ' AS ' . $this->getRelevanceColumn());
+                //$anonymous_parameters[] = $keywords;
+            }
+            $query->addSelect($column);
+        }
         $limit = $this->getApp()->settings('number of items per page');
         if ($limit !== 0) {
             $page = intval($this->getPage()) - 1;

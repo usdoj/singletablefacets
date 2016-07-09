@@ -31,6 +31,13 @@ class Config extends \Noodlehaus\Config
             'sort facet items by popularity' =>  FALSE,
             'remove common keywords' => TRUE,
             'text alterations' => array(),
+            'keywords in files' => array(),
+            'keywords in database' => array(),
+            'output as links' => array(),
+            'collapse facet items' => array(),
+            'required columns' => array(),
+            'facet labels' => array(),
+            'search result labels' => array(),
         );
     }
 }
