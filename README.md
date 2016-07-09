@@ -4,8 +4,12 @@ This class is intended as a simple faceted search solution for PHP applications 
 
 ## Dependencies
 
-* PHP/MySQL
+* PHP 5.3.2 or higher
+* MySQL 5.5 or higher
 * jQuery
+
+## Dev dependencies
+
 * Composer
 
 ## Installation
@@ -22,8 +26,7 @@ Use composer to bring this into your PHP project. The composer.json should look 
             "type": "vcs",
             "url": "https://github.com/usdoj/singletablefacets.git"
         }
-    ],
-    "minimum-stability": "dev"
+    ]
 }
 ```
 
@@ -39,9 +42,8 @@ It is up to you to create the database table that you will be using. Some notes:
 
 1. The column names of the database should be the same as the headers (first row) that will be in the Excel/CSV source file.
 2. At least one column must be set in MySQL as a unique index. If the data does not naturally have any unique columns, add an auto-increment column to the database and set it as a unique index.
-3. For keyword searches you must add 2 columns to the database. These columns should be able to hold a lot of text. (Recommend using the "longtext" column type.) The names of the columns must be:
-    * stf_doc_keywords
-    * stf_data_keywords
+3. For keyword searches you must add a column to the database. This columns should be able to hold a lot of text. (Recommend using the "longtext" column type.) The name of the column must be `stf_keywords`.
+4. The `stf_keywords` column mentioned above, as well as any other columns that you would like to include in the keyword search, must belong to a FULLTEXT index on the table. Note that this has ramifications about the storage engine the table uses: on MySQL 5.6 or higher, you can use InnoDB or MyISAM, but for MySQL 5.5 you must use MyISAM.
 
 ## Importing source data
 
@@ -65,18 +67,18 @@ xls2csv -d utf-8 file.xls > file-utf-8.csv
 
 The library depends on configuration in a separate YAML file. See singletablefacets.yml.dist for an example. Here is that example config:
 ```
-# Database credentials
+# Database credentials: this is the only required section.
 database name: myDatabase
 database user: myUser
 database password: myPassword
 database host: localhost
-
-# Per the name of this library, we look at only a single table.
 database table: myTable
+
+# Everything else in this document is optional.
 
 # Indicate the columns that are required to have data in order for a row to
 # appear in the search results. For example, if you don't want any rows to show
-# up with titles, make your title column a required column here.
+# up without titles, make your title column a required column here.
 required columns:
     - myDatabaseColumn1
 
@@ -87,30 +89,36 @@ facet labels:
     myDatabaseColumn2: Filter by something else
 
 # Choose the order that you would like the fields to show in search results,
-# and indicate the human-readable labels to display above each one.
+# and indicate the human-readable labels to display above each one. There is
+# one special field called "stf_score". This is not an actual column in your
+# database/spreadsheet, but you can include it here to display a "relevance"
+# field in your search results.
 search result labels:
     myDatabaseColumn2: Something
     myDatabaseColumn1: Something Else
+    stf_score: Keyword Relevance
 
 # Choose the priority (order) and default direction for the sortable columns.
+# As with search result labels, there is a special field called "stf_score",
+# which you can include to allow users to sort by (keyword) relevance.
 # ASC = ascending, DESC = descending
 sort directions:
     myDatabaseColumn1: ASC
     myDatabaseColumn2: DESC
+    stf_score: DESC
 
-# List the columns that contain keywords in the database.
-keywords in database:
-    - myDatabaseColumn1
-
-# List the columns that contain URLs pointing to files with keywords.
+# List the columns that contain URLs pointing to files with keywords. The
+# keywords in these files will be crawled and indexed. Note, this only works on
+# PDF and HTML files.
 keywords in files:
     - myDatabaseColumn2
 
 # List the columns that should be output as links, using another columns to
-# get the destination URLs.
-output as links:
-    # Link label : Link URL
-    myDatabaseColumn1: myDatabaseColumn2
+# get the destination URLs. For example, if you wanted to display the row's
+# title as a link to a document, you might do something like this:
+# (The format should be: Link label : Link URL)
+    output as links:
+    myTitleField: myDocumentURLField
 
 # List the facet columns that should be collapsed at a certain point. Use 0 to
 # collapse all items, or for example, 5 to collapse items in excess of 5.
@@ -142,9 +150,6 @@ show dependents indented to the right: true
 # This can be used to cut down on undesirable text wrapping.
 minimum column widths:
     myDatabaseColumn1: 75px
-
-# Do not consider keywords shorter than this number.
-minimum valid keyword length: 3
 
 # Next to facet items, show the totals in parenthesis.
 show counts next to facet items: true
@@ -190,17 +195,6 @@ sort facet items by popularity: false
 # URL of "mydoc.pdf" will be fetched from "http://example.com/files/mydoc.pdf".
 prefix for relative keyword URLs: http://example.com/files/
 
-# Normally keywords are processed to remove common words and such. This is a
-# good thing in general, but if you expect your users to be searching for
-# specific phrases/sentences that are in the documents, you might want to set
-# this to false. For example, if this is set to false, and you are indexing a
-# PDF that contains "The brown fox jumped over the lazy dog", it would have
-# keyword data that is saved in exactly the same way: "The brown fox jumped over
-# the lazy dog". However, if this is set to true, the keywords might be saved
-# as "brown fox jumped lazy dog". So if someone were searching for that exact
-# phrase, the desired result would not show up.
-remove common keywords: true
-
 # Normally when users do a keyword search, the full text (crawled) data is
 # included. However if you would like to exclude the full text by default, and
 # give the user the option to include it, set this to true.
@@ -221,7 +215,4 @@ allow user to exclude full text from keyword search: false
 
 ## Scale limits
 
-Because this approach uses only a single table, it will not scale well. Eventually, as the number of rows increases, it will get too slow. I am not sure what that number is, but a general guess is about 5-10k. Future avenues for improvement in this area might be:
-
-* Require additional tables and joins to handle keywords (though then I might have to change the name...)
-* Require the keywords columns make use of MySQL's FULLTEXT index
+Because this solution relies on MySQL's FULLTEXT capabilities, it should scale reasonably well. A Solr implementation would surely perform better though, and might make a good future improvement.

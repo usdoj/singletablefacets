@@ -10,7 +10,6 @@ class Config extends \Noodlehaus\Config
 {
     protected function getDefaults() {
         return array(
-            'minimum valid keyword length' => 3,
             'show counts next to facet items' => TRUE,
             'search button text' => 'Search',
             'no results message' => '<p>Sorry, no results could be found for those keywords.</p>',
@@ -29,10 +28,8 @@ class Config extends \Noodlehaus\Config
             ',
             'keyword help label' => "Need help searching?",
             'sort facet items by popularity' =>  FALSE,
-            'remove common keywords' => TRUE,
             'text alterations' => array(),
             'keywords in files' => array(),
-            'keywords in database' => array(),
             'output as links' => array(),
             'collapse facet items' => array(),
             'required columns' => array(),

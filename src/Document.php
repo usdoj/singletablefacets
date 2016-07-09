@@ -135,17 +135,7 @@ class Document {
 
     public function getKeywords() {
 
-        $text = $this->fetchText();
-        $keywords = '';
-        try {
-            $ranker = new \USDOJ\SingleTableFacets\KeywordRanker($this->getApp(), $text);
-            $keywords = $ranker->run();
-        }
-        catch (\Exception $e) {
-            // Anything?
-        }
-
-        return $keywords;
+        return $this->fetchText();
     }
 
     private function isText() {
