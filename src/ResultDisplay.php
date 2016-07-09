@@ -47,7 +47,7 @@ abstract class ResultDisplay {
         $sortDirections = $this->getApp()->settings('sort directions');
 
         // Special case, remove stf_score if there are no keywords searched.
-        $keywords = $this->getApp()->getParameter('keys');
+        $keywords = $this->getApp()->getUserKeywords();
         if (empty($keywords)) {
             unset($sortDirections[$this->getApp()->getRelevanceColumn()]);
         }
@@ -106,7 +106,7 @@ abstract class ResultDisplay {
         }
 
         // Now make sure that the query gets relevance if needed.
-        $keywords = $this->getApp()->getParameter('keys');
+        $keywords = $this->getApp()->getUserKeywords();
         if (!empty($keywords)) {
             $matchSQL = $this->getApp()->getMatchSQL();
             $query->setParameter('keywords', $keywords);

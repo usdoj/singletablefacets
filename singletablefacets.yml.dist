@@ -144,6 +144,33 @@ prefix for relative keyword URLs: http://example.com/files/
 # give the user the option to include it, set this to true.
 allow user to exclude full text from keyword search: false
 
+# Out of the box, the system uses MySQL's "Boolean" full-text search system.
+# You can read about its supported operators here:
+# https://dev.mysql.com/doc/refman/5.5/en/fulltext-boolean.html
+# You may find you want different behavior, though, from what MySQL decided on.
+# Here a couple of ways to tweak the behavior.
+
+# By default, multiple keywords are treated as an "OR" query. If users want to
+# get "AND" behavior, they have to put "+" in front of each word. If you would
+# like the default to be "AND", set this value to true. To demonstrate this
+# behavior, the following two keyword searches would give identical results:
+# - this setting set to false: +dogs +cats
+# - this setting set to true:  dogs cats
+# As another demonstration, the following two keyword searches would also give
+# identical results:
+# - this setting set to false: dogs cats
+# - this setting set to true:  dogs OR cats
+use AND for keyword logic by default: false
+
+# By default the partial word matches will not give results. For example, if
+# a row's keywords are all "cats", a search for "cat" will not find results.
+# Users can deal with this by putting asterisks at the end of words. For example
+# a search for "cat*" would match both "cat" and "cats" (and any other word
+# that starts with c-a-t). If you would like all user keywords to be treated
+# in this way (automatically getting an asterisk at the end) then set this value
+# to true.
+automatically put wildcards on keywords entered: false
+
 # If the environment needs to use a proxy, uncomment and fill out this section.
 # proxy: 192.168.1.1:8080
 # To prevent the use of the proxy for certain URLs, enter partial patterns here.

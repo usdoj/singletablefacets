@@ -14,7 +14,7 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
         $tableColumns = $this->getApp()->settings('search result labels');
         // Special case. If there are no keywords being searched, do not show
         // the relevance column.
-        $keywords = $this->getApp()->getParameter('keys');
+        $keywords = $this->getApp()->getUserKeywords();
         if (empty($keywords)) {
             unset($tableColumns[$this->getApp()->getRelevanceColumn()]);
         }

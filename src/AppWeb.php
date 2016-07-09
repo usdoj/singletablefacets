@@ -11,6 +11,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     private $parameters;
     private $facets;
     private $display;
+    private $userKeywords;
 
     public function __construct($configFile) {
 
@@ -124,7 +125,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                     $tokens[] = substr($nextToken, 1, -1);
                 }
                 else {
-                    $tokens[] = substr($nextToken, 1) . ' ' . strtok($nextToken[0]);
+                    $tokens[] = '"' . substr($nextToken, 1) . ' ' . strtok($nextToken[0]) . '"';
                 }
             }
             else {
@@ -142,22 +143,65 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return '<link rel="stylesheet" href="assets/singletablefacets.css" />';
     }
 
+    public function getUserKeywords() {
+
+        if (!empty($this->userKeywords)) {
+            return $this->userKeywords;
+        }
+
+        $keywords = $this->getParameter('keys');
+        $tokenized = $this->tokenizeQuoted($keywords);
+        if ($this->settings('use AND for keyword logic by default')) {
+            $ors = array();
+            foreach ($tokenized as $index => $value) {
+                if ('OR' == $value || 'or' == $value) {
+                    $ors[] = $index;
+                }
+            }
+            $addPlus = TRUE;
+            foreach ($tokenized as $index => &$value) {
+                if (in_array($index, $ors)) {
+                    $value = '';
+                    $addPlus = FALSE;
+                    continue;
+                }
+                if ($addPlus) {
+                    $otherOperators = '-~<>+';
+                    if (strpos($otherOperators, substr($value, 0, 1)) === FALSE) {
+                        $value = '+' . $value;
+                    }
+                }
+                $addPlus = TRUE;
+            }
+            $tokenized = array_filter($tokenized);
+            $keywords = implode(' ', $tokenized);
+        }
+        if ($this->settings('automatically put wildcards on keywords entered')) {
+            foreach ($tokenized as &$value) {
+                $otherOperators = '"\'*)';
+                if (strpos($otherOperators, substr($value, -1)) === FALSE) {
+                    $value = $value . '*';
+                }
+            }
+            $keywords = implode(' ' , $tokenized);
+        }
+
+        $this->userKeywords = $keywords;
+        return $keywords;
+    }
+
     public function query() {
 
         $query = parent::query();
         $query->from($this->settings('database table'));
 
         // Keywords are handled by MySQL, mostly.
-        $keywords = $this->getParameter('keys');
+        $keywords = $this->getUserKeywords();
         if (!empty($keywords)) {
 
             $matchSQL = $this->getMatchSQL();
             $query->andWhere($matchSQL);
             $query->setParameter('keywords', $keywords);
-
-            // Since MySQL has its own set of operator logic, we need to massage
-            // the user-inputted keywords a bit to make it more user-friendly.
-            // @TODO: Massage the keywords a bit.
         }
 
         // Add conditions for the facets. At this point, we consult the full query
