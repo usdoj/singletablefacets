@@ -30,7 +30,7 @@ class App
         $fullTextParam = $this->getParameter('full_text');
 
         $keywordColumns = $this->databaseKeywordColumns;
-        if (!$excludeFullText || empty($fullTextParam)) {
+        if (!$excludeFullText || !empty($fullTextParam)) {
             $keywordColumns[] = $this->getDocumentKeywordColumn();
         }
         $keywordColumns = implode(',', $keywordColumns);

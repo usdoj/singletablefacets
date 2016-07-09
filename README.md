@@ -44,6 +44,7 @@ It is up to you to create the database table that you will be using. Some notes:
 2. At least one column must be set in MySQL as a unique index. If the data does not naturally have any unique columns, add an auto-increment column to the database and set it as a unique index.
 3. For keyword searches you must add a column to the database. This columns should be able to hold a lot of text. (Recommend using the "longtext" column type.) The name of the column must be `stf_keywords`.
 4. The `stf_keywords` column mentioned above, as well as any other columns that you would like to include in the keyword search, must belong to a FULLTEXT index on the table. Note that this has ramifications about the storage engine the table uses: on MySQL 5.6 or higher, you can use InnoDB or MyISAM, but for MySQL 5.5 you must use MyISAM.
+5. You must create a second FULLTEXT index on the table, just as in #4, except that it does not include the `stf_keywords` column.`
 
 ## Importing source data
 
