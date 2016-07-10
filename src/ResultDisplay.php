@@ -95,7 +95,8 @@ abstract class ResultDisplay {
 
         $query = $this->getApp()->query();
         $relevanceColumn = $this->getApp()->getRelevanceColumn();
-        foreach ($this->getApp()->settings('search result labels') as $column => $label) {
+        $searchResultLabels = $this->getApp()->settings('search result labels');
+        foreach ($searchResultLabels as $column => $label) {
             // Special case for "stf_score", which gets a fancy MATCH
             // expression later.
             if ($column == $relevanceColumn) {
@@ -103,6 +104,14 @@ abstract class ResultDisplay {
             }
             // Otherwise do a normal SELECT.
             $query->addSelect($column);
+        }
+
+        // Also make sure any URL columns are queried.
+        $urlColumns = $this->getApp()->settings('output as links');
+        foreach ($urlColumns as $labal => $url) {
+            if (empty($searchResultLabels[$url])) {
+                $query->addSelect($url);
+            }
         }
 
         // Now make sure that the query gets relevance if needed.
