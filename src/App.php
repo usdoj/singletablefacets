@@ -87,7 +87,7 @@ class App
         // Another requirement is that at least one column (stf_keywords) has a
         // FULLTEXT index. If something is not right, throw an Exception now.
         $keywordColumn = $this->getDocumentKeywordColumn();
-        $query = $this->query();
+        $query = $this->getDb()->createQueryBuilder();
         $query
             ->from('information_Schema.STATISTICS')
             ->select('DISTINCT index_name')
@@ -119,7 +119,7 @@ class App
         // Also, save a list of other columns that are part of the same index,
         // since we'll need that info later.
         $indexName = $results[0]['index_name'];
-        $query = $this->query();
+        $query = $this->getDb()->createQueryBuilder();
         $query
             ->from('information_Schema.STATISTICS')
             ->select('DISTINCT column_name')
