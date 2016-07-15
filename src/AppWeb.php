@@ -137,14 +137,12 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
     public function renderJavascript() {
         $location = $this->settings('location of assets');
-        $ret = '<script type="text/javascript" src="' + $location + '/singletablefacets.js"></script>';
-        return $ret;
+        return '<script type="text/javascript" src="' . $location . '/singletablefacets.js"></script>';
     }
 
     public function renderStyles() {
         $location = $this->settings('location of assets');
-        $ret = '<link rel="stylesheet" href="' + $location + '/singletablefacets.css" />';
-        return $ret;
+        return '<link rel="stylesheet" href="' . $location . '/singletablefacets.css" />';
     }
 
     public function getUserKeywords() {
