@@ -35,6 +35,7 @@ class Config extends \Noodlehaus\Config
             'required columns' => array(),
             'facet labels' => array(),
             'search result labels' => array(),
+            'location of assets' => 'assets',
         );
     }
 }

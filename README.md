@@ -239,6 +239,11 @@ automatically put wildcards on keywords entered: false
 # change all occurences of § with &#167; uncomment the lines below.
 #text alterations:
 #    "§": "&#167;"
+
+# This specifies an alternate location to look for the javascript and CSS files.
+# The default is to look in an "assets" folder in same directory as the search
+# page.
+#location of assets: /assets
 ```
 
 ## Scale limits
