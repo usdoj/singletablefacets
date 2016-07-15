@@ -29,6 +29,10 @@ class Facet {
     public function isActive() {
         return $this->active;
     }
+    public function isDate() {
+        $dateColumns = $this->getApp()->settings('output as dates');
+        return in_array($this->getName(), $dateColumns);
+    }
 
     public function __construct($app, $name) {
 

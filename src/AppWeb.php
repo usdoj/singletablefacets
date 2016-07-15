@@ -12,6 +12,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     private $facets;
     private $display;
     private $userKeywords;
+    private $dateGranularities;
 
     public function __construct($configFile) {
 
@@ -22,6 +23,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
         $uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
         $this->baseUrl = $uri_parts[0];
+
+        $this->setDateGranularities();
 
         // For now, there is only one type of display, but in the future we may
         // want to make this configurable.
@@ -60,6 +63,10 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
     public function getParameters() {
         return $this->parameters;
+    }
+
+    public function getDateGranularities() {
+        return $this->dateGranularities;
     }
 
     /**
@@ -213,31 +220,50 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             unset($parsedQueryString[$extraParameter]);
         }
         if (!empty($parsedQueryString)) {
+            $dateColumns = $this->settings('output as dates');
             $additionalColumns = $this->settings('columns for additional values');
             foreach ($parsedQueryString as $facetName => $facetItemValues) {
+
                 // Create our sequences of placeholders for the parameters.
                 $placeholders = array();
-                foreach ($facetItemValues as $facetItemValue) {
-                    $placeholder = $query->createNamedParameter($facetItemValue);
-                    $placeholders[$facetItemValue] = $placeholder;
-                }
-                $in = implode(',', array_values($placeholders));
 
-                // Check to see if we need to include additional columns.
-                $columnsToCheck = array($facetName);
-                if (!empty($additionalColumns)) {
-                    foreach ($additionalColumns as $additionalColumn => $mainColumn) {
-                        if ($facetName == $mainColumn) {
-                            $columnsToCheck[] = $additionalColumn;
+                // Date facets are unique in that they will have only a single
+                // value that we interpret into a hierarchical display. This is
+                // no way, for example, for a date facet to be both "2011" and
+                // "2012", or both "2012-01" and "2012-02". Once you select a
+                // year, month, or day, all the other years/months/days will
+                // disappear. Since they are unusal, handle them first.
+                if (!empty($dateColumns[$facetName])) {
+                    // Date facets are essentially ranges, so we need to figure
+                    // out the start and end for our facet. There are six
+                    // possible "granularities":
+
+
+                }
+                // Otherwise, non-date facets act completely differently.
+                else {
+                    foreach ($facetItemValues as $facetItemValue) {
+                        $placeholder = $query->createNamedParameter($facetItemValue);
+                        $placeholders[$facetItemValue] = $placeholder;
+                    }
+                    $in = implode(',', array_values($placeholders));
+
+                    // Check to see if we need to include additional columns.
+                    $columnsToCheck = array($facetName);
+                    if (!empty($additionalColumns)) {
+                        foreach ($additionalColumns as $additionalColumn => $mainColumn) {
+                            if ($facetName == $mainColumn) {
+                                $columnsToCheck[] = $additionalColumn;
+                            }
                         }
                     }
+                    // Build the "where" for the facet.
+                    $facetWhere = $query->expr()->orX();
+                    foreach ($columnsToCheck as $columnToCheck) {
+                        $facetWhere->add("$columnToCheck IN ($in)");
+                    }
+                    $query->andWhere($facetWhere);
                 }
-                // Build the "where" for the facet.
-                $facetWhere = $query->expr()->orX();
-                foreach ($columnsToCheck as $columnToCheck) {
-                    $facetWhere->add("$columnToCheck IN ($in)");
-                }
-                $query->andWhere($facetWhere);
             }
         }
         // Add conditions for any required columns.
@@ -263,11 +289,33 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return $href;
     }
 
-    public function getDateGranularities() {
-        return array(
-            'year' => 'Y',
-            'month' => 'F Y',
-            'day' => 'F, j Y',
+    public function setDateGranularities() {
+        // These are the possible date granularies:
+        //   - year
+        //   - year + month
+        //   - year + month + day
+        //   - month
+        //   - month + day
+        //   - day
+        $dateFormatTokens = array(
+            'year' => array('Y', 'y', 'o'),
+            'month' => array('F', 'm', 'M', 'n'),
+            'day' => array('d', 'j'),
         );
+        $granularities = array();
+
+        $dateColumns = $this->settings('output as dates');
+        foreach ($dateColumns as $column => $format) {
+            foreach ($dateFormatTokens as $granularity => $tokens) {
+                foreach ($tokens as $token) {
+                    if (strpos($format, $token) !== FALSE) {
+                        $granularities[$column][] = $granularity;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $this->dateGranularities = $granularities;
     }
 }

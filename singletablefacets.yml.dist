@@ -86,14 +86,18 @@ columns for additional values:
 #convert from excel dates:
 #    - myDatabaseColumn1
 
-# Dates also prevent an interesting problem with facets. Columns that you list
-# here, if displayed as a facet, will be a hierarchy date facet, where you first
-# select the year, month, day, etc. For each, indicate the lowest granularity
-# that the facet should reach. Choices are: "year", "month", "day". This choice
-# also affects the display of the date in the search results.
-#columns that are dates:
-#    myDatabaseColumn1: month
-#    myDatabaseColumn2: day
+# If any of the database table's columns contain Unix timestamps, then you can
+# list them here along with a PHP date format string to use when displaying the
+# dates in search results. This also tells the system to use a special
+# "drill-down" hierarchical approach when displaying these columns as facets.
+# The system deduces from your PHP date format how "granular" you want the facet
+# to get. For example, if your PHP date format is just 'Y', then the system
+# assumes you only want the facets to drill-down to the year. But if your PHP
+# date format is 'M j, Y' then the system assumes you want the facets to drill
+# all the way from year, to month, to day.
+#output as dates:
+#    myDatabaseColumn1: 'M Y'
+#    myDatabaseColumn2: 'M j, Y'
 
 # List the facet columns that depend on other facets. For example, if you don't
 # want "Sub Category" to appear unless "Category" is active, you can set that

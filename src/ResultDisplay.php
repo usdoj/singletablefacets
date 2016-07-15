@@ -176,15 +176,13 @@ abstract class ResultDisplay {
         }
 
         // Convert any date columns.
-        $dateColumns = $this->getApp()->settings('columns that are dates');
+        $dateColumns = $this->getApp()->settings('output as dates');
         if (!empty($dateColumns)) {
-            $granularities = $this->getApp()->getDateGranularities();
             foreach ($results as &$result) {
-                foreach ($dateColumns as $dateColumn => $granularity) {
+                foreach ($dateColumns as $dateColumn => $dateFormat) {
                     if (!empty($result[$dateColumn])) {
                         $unix = $result[$dateColumn];
-                        $format = $granularities[$granularity];
-                        $formatted = date($format, $unix);
+                        $formatted = date($dateFormat, $unix);
                         if (!empty($formatted)) {
                             $result[$dateColumn] = $formatted;
                         }
