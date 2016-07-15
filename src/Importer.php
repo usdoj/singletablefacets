@@ -72,6 +72,13 @@ class Importer {
 
         $csvFile = new \Keboola\Csv\CsvFile($filePath);
         $header = $csvFile->getHeader();
+
+        // Catch an edge case where the final column is empty.
+        $lastHeader = count($header) - 1;
+        if (isset($header[$lastHeader]) && empty($header[$lastHeader])) {
+            array_pop($header);
+        }
+
         $data = array();
         // Skip the first row since it is the headers.
         $skip = TRUE;

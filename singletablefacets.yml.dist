@@ -61,7 +61,7 @@ keywords in files:
 # get the destination URLs. For example, if you wanted to display the row's
 # title as a link to a document, you might do something like this:
 # (The format should be: Link label : Link URL)
-    output as links:
+output as links:
     myTitleField: myDocumentURLField
 
 # List the facet columns that should be collapsed at a certain point. Use 0 to

@@ -106,11 +106,20 @@ abstract class ResultDisplay {
             $query->addSelect($column);
         }
 
-        // Also make sure any URL columns are queried.
+        // Special case: make sure any URL columns are queried.
         $urlColumns = $this->getApp()->settings('output as links');
         foreach ($urlColumns as $labal => $url) {
             if (empty($searchResultLabels[$url])) {
                 $query->addSelect($url);
+            }
+        }
+
+        // Another special case, look for any "additional columns" to add to the
+        // query.
+        $additionalColumns = $this->getApp()->settings('columns for additional values');
+        foreach ($additionalColumns as $additionalColumn => $mainColumn) {
+            if (!empty($searchResultLabels[$mainColumn])) {
+                $query->addSelect($additionalColumn);
             }
         }
 
@@ -141,11 +150,12 @@ abstract class ResultDisplay {
         }
 
         // Do we need to consolidate any "additional" values?
-        $additionalColumns = $this->getApp()->settings('columns for additional values');
         if (!empty($additionalColumns)) {
             foreach ($additionalColumns as $additional => $main) {
                 foreach ($results as &$row) {
-                    $row[$main] .= ', ' . $row[$additional];
+                    if (!empty($row[$additional])) {
+                        $row[$main] .= ', ' . $row[$additional];
+                    }
                 }
             }
         }
