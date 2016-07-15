@@ -87,6 +87,14 @@ class Importer {
                 $skip = FALSE;
                 continue;
             }
+            // If the number of items is not correct, we'll get errors later,
+            // so skip those.
+            if (count($row) < count($header)) {
+                print 'Warning, this row did not have enough cells.' . PHP_EOL;
+                print_r($row);
+                continue;
+            }
+
             // Do we need to filter any of the text?
             $filteredRow = $row;
             $textAlterations = $this->getApp()->settings('text alterations');
