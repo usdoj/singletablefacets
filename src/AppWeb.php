@@ -262,4 +262,12 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         }
         return $href;
     }
+
+    public function getDateGranularities() {
+        return array(
+            'year' => 'Y',
+            'month' => 'F Y',
+            'day' => 'F, j Y',
+        );
+    }
 }

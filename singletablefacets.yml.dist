@@ -78,6 +78,23 @@ columns for additional values:
     # Extra column: Main column
     myDatabaseColumn1: myDatabaseColumn2
 
+# Excel stores dates in a weird way, and it's a waste of processing power to
+# convert it dynamically, so we assume that all date columns will by Unix
+# timestamps. Consequently, you should list here any columns that are formatted
+# as dates in the source Excel spreadsheet, so they can be converted once as
+# they are being imported.
+#convert from excel dates:
+#    - myDatabaseColumn1
+
+# Dates also prevent an interesting problem with facets. Columns that you list
+# here, if displayed as a facet, will be a hierarchy date facet, where you first
+# select the year, month, day, etc. For each, indicate the lowest granularity
+# that the facet should reach. Choices are: "year", "month", "day". This choice
+# also affects the display of the date in the search results.
+#columns that are dates:
+#    myDatabaseColumn1: month
+#    myDatabaseColumn2: day
+
 # List the facet columns that depend on other facets. For example, if you don't
 # want "Sub Category" to appear unless "Category" is active, you can set that
 # here. This is the only way to imitate a hierarchical setup, and works well

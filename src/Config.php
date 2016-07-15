@@ -36,6 +36,8 @@ class Config extends \Noodlehaus\Config
             'facet labels' => array(),
             'search result labels' => array(),
             'location of assets' => 'assets',
+            'convert from excel dates' => array(),
+            'columns that are dates' => array(),
         );
     }
 }

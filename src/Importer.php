@@ -95,6 +95,15 @@ class Importer {
                     $filteredRow = str_replace($search, $replace, $filteredRow);
                 }
             }
+            // Do we need to convert any Excel dates?
+            $excelDateColumns = $this->getApp()->settings('convert from excel dates');
+            if (!empty($excelDateColumns)) {
+                foreach ($header as $index => $column) {
+                    if (in_array($column, $excelDateColumns)) {
+                        $filteredRow[$index] = $this->convertExcelDate($filteredRow[$index]);
+                    }
+                }
+            }
             // Skip invalid rows.
             if (count($filteredRow) != count($header)) {
                 continue;
@@ -102,5 +111,20 @@ class Importer {
             $data[] = array_combine($header, $filteredRow);
         }
         return $data;
+    }
+
+    private function convertExcelDate($excelDate) {
+
+        // Numbers of days between January 1, 1900 and 1970 (including 19 leap years).
+        $daysSince = 25569;
+
+        // Numbers of second in a day:
+        $secondsInDay = 86400;
+
+        if ($excelDate <= $daysSince) {
+            return 0;
+        }
+
+        return  ($excelDate - $daysSince) * $secondsInDay;
     }
 }

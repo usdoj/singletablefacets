@@ -175,6 +175,24 @@ abstract class ResultDisplay {
             }
         }
 
+        // Convert any date columns.
+        $dateColumns = $this->getApp()->settings('columns that are dates');
+        if (!empty($dateColumns)) {
+            $granularities = $this->getApp()->getDateGranularities();
+            foreach ($results as &$result) {
+                foreach ($dateColumns as $dateColumn => $granularity) {
+                    if (!empty($result[$dateColumn])) {
+                        $unix = $result[$dateColumn];
+                        $format = $granularities[$granularity];
+                        $formatted = date($format, $unix);
+                        if (!empty($formatted)) {
+                            $result[$dateColumn] = $formatted;
+                        }
+                    }
+                }
+            }
+        }
+
         return $results;
     }
 
