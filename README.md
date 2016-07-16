@@ -34,7 +34,29 @@ After creating a composer.json similar to the above, do a "composer install".
 
 ## Usage
 
-To use the library you need to include the autoloader. For an example of this, see docs/example.index.php. The various parts of the page can be rendered individually using these methods: renderStyles(), renderJavascript(), renderFacets(), renderKeywordSearch(), renderResults(), and renderPager().
+To use the library you need to include the autoloader, and then instantiate the object referencing your configuration file. (See below in the Configuration section for more information about this file.) For example:
+
+```
+require_once '/path/to/my/libraries/singletablefacets/vendor/autoload.php';
+$configFile = '/path/to/my/configurations/singletablefacets/singletablefacets.yml';
+$app = new \USDOJ\SingleTableFacets\AppWeb($configFile);
+```
+
+After that, you simply render the various parts of the system wherever you would like them to appear on the page. For example:
+```
+<div class="my-facets">
+ <?php print $app->renderFacets(); ?>
+</div>
+```
+
+The rendering methods available are:
+
+* renderStyles()
+* renderJavascript()
+* renderFacets()
+* renderKeywordSearch()
+* renderResults()
+* renderPager()
 
 ## Database table
 
