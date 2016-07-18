@@ -12,6 +12,7 @@ class App
     private $config;
     private $uniqueColumn;
     private $databaseKeywordColumns;
+    private $dateColumns;
 
     public function getDb() {
         return $this->db;
@@ -23,6 +24,10 @@ class App
 
     public function getDocumentKeywordColumn() {
         return 'stf_keywords';
+    }
+
+    public function getDateColumns() {
+        return $this->dateColumns;
     }
 
     public function getKeywordColumns() {
@@ -82,6 +87,17 @@ class App
         }
         if (empty($this->uniqueColumn)) {
             throw new \Exception('The database table does not contain a unique index.');
+        }
+
+        // Take note of all the datetime columns so that their facets can be
+        // rendered hierarchically.
+        $this->dateColumns = array();
+        $statement = $this->getDb()->query('DESCRIBE ' . $this->settings('database table'));
+        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        foreach ($result as $column) {
+            if ('datetime' == $column['Type']) {
+                $this->dateColumns[] = $column['Field'];
+            }
         }
 
         // Another requirement is that at least one column (stf_keywords) has a

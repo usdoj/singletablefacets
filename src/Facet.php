@@ -33,8 +33,8 @@ class Facet {
         if (empty($name)) {
             $name = $this->getName();
         }
-        $dateColumns = $this->getApp()->settings('date formats');
-        return in_array($this->getName(), array_keys($dateColumns));
+        $dateColumns = $this->getApp()->getDateColumns();
+        return in_array($this->getName(), $dateColumns);
     }
 
     public function __construct($app, $name) {
@@ -139,7 +139,6 @@ class Facet {
 
         $query->addSelect("COUNT(*) AS count");
         $query->addGroupBy('item');
-        //print $query->getSQL() . PHP_EOL;
         return $query->execute()->fetchAll();
     }
 

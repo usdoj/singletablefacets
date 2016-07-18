@@ -13,6 +13,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     private $display;
     private $userKeywords;
     private $dateGranularities;
+    private $dateFormats;
 
     public function __construct($configFile) {
 
@@ -24,6 +25,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         $uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
         $this->baseUrl = $uri_parts[0];
 
+        // Date stuff. The order of these is important.
+        $this->setDateFormats();
         $this->setDateGranularities();
 
         // For now, there is only one type of display, but in the future we may
@@ -46,6 +49,10 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     private function getFacetColumns() {
         $facets = $this->settings('facet labels');
         return array_keys($facets);
+    }
+
+    public function getDateFormats() {
+        return $this->dateFormats;
     }
 
     private function getAllowedParameters() {
@@ -220,7 +227,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             unset($parsedQueryString[$extraParameter]);
         }
         if (!empty($parsedQueryString)) {
-            $dateColumns = $this->settings('date formats');
+            $dateColumns = $this->getDateColumns();
             $additionalColumns = $this->settings('columns for additional values');
             foreach ($parsedQueryString as $facetName => $facetItemValues) {
 
@@ -243,7 +250,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                 // "2012", or both "2012-01" and "2012-02". Once you select a
                 // year, month, or day, all the other years/months/days will
                 // disappear. Since they are unusal, handle them first.
-                if (!empty($dateColumns[$facetName])) {
+                if (in_array($facetName, $dateColumns)) {
                     // Date facets are essentially ranges, so we need to query
                     // a range of dates. Because we are assuming that date
                     // facet items will only have one at a time, we treat them
@@ -319,8 +326,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         );
         $granularities = array();
 
-        $dateColumns = $this->settings('date formats');
-        foreach ($dateColumns as $column => $format) {
+        $dateFormats = $this->getDateFormats();
+        foreach ($dateFormats as $column => $format) {
             foreach ($dateFormatTokens as $granularity => $tokens) {
                 foreach ($tokens as $token) {
                     if (strpos($format, $token) !== FALSE) {
@@ -337,6 +344,22 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         }
 
         $this->dateGranularities = $granularities;
+    }
+
+    private function setDateFormats() {
+        $this->dateFormats = array();
+        $dateColumns = $this->getDateColumns();
+        $dateFormats = $this->settings('date formats');
+        if (!empty($dateColumns)) {
+            foreach ($dateColumns as $column) {
+                if (empty($dateFormats[$column])) {
+                    $this->dateFormats[$column] = 'm/d/Y';
+                }
+                else {
+                    $this->dateFormats[$column] = $dateFormats[$column];
+                }
+            }
+        }
     }
 
     public function normalizeDate($date, $endOfRange = FALSE) {

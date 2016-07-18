@@ -176,10 +176,10 @@ abstract class ResultDisplay {
         }
 
         // Convert any date columns.
-        $dateColumns = $this->getApp()->settings('date formats');
-        if (!empty($dateColumns)) {
+        $dateFormats = $this->getApp()->getDateFormats();
+        if (!empty($dateFormats)) {
             foreach ($results as &$result) {
-                foreach ($dateColumns as $dateColumn => $dateFormat) {
+                foreach ($dateFormats as $dateColumn => $dateFormat) {
                     if (!empty($result[$dateColumn])) {
                         $unix = strtotime($result[$dateColumn]);
                         $formatted = date($dateFormat, $unix);
