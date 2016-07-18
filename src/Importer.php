@@ -133,6 +133,7 @@ class Importer {
             return 0;
         }
 
-        return  ($excelDate - $daysSince) * $secondsInDay;
+        $unixTimestamp = ($excelDate - $daysSince) * $secondsInDay;
+        return date('Y-m-d H:i:s', $unixTimestamp);
     }
 }
