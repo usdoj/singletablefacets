@@ -245,46 +245,30 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                 // disappear. Since they are unusal, handle them first.
                 if (!empty($dateColumns[$facetName])) {
                     // Date facets are essentially ranges, so we need to query
-                    // a range of dates.
-                    foreach ($facetItemValues as $facetItemValue) {
-                        $start = '';
-                        $end = '';
-                        // Each value can either be:
-                        // - YYYY
-                        // - YYYY-MM
-                        // - YYYY-MM-DD
-                        // So we can easily figure it out by the number of
-                        // characters.
-                        $numChars = strlen($facetItemValue);
-                        if (4 == $numChars) {
-                            // Year range.
-                            $start = $facetItemValue . '-01-01 00:00:00';
-                            $end = $facetItemValue . '-12-31 23:59:59';
-                        }
-                        elseif (7 == $numChars) {
-                            // Month range.
-                            $start = $facetItemValue . '-01 00:00:00';
-                            $end = $facetItemValue . '-31 23:59:59';
-                        }
-                        elseif (10 == $numChars) {
-                            $start = $facetItemValue . ' 00:00:00';
-                            $end = $facetItemValue . ' 23:59:59';
-                        }
-                        else {
-                            // Bad parameter, just skip it.
-                            continue;
-                        }
-
-                        $startPlaceholder = $query->createNamedParameter($start);
-                        $endPlaceholder = $query->createNamedParameter($end);
-                        $dateOr = $query->expr()->orX();
-                        foreach ($columnsToCheck as $columnToCheck) {
-                            $dateOr->add("$columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder");
-                        }
-                        $facetWhere->add($dateOr);
+                    // a range of dates. Because we are assuming that date
+                    // facet items will only have one at a time, we treat them
+                    // as strings instead of arrays.
+                    $facetItemValue = $facetItemValues;
+                    $start = $this->normalizeDate($facetItemValue);
+                    $end = $this->normalizeDate($facetItemValue, TRUE);
+                    if ($start == $facetItemValue || $end == $facetItemValue) {
+                        // If the facet value is the same as the normalized
+                        // string, something is wrong, so skip it.
+                        continue;
                     }
+
+                    $startPlaceholder = $query->createNamedParameter($start);
+                    $endPlaceholder = $query->createNamedParameter($end);
+                    $dateOr = $query->expr()->orX();
+                    foreach ($columnsToCheck as $columnToCheck) {
+                        $dateOr->add("$columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder");
+                    }
+                    $facetWhere->add($dateOr);
                 }
-                // Otherwise, non-date facets act completely differently.
+                // Otherwise, non-date facets act completely differently. Most
+                // notably, they are treated as arrays. Also, they can be
+                // queried more simply by looking in all of the columns they
+                // might be in.
                 else {
                     foreach ($facetItemValues as $facetItemValue) {
                         $placeholder = $query->createNamedParameter($facetItemValue);
@@ -353,5 +337,31 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         }
 
         $this->dateGranularities = $granularities;
+    }
+
+    public function normalizeDate($date, $endOfRange = FALSE) {
+        $numChars = strlen($date);
+        if (4 == $numChars) {
+            // Year range.
+            $start = $date . '-01-01 00:00:00';
+            $end = $date . '-12-31 23:59:59';
+        }
+        elseif (7 == $numChars) {
+            // Month range.
+            $start = $date . '-01 00:00:00';
+            $end = $date . '-31 23:59:59';
+        }
+        elseif (10 == $numChars) {
+            $start = $date . ' 00:00:00';
+            $end = $date . ' 23:59:59';
+        }
+        if ($endOfRange) {
+            return $end;
+        }
+        else {
+            return $start;
+        }
+
+        return $date;
     }
 }

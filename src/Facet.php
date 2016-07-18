@@ -71,7 +71,7 @@ class Facet {
         // Query the database to get all the items.
         $items = $this->queryFacetItems($name, $dateGranularity);
         foreach ($additionalColumns as $additional) {
-            $items = array_merge($items, $this->queryFacetItems($additional));
+            $items = array_merge($items, $this->queryFacetItems($additional, $dateGranularity));
         }
 
         // First make add all the duplicates. This is necessary because the same
@@ -138,7 +138,8 @@ class Facet {
         }
 
         $query->addSelect("COUNT(*) AS count");
-        $query->addGroupBy($name);
+        $query->addGroupBy('item');
+        //print $query->getSQL() . PHP_EOL;
         return $query->execute()->fetchAll();
     }
 
@@ -211,9 +212,57 @@ class Facet {
         }
         $output = '  <ul class="' . $class . '">' . PHP_EOL;
 
+        $listItems = $this->getListItems($this->getItems(), $collapseAfter);
+        $output .= $listItems;
+
+        // If this is a date facet, we may need to add more "children" of the
+        // date hierarcy.
+        if ($this->isDate()) {
+            $currentValue = $this->getApp()->getParameter($this->getName());
+            $showMonths = FALSE;
+            $showDays = FALSE;
+            if (!empty($currentValue)) {
+
+                $numChars = strlen($currentValue);
+                if ($numChars >= 4) {
+                    $showMonths = TRUE;
+                }
+                if ($numChars >= 7) {
+                    $showDays = TRUE;
+                }
+            }
+            // If the months should be visible, we add a nested list.
+            $dateGranularities = $this->getApp()->getDateGranularities();
+            if (!empty($dateGranularities[$this->getName()])) {
+                $dateGranularities = $dateGranularities[$this->getName()];
+            }
+            else {
+                $dateGranularities = array();
+            }
+            if ($showMonths && in_array('2month', $dateGranularities)) {
+                $monthItems = $this->fetchItems($this->getName(), 'month');
+                $listItems = $this->getListItems($monthItems, $collapseAfter, 'F');
+                $output .= '<ul class="doj-facet-months">' . $listItems;
+                // If the days should be visible, we add another nested list.
+                if ($showDays && in_array('3day', $dateGranularities)) {
+                    $dayItems = $this->fetchItems($this->getName(), 'day');
+                    $listItems = $this->getListItems($dayItems, $collapseAfter, 'j');
+                    $output .= '<ul class="doj-facet-days">' . $listItems;
+                    $output .= '  </ul>' . PHP_EOL;
+
+                }
+                $output .= '  </ul>' . PHP_EOL;
+            }
+        }
+        $output .= '  </ul>' . PHP_EOL;
+        return $output;
+    }
+
+    private function getListItems($facetItems, $collapseAfter, $dateFormat = 'Y') {
         $numDisplayed = 0;
-        foreach ($this->getItems() as $item) {
-            $link = $item->render();
+        $output = '';
+        foreach ($facetItems as $item) {
+            $link = $item->render($dateFormat);
             $itemClass = '';
             $numDisplayed += 1;
             if ($collapseAfter > -1 && $numDisplayed > $collapseAfter) {
@@ -221,44 +270,6 @@ class Facet {
             }
             $output .= '    <li' . $itemClass . '>' . $link . '</li>' . PHP_EOL;
         }
-        // If this is a date facet, we may need to add more "children" of the
-        // date hierarcy.
-        if ($this->isDate()) {
-            $currentValues = $this->getApp()->getParameter($this->getName());
-            $showMonths = FALSE;
-            $showDays = FALSE;
-            if (!empty($currentValues)) {
-                foreach ($currentValues as $currentValue) {
-                    $numChars = strlen($currentValue);
-                    if ($numChars >= 4) {
-                        $showMonths = TRUE;
-                    }
-                    if ($numChars >= 7) {
-                        $showDays = TRUE;
-                    }
-                }
-                if ($showMonths) {
-                    $monthItems = $this->fetchItems($this->getName(), 'month');
-                    $numDisplayed = 0;
-                    $output .= '  <ul class="doj-facet-item-months">' . PHP_EOL;
-                    foreach ($monthItems as $item) {
-                        $link = $item->render('F');
-                        $itemClass = '';
-                        $numDisplayed += 1;
-                        if ($collapseAfter > -1 && $numDisplayed > $collapseAfter) {
-                            $itemClass .= ' class="doj-facet-item-collapsed"';
-                        }
-                        $output .= '    <li' . $itemClass . '>' . $link . '</li>' . PHP_EOL;
-                    }
-                    $output .= '  </ul>' . PHP_EOL;
-                }
-                if ($showDays) {
-                    $dayItems = $this->fetchItems($this->getName(), 'day');
-                    print_r($dayItems);
-                }
-            }
-        }
-        $output .= '  </ul>' . PHP_EOL;
         return $output;
     }
 

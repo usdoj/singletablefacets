@@ -130,7 +130,7 @@ class Importer {
         $secondsInDay = 86400;
 
         if ($excelDate <= $daysSince) {
-            return 0;
+            return NULL;
         }
 
         $unixTimestamp = ($excelDate - $daysSince) * $secondsInDay;
