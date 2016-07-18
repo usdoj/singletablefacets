@@ -67,6 +67,7 @@ It is up to you to create the database table that you will be using. Some notes:
 3. For keyword searches you must add a column to the database. This columns should be able to hold a lot of text. (Recommend using the "longtext" column type.) The name of the column must be `stf_keywords`.
 4. The `stf_keywords` column mentioned above, as well as any other columns that you would like to include in the keyword search, must belong to a FULLTEXT index on the table. Note that this has ramifications about the storage engine the table uses: on MySQL 5.6 or higher, you can use InnoDB or MyISAM, but for MySQL 5.5 you must use MyISAM.
 5. You must create a second FULLTEXT index on the table, just as in #4, except that it does not include the `stf_keywords` column.`
+6. Any columns you want to render as dates must be of the DATETIME type.
 
 ## Importing source data
 
@@ -158,14 +159,19 @@ columns for additional values:
     myDatabaseColumn1: myDatabaseColumn2
 
 # Excel stores dates in a weird way, and it's a waste of processing power to
-# convert it dynamically, so we assume that all date columns will by Unix
-# timestamps. Consequently, you should list here any columns that are formatted
+# convert it dynamically, so we assume that all date columns will be DATETIME
+# columns. Consequently, you should list here any columns that are formatted
 # as dates in the source Excel spreadsheet, so they can be converted once as
-# they are being imported.
+# they are being imported. Otherwise, MySQL will not let you import them.
 #convert from excel dates:
 #    - myDatabaseColumn1
 
-# If any of the database table's columns contain Unix timestamps, then you can
+# Similarly, if the source data is storing dates as Unix timestamps, make sure
+# to note that here so that they will be converted into MySQL DATETIME values.
+#conver from unix dates:
+#    - myDatabaseColumn2
+
+# If any of the database table's columns are DATETIME columns, then you can
 # list them here along with a PHP date format string to use when displaying the
 # dates in search results. This also tells the system to use a special
 # "drill-down" hierarchical approach when displaying these columns as facets.
