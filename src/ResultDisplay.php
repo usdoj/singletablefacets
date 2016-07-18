@@ -181,11 +181,14 @@ abstract class ResultDisplay {
             foreach ($results as &$result) {
                 foreach ($dateColumns as $dateColumn => $dateFormat) {
                     if (!empty($result[$dateColumn])) {
-                        $unix = $result[$dateColumn];
+                        $unix = strtotime($result[$dateColumn]);
                         $formatted = date($dateFormat, $unix);
                         if (!empty($formatted)) {
                             $result[$dateColumn] = $formatted;
                         }
+                    }
+                    else {
+                        $result[$dateColumn] = '';
                     }
                 }
             }

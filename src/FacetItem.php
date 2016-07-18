@@ -38,7 +38,7 @@ class FacetItem {
     }
 
     public function isActive() {
-        $parameter = $this->getApp()->getParameter($this->getFacet());
+        $parameter = $this->getApp()->getParameter($this->getFacet()->getName());
         if (empty($parameter)) {
             return FALSE;
         }
@@ -49,7 +49,7 @@ class FacetItem {
 
         $parameters = $this->getApp()->getParameters();
         $class = 'doj-facet-item-inactive';
-        $facet = $this->getFacet();
+        $facet = $this->getFacet()->getName();
         $value = $this->getValue();
 
         // If the current query already has the facet item we need to remove it
@@ -66,6 +66,15 @@ class FacetItem {
 
         // Add the item count if necessary.
         $label = $this->getValue();
+        // If this is a date facet, we need to format the value.
+        if ($this->getFacet()->isDate()) {
+            $formats = $this->getApp()->settings('output as dates');
+            if (!empty($formats[$this->getFacet()->getName()])) {
+                $format = $formats[$this->getFacet()->getName()];
+                $unix = strtotime($label);
+                $label = date($format, $unix);
+            }
+        }
         if ($this->getApp()->settings('show counts next to facet items')) {
             $label .= sprintf(' (%s)', $this->getCount());
         }

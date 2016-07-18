@@ -29,9 +29,12 @@ class Facet {
     public function isActive() {
         return $this->active;
     }
-    public function isDate() {
+    public function isDate($name = NULL) {
+        if (empty($name)) {
+            $name = $this->getName();
+        }
         $dateColumns = $this->getApp()->settings('output as dates');
-        return in_array($this->getName(), $dateColumns);
+        return in_array($this->getName(), array_keys($dateColumns));
     }
 
     public function __construct($app, $name) {
@@ -55,9 +58,13 @@ class Facet {
             }
         }
 
-        $items = $this->queryFacetItems($name);
+        // Query the database to get all the items.
+        $items = $this->queryFacetItems();
         foreach ($additionalColumns as $additional) {
             $items = array_merge($items, $this->queryFacetItems($additional));
+        }
+        if (empty($items)) {
+            return;
         }
 
         // First make add all the duplicates. This is necessary because the same
@@ -86,7 +93,7 @@ class Facet {
         $this->active = FALSE;
         foreach ($keyedByName as $itemName => $itemCount) {
             if (!empty($itemCount)) {
-                $item = new FacetItem($app, $name, $itemName, $itemCount);
+                $item = new FacetItem($app, $this, $itemName, $itemCount);
                 if ($item->isActive()) {
                     $this->active = TRUE;
                 }
@@ -95,10 +102,38 @@ class Facet {
         }
     }
 
-    private function queryFacetItems($name) {
+    private function queryFacetItems($name = NULL) {
 
+        if (empty($name)) {
+            $name = $this->getName();
+        }
         $query = $this->getApp()->query();
-        $query->addSelect("$name as item");
+
+        // Special select for date facets.
+        if ($this->isDate($name)) {
+            $granularities = $this->getApp()->getDateGranularities();
+            if (empty($granularities[$name])) {
+                throw new \Exception("No date format set for column $name");
+            }
+            $granularities = $granularities[$name];
+
+            // Convert the granularities from the weird strings we set in
+            // AppWeb.php to useful MySQL tokens.
+            $mysqlTokens = array(
+                '1year' => '%Y',
+                '2month' => '%m',
+                '3day' => '%d',
+            );
+            foreach ($granularities as &$granularity) {
+                $granularity = $mysqlTokens[$granularity];
+            }
+            $granularities = implode('-', $granularities);
+            $query->addSelect("DATE_FORMAT($name, '$granularities') AS item");
+        }
+        else {
+            $query->addSelect("$name as item");
+        }
+
         $query->addSelect("COUNT(*) AS count");
         $query->addGroupBy($name);
         return $query->execute()->fetchAll();

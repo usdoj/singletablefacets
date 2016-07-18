@@ -224,8 +224,18 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             $additionalColumns = $this->settings('columns for additional values');
             foreach ($parsedQueryString as $facetName => $facetItemValues) {
 
-                // Create our sequences of placeholders for the parameters.
-                $placeholders = array();
+                // Check to see if we need to include additional columns.
+                $columnsToCheck = array($facetName);
+                if (!empty($additionalColumns)) {
+                    foreach ($additionalColumns as $additionalColumn => $mainColumn) {
+                        if ($facetName == $mainColumn) {
+                            $columnsToCheck[] = $additionalColumn;
+                        }
+                    }
+                }
+
+                // Create an AND statement to construct our WHERE for the facet.
+                $facetWhere = $query->expr()->andX();
 
                 // Date facets are unique in that they will have only a single
                 // value that we interpret into a hierarchical display. This is
@@ -234,43 +244,63 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                 // year, month, or day, all the other years/months/days will
                 // disappear. Since they are unusal, handle them first.
                 if (!empty($dateColumns[$facetName])) {
-                    // Date facets are essentially ranges, so we need to figure
-                    // out the start and end for our facet. There are six
-                    // possible "granularities":
+                    // Date facets are essentially ranges, so we need to query
+                    // a range of dates.
+                    foreach ($facetItemValues as $facetItemValue) {
+                        $start = '';
+                        $end = '';
+                        // Each value can either be:
+                        // - YYYY
+                        // - YYYY-MM
+                        // - YYYY-MM-DD
+                        // So we can easily figure it out by the number of
+                        // characters.
+                        $numChars = strlen($facetItemValue);
+                        if (4 == $numChars) {
+                            // Year range.
+                            $start = $facetItemValue . '-01-01 00:00:00';
+                            $end = $facetItemValue . '-12-31 23:59:59';
+                        }
+                        elseif (7 == $numChars) {
+                            // Month range.
+                            $start = $facetItemValue . '-01 00:00:00';
+                            $end = $facetItemValue . '-31 23:59:59';
+                        }
+                        elseif (10 == $numChars) {
+                            $start = $facetItemValue . ' 00:00:00';
+                            $end = $facetItemValue . ' 23:59:59';
+                        }
+                        else {
+                            // Bad parameter, just skip it.
+                            continue;
+                        }
 
-
+                        $startPlaceholder = $query->createNamedParameter($start);
+                        $endPlaceholder = $query->createNamedParameter($end);
+                        $dateOr = $query->expr()->orX();
+                        foreach ($columnsToCheck as $columnToCheck) {
+                            $dateOr->add("$columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder");
+                        }
+                        $facetWhere->add($dateOr);
+                    }
                 }
                 // Otherwise, non-date facets act completely differently.
                 else {
                     foreach ($facetItemValues as $facetItemValue) {
                         $placeholder = $query->createNamedParameter($facetItemValue);
-                        $placeholders[$facetItemValue] = $placeholder;
+                        $columnsToCheckString = implode(',', $columnsToCheck);
+                        $facetWhere->add("$placeholder IN ($columnsToCheckString)");
                     }
-                    $in = implode(',', array_values($placeholders));
-
-                    // Check to see if we need to include additional columns.
-                    $columnsToCheck = array($facetName);
-                    if (!empty($additionalColumns)) {
-                        foreach ($additionalColumns as $additionalColumn => $mainColumn) {
-                            if ($facetName == $mainColumn) {
-                                $columnsToCheck[] = $additionalColumn;
-                            }
-                        }
-                    }
-                    // Build the "where" for the facet.
-                    $facetWhere = $query->expr()->orX();
-                    foreach ($columnsToCheck as $columnToCheck) {
-                        $facetWhere->add("$columnToCheck IN ($in)");
-                    }
-                    $query->andWhere($facetWhere);
                 }
+
+                // Add the facet selects to the query.
+                $query->andWhere($facetWhere);
             }
         }
         // Add conditions for any required columns.
         foreach ($this->settings('required columns') as $column) {
             $query->andWhere("($column <> '' AND $column IS NOT NULL)");
         }
-
         return $query;
     }
 
@@ -297,10 +327,11 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         //   - month
         //   - month + day
         //   - day
+        // The keys below are weirdly keyed to enforce a certain sort later.
         $dateFormatTokens = array(
-            'year' => array('Y', 'y', 'o'),
-            'month' => array('F', 'm', 'M', 'n'),
-            'day' => array('d', 'j'),
+            '1year' => array('Y', 'y', 'o'),
+            '2month' => array('F', 'm', 'M', 'n'),
+            '3day' => array('d', 'j'),
         );
         $granularities = array();
 
@@ -314,6 +345,11 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                     }
                 }
             }
+        }
+
+        foreach ($granularities as $column => &$columnGranularities) {
+            // Easy sort because year/month/day is naturally reverse alpha.
+            sort($columnGranularities);
         }
 
         $this->dateGranularities = $granularities;
