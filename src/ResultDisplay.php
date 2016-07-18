@@ -176,7 +176,7 @@ abstract class ResultDisplay {
         }
 
         // Convert any date columns.
-        $dateColumns = $this->getApp()->settings('output as dates');
+        $dateColumns = $this->getApp()->settings('date formats');
         if (!empty($dateColumns)) {
             foreach ($results as &$result) {
                 foreach ($dateColumns as $dateColumn => $dateFormat) {

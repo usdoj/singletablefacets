@@ -45,7 +45,7 @@ class FacetItem {
         return in_array($this->getValue(), $parameter);
     }
 
-    public function render() {
+    public function render($dateFormat = 'Y') {
 
         $parameters = $this->getApp()->getParameters();
         $class = 'doj-facet-item-inactive';
@@ -68,13 +68,11 @@ class FacetItem {
         $label = $this->getValue();
         // If this is a date facet, we need to format the value.
         if ($this->getFacet()->isDate()) {
-            $formats = $this->getApp()->settings('output as dates');
-            if (!empty($formats[$this->getFacet()->getName()])) {
-                $format = $formats[$this->getFacet()->getName()];
-                $unix = strtotime($label);
-                $label = date($format, $unix);
-            }
+            $unix = strtotime($label);
+            $label = date($dateFormat, $unix);
+            print "format $dateFormat unix $unix label $label" . PHP_EOL;
         }
+
         if ($this->getApp()->settings('show counts next to facet items')) {
             $label .= sprintf(' (%s)', $this->getCount());
         }

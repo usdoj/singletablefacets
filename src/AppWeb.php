@@ -220,7 +220,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             unset($parsedQueryString[$extraParameter]);
         }
         if (!empty($parsedQueryString)) {
-            $dateColumns = $this->settings('output as dates');
+            $dateColumns = $this->settings('date formats');
             $additionalColumns = $this->settings('columns for additional values');
             foreach ($parsedQueryString as $facetName => $facetItemValues) {
 
@@ -335,7 +335,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         );
         $granularities = array();
 
-        $dateColumns = $this->settings('output as dates');
+        $dateColumns = $this->settings('date formats');
         foreach ($dateColumns as $column => $format) {
             foreach ($dateFormatTokens as $granularity => $tokens) {
                 foreach ($tokens as $token) {

@@ -33,7 +33,7 @@ class Facet {
         if (empty($name)) {
             $name = $this->getName();
         }
-        $dateColumns = $this->getApp()->settings('output as dates');
+        $dateColumns = $this->getApp()->settings('date formats');
         return in_array($this->getName(), array_keys($dateColumns));
     }
 
@@ -45,6 +45,16 @@ class Facet {
 
         $labels = $this->getApp()->settings('facet labels');
         $this->label = $labels[$name];
+
+        $this->items = $this->fetchItems($name);
+    }
+
+    private function fetchItems($name = NULL, $dateGranularity = 'year') {
+
+        $app = $this->getApp();
+        if (empty($name)) {
+            $name = $this->getName();
+        }
 
         // Check to see if this facet needs to compile values from additional
         // columns.
@@ -59,12 +69,9 @@ class Facet {
         }
 
         // Query the database to get all the items.
-        $items = $this->queryFacetItems();
+        $items = $this->queryFacetItems($name, $dateGranularity);
         foreach ($additionalColumns as $additional) {
             $items = array_merge($items, $this->queryFacetItems($additional));
-        }
-        if (empty($items)) {
-            return;
         }
 
         // First make add all the duplicates. This is necessary because the same
@@ -91,18 +98,21 @@ class Facet {
         }
 
         $this->active = FALSE;
+        $items = array();
         foreach ($keyedByName as $itemName => $itemCount) {
             if (!empty($itemCount)) {
                 $item = new FacetItem($app, $this, $itemName, $itemCount);
                 if ($item->isActive()) {
                     $this->active = TRUE;
                 }
-                $this->items[] = $item;
+                $items[] = $item;
             }
         }
+
+        return $items;
     }
 
-    private function queryFacetItems($name = NULL) {
+    private function queryFacetItems($name = NULL, $dateGranularity = 'year') {
 
         if (empty($name)) {
             $name = $this->getName();
@@ -111,24 +121,17 @@ class Facet {
 
         // Special select for date facets.
         if ($this->isDate($name)) {
-            $granularities = $this->getApp()->getDateGranularities();
-            if (empty($granularities[$name])) {
-                throw new \Exception("No date format set for column $name");
-            }
-            $granularities = $granularities[$name];
 
-            // Convert the granularities from the weird strings we set in
-            // AppWeb.php to useful MySQL tokens.
-            $mysqlTokens = array(
-                '1year' => '%Y',
-                '2month' => '%m',
-                '3day' => '%d',
+            // Because the date facets are hierarchical, here we only get the
+            // years. We will have to make additional queries later to get the
+            // months and days.
+            $tokens = array(
+                'year' => '%Y',
+                'month' => '%Y-%m',
+                'day' => '%Y-%m-%d',
             );
-            foreach ($granularities as &$granularity) {
-                $granularity = $mysqlTokens[$granularity];
-            }
-            $granularities = implode('-', $granularities);
-            $query->addSelect("DATE_FORMAT($name, '$granularities') AS item");
+            $token = $tokens[$dateGranularity];
+            $query->addSelect("DATE_FORMAT($name, '$token') AS item");
         }
         else {
             $query->addSelect("$name as item");
@@ -198,10 +201,13 @@ class Facet {
             $class .= ' facet-checkboxes';
         }
         if ($collapseAfter > -1) {
-        $class .= ' doj-facet-collapse-outer';
+            $class .= ' doj-facet-collapse-outer';
         }
         if ($collapseAfter === 0) {
-        $class .= ' doj-facet-collapse-all';
+            $class .= ' doj-facet-collapse-all';
+        }
+        if ($this->isDate()) {
+            $class .= ' doj-facet-date';
         }
         $output = '  <ul class="' . $class . '">' . PHP_EOL;
 
@@ -214,6 +220,43 @@ class Facet {
                 $itemClass .= ' class="doj-facet-item-collapsed"';
             }
             $output .= '    <li' . $itemClass . '>' . $link . '</li>' . PHP_EOL;
+        }
+        // If this is a date facet, we may need to add more "children" of the
+        // date hierarcy.
+        if ($this->isDate()) {
+            $currentValues = $this->getApp()->getParameter($this->getName());
+            $showMonths = FALSE;
+            $showDays = FALSE;
+            if (!empty($currentValues)) {
+                foreach ($currentValues as $currentValue) {
+                    $numChars = strlen($currentValue);
+                    if ($numChars >= 4) {
+                        $showMonths = TRUE;
+                    }
+                    if ($numChars >= 7) {
+                        $showDays = TRUE;
+                    }
+                }
+                if ($showMonths) {
+                    $monthItems = $this->fetchItems($this->getName(), 'month');
+                    $numDisplayed = 0;
+                    $output .= '  <ul class="doj-facet-item-months">' . PHP_EOL;
+                    foreach ($monthItems as $item) {
+                        $link = $item->render('F');
+                        $itemClass = '';
+                        $numDisplayed += 1;
+                        if ($collapseAfter > -1 && $numDisplayed > $collapseAfter) {
+                            $itemClass .= ' class="doj-facet-item-collapsed"';
+                        }
+                        $output .= '    <li' . $itemClass . '>' . $link . '</li>' . PHP_EOL;
+                    }
+                    $output .= '  </ul>' . PHP_EOL;
+                }
+                if ($showDays) {
+                    $dayItems = $this->fetchItems($this->getName(), 'day');
+                    print_r($dayItems);
+                }
+            }
         }
         $output .= '  </ul>' . PHP_EOL;
         return $output;

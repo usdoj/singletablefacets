@@ -174,7 +174,7 @@ columns for additional values:
 # assumes you only want the facets to drill-down to the year. But if your PHP
 # date format is 'M j, Y' then the system assumes you want the facets to drill
 # all the way from year, to month, to day.
-#output as dates:
+#date formats:
 #    myDatabaseColumn1: 'M Y'
 #    myDatabaseColumn2: 'M j, Y'
 
