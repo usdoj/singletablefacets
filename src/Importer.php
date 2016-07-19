@@ -112,6 +112,15 @@ class Importer {
                     }
                 }
             }
+            // Do we need to convert any Unix dates?
+            $unixDateColumns = $this->getApp()->settings('convert from unix dates');
+            if (!empty($unixDateColumns)) {
+                foreach ($header as $index => $column) {
+                    if (in_array($column, $unixDateColumns)) {
+                        $filteredRow[$index] = $this->convertUnixDate($filteredRow[$index]);
+                    }
+                }
+            }
             // Skip invalid rows.
             if (count($filteredRow) != count($header)) {
                 continue;
@@ -123,17 +132,26 @@ class Importer {
 
     private function convertExcelDate($excelDate) {
 
+        if (empty($excelDate)) {
+            return NULL;
+        }
+
         // Numbers of days between January 1, 1900 and 1970 (including 19 leap years).
         $daysSince = 25569;
 
         // Numbers of second in a day:
         $secondsInDay = 86400;
 
-        if ($excelDate <= $daysSince) {
+        $unixTimestamp = ($excelDate - $daysSince) * $secondsInDay;
+        return date('Y-m-d H:i:s', $unixTimestamp);
+    }
+
+    private function convertUnixDate($unixDate) {
+
+        if (empty($unixDate)) {
             return NULL;
         }
 
-        $unixTimestamp = ($excelDate - $daysSince) * $secondsInDay;
-        return date('Y-m-d H:i:s', $unixTimestamp);
+        return date('Y-m-d H:i:s', $unixDate);
     }
 }
