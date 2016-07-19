@@ -37,6 +37,7 @@ class Config extends \Noodlehaus\Config
             'search result labels' => array(),
             'location of assets' => 'assets',
             'convert from excel dates' => array(),
+            'convert from unix dates' => array(),
             'date formats' => array(),
         );
     }

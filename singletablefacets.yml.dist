@@ -88,7 +88,7 @@ columns for additional values:
 
 # Similarly, if the source data is storing dates as Unix timestamps, make sure
 # to note that here so that they will be converted into MySQL DATETIME values.
-#conver from unix dates:
+#convert from unix dates:
 #    - myDatabaseColumn2
 
 # If any of the database table's columns are DATETIME columns, then you can
