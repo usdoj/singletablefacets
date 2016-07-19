@@ -139,6 +139,10 @@ class Importer {
         // Numbers of days between January 1, 1900 and 1970 (including 19 leap years).
         $daysSince = 25569;
 
+        if ($excelDate <= $daysSince) {
+            return NULL;
+        }
+
         // Numbers of second in a day:
         $secondsInDay = 86400;
 
