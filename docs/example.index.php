@@ -25,7 +25,7 @@ $app = new \USDOJ\SingleTableFacets\AppWeb($configFile);
   <style>
     .my-facets { float: left; width: 30% }
     .my-results { float: left; width: 70% }
-    .doj-facet-pager { clear: both }
+    .stf-facet-pager { clear: both }
   </style>
 </head>
 <body>
