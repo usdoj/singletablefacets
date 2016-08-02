@@ -223,6 +223,6 @@ abstract class ResultDisplay {
         $paginator = new \JasonGrimes\Paginator($totalItems, $itemsPerPage, $currentPage, $urlPattern);
         $paginator->setMaxPagesToShow($this->getApp()->settings('number of pager links to show'));
 
-        return '<div class="doj-facet-pager">' . $paginator->toHtml() . '</div>';
+        return '<div class="stf-facet-pager">' . $paginator->toHtml() . '</div>';
     }
 }

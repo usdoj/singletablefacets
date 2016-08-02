@@ -34,8 +34,8 @@ class SearchBar {
             $fullTextParam = $this->getApp()->getParameter('full_text');
             $checked = (!empty($fullTextParam)) ? 'checked="checked"' : '';
             $fullTextOption = '
-                <input type="checkbox" id="doj-full-text" name="full_text" value="1" ' . $checked . '>
-                <label for="doj-full-text">Search contents of documents?</label>
+                <input type="checkbox" id="stf-full-text" name="full_text" value="1" ' . $checked . '>
+                <label for="stf-full-text">Search contents of documents?</label>
             ';
         }
 
@@ -43,17 +43,17 @@ class SearchBar {
         $labelHelp = $this->getApp()->settings('keyword help label');
         if (!empty($help)) {
             $help = '
-                <div class="doj-facet-help doj-facet-collapse">
-                <span class="doj-facet-collapse-trigger">' . $labelHelp . '</span>
-                <div class="doj-facet-collapse-inner">' . $help . '</div>
+                <div class="stf-facet-help stf-facet-collapse">
+                <span class="stf-facet-collapse-trigger">' . $labelHelp . '</span>
+                <div class="stf-facet-collapse-inner">' . $help . '</div>
                 </div>
             ';
         }
 
         $widget = '
         <form method="get">
-            <label for="doj-facet-keys">Keywords</label>
-            <input type="text" name="keys" id="doj-facet-keys" value="' . $keys . '" size="50" />
+            <label for="stf-facet-keys">Keywords</label>
+            <input type="text" name="keys" id="stf-facet-keys" value="' . $keys . '" size="50" />
             ' . $fullTextOption . '
             <input type="submit" value="' . $this->getApp()->settings('search button text') . '" />
             <input type="button" onclick="location.href=\'' . $this->getApp()->getBaseUrl() . '\';" value="Reset" />

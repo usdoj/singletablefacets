@@ -23,7 +23,7 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
         $minimumWidths = $this->getApp()->settings('minimum column widths');
         $hrefColumns = $this->getApp()->settings('output as links');
 
-        $output = '<table class="doj-facet-search-results">' . PHP_EOL;
+        $output = '<table class="stf-facet-search-results">' . PHP_EOL;
         $output .= '  <thead>' . PHP_EOL;
         $output .= '    <tr>' . PHP_EOL;
         foreach ($tableColumns as $columnName) {
@@ -74,7 +74,7 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
         $query = $this->getApp()->getParameters();
         $query['sort'] = $columnName;
 
-        $class = 'doj-facet-sort-link';
+        $class = 'stf-facet-sort-link';
         // If this is the currently sorted field, then make the direction the
         // reverse of the default. Otherwise make it the default. We also take this
         // opportunity to add a class to show an up/down arrow.
@@ -83,11 +83,11 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
         if ($columnName == $currentSort) {
             if ($direction == 'ASC') {
                 $direction = 'DESC';
-                $class .= ' doj-facet-sort-link-asc';
+                $class .= ' stf-facet-sort-link-asc';
             }
             elseif ($direction == 'DESC') {
                 $direction = 'ASC';
-                $class .= ' doj-facet-sort-link-desc';
+                $class .= ' stf-facet-sort-link-desc';
             }
         }
         $query['sort_direction'] = $direction;

@@ -53,7 +53,7 @@ class FacetItem {
     public function render($dateFormat = 'Y') {
 
         $parameters = $this->getApp()->getParameters();
-        $class = 'doj-facet-item-inactive';
+        $class = 'stf-facet-item-inactive';
         $facet = $this->getFacet()->getName();
         $value = $this->getValue();
 
@@ -76,7 +76,7 @@ class FacetItem {
             // Check to see if this is the active facet.
             if (!empty($parameters[$facet]) && $newDateValue == $parameters[$facet]) {
                 unset($parameters[$facet]);
-                $class = 'doj-facet-item-active';
+                $class = 'stf-facet-item-active';
             }
             else {
                 $parameters[$facet] = $newDateValue;
@@ -89,7 +89,7 @@ class FacetItem {
             if (!empty($parameters[$facet]) && in_array($value, $parameters[$facet])) {
                 $key = array_search($value, $parameters[$facet]);
                 unset($parameters[$facet][$key]);
-                $class = 'doj-facet-item-active';
+                $class = 'stf-facet-item-active';
             }
             // Otherwise we need to add it to the current query.
             else {

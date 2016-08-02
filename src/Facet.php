@@ -196,18 +196,18 @@ class Facet {
         }
 
         $collapseAfter = $this->getCollapse();
-        $class = 'facet-items';
+        $class = 'stf-facet-items';
         if ($this->getApp()->settings('use checkboxes for facets instead of links')) {
-            $class .= ' facet-checkboxes';
+            $class .= ' stf-facet-checkboxes';
         }
         if ($collapseAfter > -1) {
-            $class .= ' doj-facet-collapse-outer';
+            $class .= ' stf-facet-collapse-outer';
         }
         if ($collapseAfter === 0) {
-            $class .= ' doj-facet-collapse-all';
+            $class .= ' stf-facet-collapse-all';
         }
         if ($this->isDate()) {
-            $class .= ' doj-facet-date';
+            $class .= ' stf-facet-date';
         }
         $output = '  <ul class="' . $class . '">' . PHP_EOL;
 
@@ -241,12 +241,12 @@ class Facet {
             if ($showMonths && in_array('2month', $dateGranularities)) {
                 $monthItems = $this->fetchItems($this->getName(), 'month');
                 $listItems = $this->getListItems($monthItems, $collapseAfter, 'F');
-                $output .= '<ul class="doj-facet-months">' . $listItems;
+                $output .= '<ul class="stf-facet-months">' . $listItems;
                 // If the days should be visible, we add another nested list.
                 if ($showDays && in_array('3day', $dateGranularities)) {
                     $dayItems = $this->fetchItems($this->getName(), 'day');
                     $listItems = $this->getListItems($dayItems, $collapseAfter, 'j');
-                    $output .= '<ul class="doj-facet-days">' . $listItems;
+                    $output .= '<ul class="stf-facet-days">' . $listItems;
                     $output .= '  </ul>' . PHP_EOL;
 
                 }
@@ -265,7 +265,7 @@ class Facet {
             $itemClass = '';
             $numDisplayed += 1;
             if ($collapseAfter > -1 && $numDisplayed > $collapseAfter) {
-                $itemClass .= ' class="doj-facet-item-collapsed"';
+                $itemClass .= ' class="stf-facet-item-collapsed"';
             }
             $output .= '    <li' . $itemClass . '>' . $link . '</li>' . PHP_EOL;
         }
@@ -283,11 +283,11 @@ class Facet {
         $dependentColumns = $this->getApp()->settings('dependent columns');
         $dependent = (!empty($dependentColumns[$this->getName()]));
 
-        $class = 'doj-facet';
+        $class = 'stf-facet';
         $showLabel = TRUE;
         if ($dependent && $this->getApp()->settings('show dependents indented to the right')) {
             $showLabel = FALSE;
-            $class .= ' doj-facet-dependent';
+            $class .= ' stf-facet-dependent';
         }
 
         // Get the actual list of facet items.
@@ -298,7 +298,7 @@ class Facet {
 
         $output = '<div class="' . $class . '">' . PHP_EOL;
         if ($showLabel) {
-            $output .= '  <h2 class="doj-facet-label">' . $this->getLabel() . '</h2>' . PHP_EOL;
+            $output .= '  <h2 class="stf-facet-label">' . $this->getLabel() . '</h2>' . PHP_EOL;
         }
         $output .= $list;
         $output .= '</div>' . PHP_EOL;

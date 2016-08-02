@@ -5,17 +5,17 @@
 $(document).ready(function () {
 
     // Checkboxes.
-    $('.facet-checkboxes a').not('.facet-processed').each(function (index) {
+    $('.stf-facet-checkboxes a').not('.stf-facet-processed').each(function (index) {
         // To avoid confusion with "this", a variable referring to the link.
         var link = this;
         // Add the class now so that it is not processed twice.
-        $(link).addClass('facet-processed');
+        $(link).addClass('stf-facet-processed');
         // Unique id and text for checkbox/label.
-        var id = 'doj-facet-cb-' + index;
+        var id = 'stf-facet-cb-' + index;
         var labelText = $(link).text();
         // Decide whether the checkbox should be checked.
         var checked = '';
-        if ($(link).hasClass('doj-facet-item-active')) {
+        if ($(link).hasClass('stf-facet-item-active')) {
             checked = ' checked="checked"';
         }
         // Create the DOM elements for the checkbox and label.
@@ -33,51 +33,51 @@ $(document).ready(function () {
     });
 
     // Help text collapsing.
-    $('.doj-facet-collapse').not('.facet-collapse-processed').each(function (index) {
+    $('.stf-facet-collapse').not('.stf-facet-collapse-processed').each(function (index) {
         // To avoid confusion with "this", a variable referring to the item.
         var collapsible = this;
         // Add the class now so that it is not processed twice.
-        $(collapsible).addClass('facet-collapse-processed');
+        $(collapsible).addClass('stf-facet-collapse-processed');
 
-        var trigger = $(collapsible).find('.doj-facet-collapse-trigger');
-        var contents = $(collapsible).find('.doj-facet-collapse-inner');
+        var trigger = $(collapsible).find('.stf-facet-collapse-trigger');
+        var contents = $(collapsible).find('.stf-facet-collapse-inner');
 
         // Hide the contents.
         $(contents).hide();
         // Add the behavior.
         $(trigger).click(function () {
             $(contents).slideToggle();
-            $(this).toggleClass('doj-facet-collapse-active');
+            $(this).toggleClass('stf-facet-collapse-active');
         });
     });
 
     // Facet item collapsing.
-    $('.doj-facet-collapse-outer').not('.facet-collapse-processed').each(function (index) {
+    $('.stf-facet-collapse-outer').not('.stf-facet-collapse-processed').each(function (index) {
         // To avoid confusion with "this", a variable referring to the item.
         var collapsible = this;
         // Add the class now so that it is not processed twice.
-        $(collapsible).addClass('facet-collapse-processed');
+        $(collapsible).addClass('stf-facet-collapse-processed');
 
         // First hide all the collapsed items.
-        $(collapsible).find('.doj-facet-item-collapsed').hide();
+        $(collapsible).find('.stf-facet-item-collapsed').hide();
 
         var labelOn = 'Show more';
         var labelOff = 'Show fewer';
-        if ($(collapsible).hasClass('doj-facet-collapse-all')) {
+        if ($(collapsible).hasClass('stf-facet-collapse-all')) {
             labelOn = 'Show filters';
             labelOff = 'Hide filters';
         }
         var trigger = $('<div>' + labelOn + '</div>')
-            .addClass('doj-facet-collapse-trigger')
+            .addClass('stf-facet-collapse-trigger')
             .click(function () {
-                $(this).parent().find('.doj-facet-item-collapsed').slideToggle();
+                $(this).parent().find('.stf-facet-item-collapsed').slideToggle();
                 if ($(this).text() == labelOn) {
                     $(this).text(labelOff);
                 }
                 else {
                     $(this).text(labelOn);
                 }
-                $(this).toggleClass('doj-facet-collapse-active');
+                $(this).toggleClass('stf-facet-collapse-active');
             });
         $(collapsible).append(trigger);
     });
