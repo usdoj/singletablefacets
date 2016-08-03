@@ -64,6 +64,11 @@ keywords in files:
 output as links:
     myTitleField: myDocumentURLField
 
+# List the columns that should be output as images. This assumes that the data
+# in these columns is the "src" attribute of an image.
+#output as images:
+#    - myImageSrcField
+
 # List the facet columns that should be collapsed at a certain point. Use 0 to
 # collapse all items, or for example, 5 to collapse items in excess of 5.
 collapse facet items:

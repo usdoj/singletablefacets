@@ -40,6 +40,7 @@ class Config extends \Noodlehaus\Config
             'convert from unix dates' => array(),
             'date formats' => array(),
             'search result display' => 'table',
+            'output as images' => array(),
         );
     }
 }

@@ -11,17 +11,10 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
     public function render() {
 
         $totalRows = 0;
-        $tableColumns = $this->getApp()->settings('search result labels');
-        // Special case. If there are no keywords being searched, do not show
-        // the relevance column.
-        $keywords = $this->getApp()->getUserKeywords();
-        if (empty($keywords)) {
-            unset($tableColumns[$this->getApp()->getRelevanceColumn()]);
-        }
+        $tableColumns = $this->getColumnsToDisplay();
         $tableColumns = array_keys($tableColumns);
 
         $minimumWidths = $this->getApp()->settings('minimum column widths');
-        $hrefColumns = $this->getApp()->settings('output as links');
 
         $output = '<table class="stf-facet-search-results">' . PHP_EOL;
         $output .= '  <thead>' . PHP_EOL;
@@ -40,13 +33,7 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
         foreach ($this->getRows() as $row) {
             $rowMarkup = '  <tr>' . PHP_EOL;
             foreach ($tableColumns as $column) {
-                $td = $row[$column];
-                if (!empty($hrefColumns[$column])) {
-                    $hrefColumn = $hrefColumns[$column];
-                    if (!empty($row[$hrefColumn])) {
-                        $td = '<a href="' . $row[$hrefColumn] . '">' . $row[$column] . '</a>';
-                    }
-                }
+                $td = $this->getCellContent($row, $column);
                 $rowMarkup .= '    <td>' . $td . '</td>' . PHP_EOL;
             }
             $rowMarkup .= '  </tr>' . PHP_EOL;
