@@ -29,9 +29,14 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         $this->setDateFormats();
         $this->setDateGranularities();
 
-        // For now, there is only one type of display, but in the future we may
-        // want to make this configurable.
-        $this->display = new \USDOJ\SingleTableFacets\ResultDisplayTable($this);
+        $displayType = $this->settings('search result display');
+        if ('list' == $displayType) {
+            $display = new \USDOJ\SingleTableFacets\ResultDisplayList($this);
+        }
+        else {
+            $display = new \USDOJ\SingleTableFacets\ResultDisplayTable($this);
+        }
+        $this->display = $display;
     }
 
     public function getDisplay() {

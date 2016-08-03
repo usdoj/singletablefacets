@@ -39,6 +39,7 @@ class Config extends \Noodlehaus\Config
             'convert from excel dates' => array(),
             'convert from unix dates' => array(),
             'date formats' => array(),
+            'search result display' => 'table',
         );
     }
 }

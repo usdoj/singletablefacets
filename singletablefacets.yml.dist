@@ -116,6 +116,10 @@ dependent columns:
 # that they are being shown in a hierarchical way.
 show dependents indented to the right: true
 
+# Choose a type of display for the search results. The choices are:
+# "list", "table". Default is "table".
+search result display: table
+
 # List the HTML table columns you would like to give a minimum width (CSS).
 # This can be used to cut down on undesirable text wrapping.
 minimum column widths:
