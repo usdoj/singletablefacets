@@ -31,7 +31,7 @@ class ResultDisplayList extends \USDOJ\SingleTableFacets\ResultDisplay {
                     $labelMarkup = '<span class="' . $baseClass . '-label' . '">';
                     $labelMarkup .= $label . ':&nbsp;</span>' . PHP_EOL;
                 }
-                $contentMarkup = $row[$column];
+                $contentMarkup = $labelMarkup . $row[$column];
                 if (!empty($hrefColumns[$column])) {
                     $hrefColumn = $hrefColumns[$column];
                     if (!empty($row[$hrefColumn])) {
@@ -40,7 +40,7 @@ class ResultDisplayList extends \USDOJ\SingleTableFacets\ResultDisplay {
                 }
                 $contentMarkup = '<div class="' . $baseClass . '-content' . '">' . $contentMarkup . '</div>';
 
-                $rowMarkup .= '    ' . $labelMarkup . $contentMarkup . PHP_EOL;
+                $rowMarkup .= '    ' . $contentMarkup . PHP_EOL;
             }
             $rowMarkup .= '  </li>' . PHP_EOL;
             $output .= $rowMarkup;
