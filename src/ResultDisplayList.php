@@ -28,8 +28,8 @@ class ResultDisplayList extends \USDOJ\SingleTableFacets\ResultDisplay {
                 $baseClass = 'stf-column-' . $column;
                 $labelMarkup = '';
                 if (!empty($label)) {
-                    $labelMarkup = '<div class="' . $baseClass . '-label' . '">';
-                    $labelMarkup .= $label . '</div>' . PHP_EOL;
+                    $labelMarkup = '<span class="' . $baseClass . '-label' . '">';
+                    $labelMarkup .= $label . ':&nbsp;</span>' . PHP_EOL;
                 }
                 $contentMarkup = $row[$column];
                 if (!empty($hrefColumns[$column])) {
