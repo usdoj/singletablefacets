@@ -39,7 +39,7 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
     public function run() {
 
         // First import the source data.
-        $importer = new \USDOJ\SingleTableFacets\Importer($this, $this->getSourceFile());
+        $importer = new \USDOJ\CsvToMysql\Importer($this->getConfig(), $sourceFile);
         $importer->run();
 
         // Next make sure there is nothing left in our special keyword column.
