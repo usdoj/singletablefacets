@@ -258,5 +258,7 @@ abstract class ResultDisplay {
                 $content = '<a href="' . $row[$hrefColumn] . '">' . $content . '</a>';
             }
         }
+
+        return $content;
     }
 }

@@ -18,6 +18,7 @@ class ResultDisplayList extends \USDOJ\SingleTableFacets\ResultDisplay {
             foreach ($tableColumns as $column => $label) {
 
                 $cellContent = $this->getCellContent($row, $column);
+                $baseClass = 'stf-column-' . $column;
 
                 $labelMarkup = '';
                 if (!empty($label)) {
@@ -25,7 +26,6 @@ class ResultDisplayList extends \USDOJ\SingleTableFacets\ResultDisplay {
                     $labelMarkup .= $label . ':&nbsp;</span>' . PHP_EOL;
                 }
 
-                $baseClass = 'stf-column-' . $column;
                 $contentMarkup = $labelMarkup . $cellContent;
                 $contentMarkup = '<div class="' . $baseClass . '-content' . '">' . $contentMarkup . '</div>';
 
