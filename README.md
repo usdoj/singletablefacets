@@ -25,6 +25,10 @@ Use composer to bring this into your PHP project. The composer.json should look 
         {
             "type": "vcs",
             "url": "https://github.com/usdoj/singletablefacets.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/usdoj/csvtomysql.git"
         }
     ]
 }
