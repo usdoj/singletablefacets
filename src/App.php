@@ -8,16 +8,50 @@ namespace USDOJ\SingleTableFacets;
 
 class App
 {
+    /**
+     * @var \Doctrine\DBAL\Connection
+     *   The database connection.
+     */
     private $db;
+
+    /**
+     * @var \USDOJ\SingleTableFacets\Config
+     *   The config object for this app.
+     */
     private $config;
+
+    /**
+     * @var string
+     *   The unique column in the database.
+     */
     private $uniqueColumn;
+
+    /**
+     * @var array
+     *   All of the database columns that are part of the FULLTEXT indexes.
+     */
     private $databaseKeywordColumns;
+
+    /**
+     * @var array
+     *   All of the database columns that are DATETIME values.
+     */
     private $dateColumns;
 
+    /**
+     * Get the database connection.
+     *
+     * @return \Doctrine\DBAL\Connection
+     */
     public function getDb() {
         return $this->db;
     }
 
+    /**
+     * Get the config object.
+     *
+     * @return \USDOJ\SingleTableFacets\Config
+     */
     public function getConfig() {
         return $this->config;
     }
@@ -26,10 +60,20 @@ class App
         return 'stf_keywords';
     }
 
+    /**
+     * Get the DATETIME columns.
+     *
+     * @return array
+     */
     public function getDateColumns() {
         return $this->dateColumns;
     }
 
+    /**
+     * Get all the columns in the FULLTEXT index as a comma-separated string.
+     *
+     * @return string
+     */
     public function getKeywordColumns() {
         $excludeFullText = $this->settings('allow user to exclude full text from keyword search');
         $fullTextParam = $this->getParameter('full_text');
@@ -42,22 +86,51 @@ class App
         return $keywordColumns;
     }
 
+    /**
+     * Get the pseudo-column name we're using for relevance.
+     *
+     * @return string
+     */
     public function getRelevanceColumn() {
         return 'stf_score';
     }
 
+    /**
+     * Get the unqiue column.
+     *
+     * @return string
+     */
     public function getUniqueColumn() {
         return $this->uniqueColumn;
     }
 
+    /**
+     * Helper method for getting configuration settings.
+     *
+     * @param $key
+     *   A key from the YAML configuration file to check the value for.
+     * @return null|string
+     */
     public function settings($key) {
         return $this->getConfig()->get($key);
     }
 
+    /**
+     * Start off a database query.
+     *
+     * @return \Doctrine\DBAL\Query\QueryBuilder
+     */
     public function query() {
         return $this->getDb()->createQueryBuilder();
     }
 
+    /**
+     * @param \USDOJ\SingleTableFacets\Config $config
+     *   The configuration object for the app.
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     */
     public function __construct($config) {
 
         $this->config = $config;

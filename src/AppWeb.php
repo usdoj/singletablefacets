@@ -8,14 +8,54 @@ namespace USDOJ\SingleTableFacets;
 
 class AppWeb extends \USDOJ\SingleTableFacets\App {
 
+    /**
+     * The parameters present in $_GET that are relevant to us.
+     *
+     * @var array
+     */
     private $parameters;
-    private $facets;
+
+    /**
+     * The child of ResultDisplay to use for this app.
+     *
+     * @var \USDOJ\SingleTableFacets\ResultDisplayList|\USDOJ\SingleTableFacets\ResultDisplayTable
+     */
     private $display;
+
+    /**
+     * The user-input search terms.
+     *
+     * @var string
+     */
     private $userKeywords;
+
+    /**
+     * Twig templates for search results.
+     *
+     * @var \Twig_Environment
+     */
     private $twigForSearchResults;
+
+    /**
+     * Twig templates for facet items.
+     *
+     * @var \Twig_Environment
+     */
     private $twigForFacetItems;
+
+    /**
+     * Array of all the columns in the database, for use later.
+     *
+     * @var array
+     */
     private $allColumns;
 
+    /**
+     * @param \USDOJ\SingleTableFacets\Config $configFile
+     *   The config object to use with this app.
+     *
+     * @throws \Exception
+     */
     public function __construct($configFile) {
 
         $config = new \USDOJ\SingleTableFacets\Config($configFile);
@@ -69,29 +109,62 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         }
     }
 
+    /**
+     * Get the display being used for this app.
+     *
+     * @return \USDOJ\SingleTableFacets\ResultDisplayList|\USDOJ\SingleTableFacets\ResultDisplayTable
+     */
     public function getDisplay() {
         return $this->display;
     }
 
+    /**
+     * Get the base URL of the current page, for use in building links.
+     *
+     * @return string
+     */
     public function getBaseUrl() {
         return $this->baseUrl;
     }
 
+    /**
+     * An array of paramters to allow the user to set, other than db columns.
+     *
+     * @return array
+     */
     public function getExtraParameters() {
         return array('keys', 'sort', 'sort_direction', 'page', 'full_text');
     }
 
+    /**
+     * Get a flat array of database columns to use for facets.
+     *
+     * @return array
+     */
     private function getFacetColumns() {
         $facets = $this->settings('facet labels');
         return array_keys($facets);
     }
 
+    /**
+     * Get a flat array of all the possible paramters users are allowed to use.
+     *
+     * @return array
+     */
     private function getAllowedParameters() {
         $extraParameters = $this->getExtraParameters();
         $facetColumnNames = $this->getFacetColumns();
         return array_merge($facetColumnNames, $extraParameters);
     }
 
+    /**
+     * Get a specific paramter if the user has requested it.
+     *
+     * @param $param
+     *   The $_GET parameter to look for.
+     *
+     * @return bool
+     */
     public function getParameter($param) {
         if (!empty($this->parameters[$param])) {
             return $this->parameters[$param];
@@ -99,20 +172,37 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return FALSE;
     }
 
+    /**
+     * Get all the user-requested parameters.
+     *
+     * @return array
+     */
     public function getParameters() {
         return $this->parameters;
     }
 
+    /**
+     * Get the Twig templates for search results.
+     *
+     * @return \Twig_Environment
+     */
     public function getTwigForSearchResults() {
         return $this->twigForSearchResults;
     }
 
+    /**
+     * Get the Twig templates for facet items.
+     *
+     * @return \Twig_Environment
+     */
     public function getTwigForFacetItems() {
         return $this->twigForFacetItems;
     }
 
     /**
      * Helper function to get the SQL for a full-text MATCH AGAINST query.
+     *
+     * @return string
      */
     public function getMatchSQL() {
         $keywordColumns = $this->getKeywordColumns();
@@ -120,6 +210,11 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return $matchSQL;
     }
 
+    /**
+     * Parse $_GET to grab the variables we care about.
+     *
+     * @return array
+     */
     private function parseQueryString() {
         $params = $_GET;
         $currentQuery = array();
@@ -139,11 +234,21 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return $currentQuery;
     }
 
+    /**
+     * Render the keyword search widget.
+     *
+     * @return string
+     */
     public function renderKeywordSearch() {
         $searchBar = new \USDOJ\SingleTableFacets\SearchBar($this);
         return $searchBar->render();
     }
 
+    /**
+     * Render the facets.
+     *
+     * @return string
+     */
     public function renderFacets() {
 
         $output = '';
@@ -154,18 +259,36 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return $output;
     }
 
+    /**
+     * Render the search results.
+     *
+     * @return string
+     */
     public function renderResults() {
         return $this->getDisplay()->render();
     }
 
+    /**
+     * Render the pager.
+     *
+     * @return string
+     */
     public function renderPager() {
         return $this->getDisplay()->renderPager();
     }
 
     /**
-    * Helper function to split a string into an array of space-delimited tokens
-    * taking double-quoted and single-quoted strings into account.
-    */
+     * Helper function to split a string into an array of space-delimited tokens
+     * taking double-quoted and single-quoted strings into account.
+     *
+     * @param string $string
+     *   The string to parse into tokens.
+     *
+     * @param $quotationMarks string
+     *   The characters to treat as quotes.
+     *
+     * @return array
+     */
     public function tokenizeQuoted($string, $quotationMarks='"\'') {
         $tokens = array();
         for ($nextToken = strtok($string, ' '); $nextToken !== FALSE; $nextToken = strtok(' ')) {
@@ -184,16 +307,31 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return $tokens;
     }
 
+    /**
+     * Render the javascript.
+     *
+     * @return string
+     */
     public function renderJavascript() {
         $location = $this->settings('location of assets');
         return '<script type="text/javascript" src="' . $location . '/singletablefacets.js"></script>';
     }
 
+    /**
+     * Render the CSS styles.
+     *
+     * @return string
+     */
     public function renderStyles() {
         $location = $this->settings('location of assets');
         return '<link rel="stylesheet" href="' . $location . '/singletablefacets.css" />';
     }
 
+    /**
+     * Get (or parse and return) the user-requested keywords.
+     *
+     * @return string
+     */
     public function getUserKeywords() {
 
         if (!empty($this->userKeywords)) {
@@ -241,6 +379,11 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return $keywords;
     }
 
+    /**
+     * Continuation of starting query, taking into account user input.
+     *
+     * @return \Doctrine\DBAL\Query\QueryBuilder
+     */
     public function query() {
 
         $query = parent::query();
@@ -330,12 +473,36 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return $query;
     }
 
+    /**
+     * Helper method for creating links.
+     *
+     * @param $url
+     *   The href to use for the link.
+     * @param $label
+     *   The text to use for the link.
+     * @param $query
+     *   Any query parameters to add to the link.
+     * @param $class
+     *   Any CSS class to apply to the link.
+     *
+     * @return string
+     */
     public function getLink($url, $label, $query, $class) {
 
         $href = $this->getHref($url, $query);
         return sprintf('<a href="%s" class="%s">%s</a>', $href, $class, $label);
     }
 
+    /**
+     * Helper method to build a URL for a link.
+     *
+     * @param $url
+     *   The base URL for the href.
+     * @param $query
+     *   Any query parameters to add to the href.
+     *
+     * @return string
+     */
     public function getHref($url, $query) {
         $href = $url;
         $query_string = http_build_query($query);
@@ -345,6 +512,16 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return $href;
     }
 
+    /**
+     * Normalize a date that could be year, year + month, or year + month + day.
+     *
+     * @param $date
+     *   The unknown date.
+     * @param bool|FALSE $endOfRange
+     *   Are we looking for the beginning or end of a date range?
+     *
+     * @return string
+     */
     public function normalizeDate($date, $endOfRange = FALSE) {
         $numChars = strlen($date);
         if (4 == $numChars) {

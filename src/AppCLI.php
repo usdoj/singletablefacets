@@ -8,8 +8,19 @@ namespace USDOJ\SingleTableFacets;
 
 class AppCLI extends \USDOJ\SingleTableFacets\App
 {
+    /**
+     * The source file (.csv) to import.
+     *
+     * @var string
+     */
     private $sourceFile;
 
+    /**
+     * @param \USDOJ\SingleTableFacets\Config $args
+     *   The config object for this app.
+     *
+     * @throws \Exception
+     */
     public function __construct($args) {
 
         $configFile = empty($args[1]) ? '' : $args[1];
@@ -32,10 +43,18 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         parent::__construct($config);
     }
 
+    /**
+     * Get the source file to import.
+     *
+     * @return string
+     */
     private function getSourceFile() {
         return $this->sourceFile;
     }
 
+    /**
+     * Perform the import.
+     */
     public function run() {
 
         // First import the source data.
@@ -47,6 +66,11 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         $crawler->run();
     }
 
+    /**
+     * Get the example usage for this CLI command.
+     *
+     * @return string
+     */
     private function getUsage() {
         $ret = 'Usage: singletablefacets [config file] [source file]' . PHP_EOL;
         $ret .= '  config file: Path to .yml configuration file' . PHP_EOL;
