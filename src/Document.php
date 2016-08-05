@@ -8,23 +8,52 @@ namespace USDOJ\SingleTableFacets;
 
 class Document {
 
+    /**
+     * @var \USDOJ\SingleTableFacets\App $app
+     *   Reference to the app.
+     */
     private $app;
 
-    private $documents;
-    private $text;
+    /**
+     * @var string
+     *   The URL of the document.
+     */
+    private $document;
 
+    /**
+     * @return \USDOJ\SingleTableFacets\App
+     */
     public function getApp() {
         return $this->app;
     }
 
+    /**
+     * A hardcoded location to do things in the temp folder.
+     *
+     * @return string
+     */
     public function getTempPath() {
         return '/tmp/singletablefacets';
     }
 
+
+    /**
+     * Get the URL for this document.
+     *
+     * @return string
+     */
     public function getDocument() {
         return $this->document;
     }
 
+    /**
+     * Document constructor.
+     *
+     * @param $app
+     *   Reference to the app.
+     * @param $document
+     *   The URL for the document.
+     */
     public function __construct($app, $document) {
 
         $this->document = $document;
@@ -55,6 +84,15 @@ class Document {
         file_put_contents($this->getTempPath(), $response);
     }
 
+    /**
+     * A version of file_get_contents that uses curl (needed because of proxy).
+     *
+     * @param $url
+     *   The URL of the document.
+     *
+     * @return string
+     *   Get the content of the response.
+     */
     private function file_get_contents_curl($url) {
         $ch = curl_init();
 
@@ -87,6 +125,11 @@ class Document {
         return $data;
     }
 
+    /**
+     * Get the text content of a remote file, either PDF or HTML.
+     *
+     * @return string
+     */
     private function fetchText() {
 
         $ret = '';
@@ -133,11 +176,22 @@ class Document {
         return $ret;
     }
 
+    /**
+     * A public wrapper for fetchText().
+     *
+     * @return string
+     */
     public function getKeywords() {
 
         return $this->fetchText();
     }
 
+    /**
+     * Helper method to test whether a document is text or binary.
+     *
+     * @return bool
+     *   TRUE if the document is text, FALSE otherwise.
+     */
     private function isText() {
         $finfo = finfo_open(FILEINFO_MIME);
         return (substr(finfo_file($finfo, $this->getTempPath()), 0, 4) == 'text');

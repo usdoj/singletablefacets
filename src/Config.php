@@ -8,6 +8,11 @@ namespace USDOJ\SingleTableFacets;
 
 class Config extends \Noodlehaus\Config
 {
+    /**
+     * Provide all the defaults for optional settings.
+     *
+     * @return array
+     */
     protected function getDefaults() {
         return array(
             'show counts next to facet items' => TRUE,
