@@ -231,19 +231,19 @@ class Facet {
                 }
             }
             // If the months should be visible, we add a nested list.
-            $dateGranularities = $this->getApp()->getDateGranularities();
-            if (!empty($dateGranularities[$this->getName()])) {
-                $dateGranularities = $dateGranularities[$this->getName()];
+            $dateGranularity = $this->getApp()->settings('date facet granularity');
+            if (!empty($dateGranularity[$this->getName()])) {
+                $dateGranularity = $dateGranularity[$this->getName()];
             }
             else {
-                $dateGranularities = array();
+                $dateGranularity = 'month';
             }
-            if ($showMonths && in_array('2month', $dateGranularities)) {
+            if ($showMonths && 'year' != $dateGranularity) {
                 $monthItems = $this->fetchItems($this->getName(), 'month');
                 $listItems = $this->getListItems($monthItems, $collapseAfter, 'F');
                 $output .= '<ul class="stf-facet-months">' . $listItems;
                 // If the days should be visible, we add another nested list.
-                if ($showDays && in_array('3day', $dateGranularities)) {
+                if ($showDays && 'day' == $dateGranulary) {
                     $dayItems = $this->fetchItems($this->getName(), 'day');
                     $listItems = $this->getListItems($dayItems, $collapseAfter, 'j');
                     $output .= '<ul class="stf-facet-days">' . $listItems;

@@ -12,8 +12,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     private $facets;
     private $display;
     private $userKeywords;
-    private $dateGranularities;
-    private $dateFormats;
 
     public function __construct($configFile) {
 
@@ -24,10 +22,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
         $uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
         $this->baseUrl = $uri_parts[0];
-
-        // Date stuff. The order of these is important.
-        $this->setDateFormats();
-        $this->setDateGranularities();
 
         $displayType = $this->settings('search result display');
         if ('list' == $displayType) {
@@ -56,10 +50,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         return array_keys($facets);
     }
 
-    public function getDateFormats() {
-        return $this->dateFormats;
-    }
-
     private function getAllowedParameters() {
         $extraParameters = $this->getExtraParameters();
         $facetColumnNames = $this->getFacetColumns();
@@ -75,10 +65,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
     public function getParameters() {
         return $this->parameters;
-    }
-
-    public function getDateGranularities() {
-        return $this->dateGranularities;
     }
 
     /**
@@ -313,58 +299,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             $href .= '?' . $query_string;
         }
         return $href;
-    }
-
-    public function setDateGranularities() {
-        // These are the possible date granularies:
-        //   - year
-        //   - year + month
-        //   - year + month + day
-        //   - month
-        //   - month + day
-        //   - day
-        // The keys below are weirdly keyed to enforce a certain sort later.
-        $dateFormatTokens = array(
-            '1year' => array('Y', 'y', 'o'),
-            '2month' => array('F', 'm', 'M', 'n'),
-            '3day' => array('d', 'j'),
-        );
-        $granularities = array();
-
-        $dateFormats = $this->getDateFormats();
-        foreach ($dateFormats as $column => $format) {
-            foreach ($dateFormatTokens as $granularity => $tokens) {
-                foreach ($tokens as $token) {
-                    if (strpos($format, $token) !== FALSE) {
-                        $granularities[$column][] = $granularity;
-                        break;
-                    }
-                }
-            }
-        }
-
-        foreach ($granularities as $column => &$columnGranularities) {
-            // Easy sort because year/month/day is naturally reverse alpha.
-            sort($columnGranularities);
-        }
-
-        $this->dateGranularities = $granularities;
-    }
-
-    private function setDateFormats() {
-        $this->dateFormats = array();
-        $dateColumns = $this->getDateColumns();
-        $dateFormats = $this->settings('date formats');
-        if (!empty($dateColumns)) {
-            foreach ($dateColumns as $column) {
-                if (empty($dateFormats[$column])) {
-                    $this->dateFormats[$column] = 'm/d/Y';
-                }
-                else {
-                    $this->dateFormats[$column] = $dateFormats[$column];
-                }
-            }
-        }
     }
 
     public function normalizeDate($date, $endOfRange = FALSE) {

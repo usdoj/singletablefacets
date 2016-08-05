@@ -30,7 +30,6 @@ class Config extends \Noodlehaus\Config
             'sort facet items by popularity' =>  FALSE,
             'text alterations' => array(),
             'keywords in files' => array(),
-            'output as links' => array(),
             'collapse facet items' => array(),
             'required columns' => array(),
             'facet labels' => array(),
@@ -38,9 +37,10 @@ class Config extends \Noodlehaus\Config
             'location of assets' => 'assets',
             'convert from excel dates' => array(),
             'convert from unix dates' => array(),
-            'date formats' => array(),
             'search result display' => 'table',
-            'output as images' => array(),
+            'template folder for search results' => NULL,
+            'template folder for facet items' => NULL,
+            'date facet granularity' => array(),
         );
     }
 }

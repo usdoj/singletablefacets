@@ -51,23 +51,33 @@ sort directions:
     myDatabaseColumn2: DESC
     stf_score: DESC
 
+# Twig templating can be used to produce the output of the row data. To do this,
+# create a template file in the folder indicated here, named according to the
+# column name, with an extension of ".html.twig". For example, with the example
+# location below, to create a template for the "Title" column, you would create
+# a file at /path/to/templates/Title.html.twig. If no template is created for
+# a column, it will be output as its raw value. The template is passed a "row"
+# variable which contains all of the columns from the database. As an additional
+# shortcut, it gets a "value" variable which is the value of the column being
+# output.
+template folder for search results: /path/to/templates
+
+# The above setting supports templating for the row data as displayed in the
+# search results. The setting below is the same, except that it is applied to
+# the row data as displayed in facet items. You may well want to use the same
+# templates in both cases, in which case you simply point to the same folder.
+template folder for facet items: /path/to/templates
+
 # List the columns that contain URLs pointing to files with keywords. The
 # keywords in these files will be crawled and indexed. Note, this only works on
 # PDF and HTML files.
 keywords in files:
     - myDatabaseColumn2
 
-# List the columns that should be output as links, using another columns to
-# get the destination URLs. For example, if you wanted to display the row's
-# title as a link to a document, you might do something like this:
-# (The format should be: Link label : Link URL)
-output as links:
-    myTitleField: myDocumentURLField
-
-# List the columns that should be output as images. This assumes that the data
-# in these columns is the "src" attribute of an image.
-#output as images:
-#    - myImageSrcField
+# When crawling remote URLs for keywords, add this prefix to any relative URLs.
+# For example, if this is set to: "http://example.com/files/", then a relative
+# URL of "mydoc.pdf" will be fetched from "http://example.com/files/mydoc.pdf".
+prefix for relative keyword URLs: http://example.com/files/
 
 # List the facet columns that should be collapsed at a certain point. Use 0 to
 # collapse all items, or for example, 5 to collapse items in excess of 5.
@@ -96,18 +106,12 @@ columns for additional values:
 #convert from unix dates:
 #    - myDatabaseColumn2
 
-# If any of the database table's columns are DATETIME columns, then you can
-# list them here along with a PHP date format string to use when displaying the
-# dates in search results. This also tells the system to use a special
-# "drill-down" hierarchical approach when displaying these columns as facets.
-# The system deduces from your PHP date format how "granular" you want the facet
-# to get. For example, if your PHP date format is just 'Y', then the system
-# assumes you only want the facets to drill-down to the year. But if your PHP
-# date format is 'M j, Y' then the system assumes you want the facets to drill
-# all the way from year, to month, to day.
-#date formats:
-#    myDatabaseColumn1: 'M Y'
-#    myDatabaseColumn2: 'M j, Y'
+# Date granularity can be set for each column. This determines how far the date
+# facets will "drill down". The choices are: "year", "month", "day". The default
+# is "month", for any columns not specified here.
+#date facet granularity:
+#    myDatabaseColumn1: year
+#    myDatabaseColumn2: month
 
 # List the facet columns that depend on other facets. For example, if you don't
 # want "Sub Category" to appear unless "Category" is active, you can set that
@@ -168,11 +172,6 @@ keyword help label: "Need help searching?"
 # The items within a given facet are normally sorted alphabetically, but setting
 # this to true will sort them by their counts, in descending order.
 sort facet items by popularity: false
-
-# When crawling remote URLs for keywords, add this prefix to any relative URLs.
-# For example, if this is set to: "http://example.com/files/", then a relative
-# URL of "mydoc.pdf" will be fetched from "http://example.com/files/mydoc.pdf".
-prefix for relative keyword URLs: http://example.com/files/
 
 # Normally when users do a keyword search, the full text (crawled) data is
 # included. However if you would like to exclude the full text by default, and
