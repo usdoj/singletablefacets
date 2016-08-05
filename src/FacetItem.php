@@ -106,8 +106,21 @@ class FacetItem {
             $label = date($dateFormat, $unix);
         }
 
-        if ($this->getApp()->settings('show counts next to facet items')) {
-            $label .= sprintf(' (%s)', $this->getCount());
+        // If there is a Twig template for this facet column, use that.
+        $twigTemplate = $facet . '.html.twig';
+        if ($this->getTwigForFacetItems() &&
+            $this->getTwigForFacetItems()->getLoader()->exists($twigTemplate)) {
+            // If so, render it.
+            $label = $this->getTwigForFacetItems()->render($twigTemplate, array(
+                'value' => $label,
+                'count' => $this->getCount(),
+            ));
+        }
+        else {
+            // Otherwise we'll be using the raw value, possible with the item count.
+            if ($this->getApp()->settings('show counts next to facet items')) {
+                $label .= sprintf(' (%s)', $this->getCount());
+            }
         }
 
         // Do not want page numbers to carry over into facets.

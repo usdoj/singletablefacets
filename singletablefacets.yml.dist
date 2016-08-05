@@ -64,8 +64,16 @@ template folder for search results: /path/to/templates
 
 # The above setting supports templating for the row data as displayed in the
 # search results. The setting below is the same, except that it is applied to
-# the row data as displayed in facet items. You may well want to use the same
-# templates in both cases, in which case you simply point to the same folder.
+# the data when displaying a single facet item.
+# For facet items, there is no "row" variable, and the "value" variable contains
+# the raw value of a particular item within the facet. In addition, the template
+# gets passed a "count" variable which you can use to display the item count.
+# Any columns not specified here will have their facet items displayed as a raw
+# value, possible with the item count, depending on the setting you have set for
+# "show counts next to facet items" below.
+# In most cases you probably will not need to use this, except in cases where
+# you need to filter the facet items, such as to capitalize them, eg:
+# {{ value|capitalize }} ({{ count }})
 template folder for facet items: /path/to/templates
 
 # List the columns that contain URLs pointing to files with keywords. The

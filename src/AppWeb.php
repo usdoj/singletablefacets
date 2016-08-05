@@ -12,6 +12,9 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     private $facets;
     private $display;
     private $userKeywords;
+    private $twigForSearchResults;
+    private $twigForFacetItems;
+    private $allColumns;
 
     public function __construct($configFile) {
 
@@ -31,6 +34,39 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             $display = new \USDOJ\SingleTableFacets\ResultDisplayTable($this);
         }
         $this->display = $display;
+
+        // Load the Twig templates for later use.
+        $templateFolder = $this->settings('template folder for search results');
+        if (!empty($templateFolder) && file_exists($templateFolder)) {
+
+            $loader = new \Twig_Loader_Filesystem($templateFolder);
+            $this->twigForSearchResults = new \Twig_Environment($loader);
+        }
+        $templateFolder = $this->settings('template folder for facet items');
+        if (!empty($templateFolder) && file_exists($templateFolder)) {
+
+            $loader = new \Twig_Loader_Filesystem($templateFolder);
+            $this->twigForFacetItems = new \Twig_Environment($loader);
+        }
+
+        // Save the total array of database columns for later use.
+        $query = $this->getDb()->createQueryBuilder();
+        $query
+            ->from('information_schema.columns')
+            ->select('column_name')
+            ->where('table_schema = :database')
+            ->andWhere('table_name = :table');
+        $params = array(
+            'database' => $this->settings('database name'),
+            'table' => $this->settings('database table'),
+        );
+        $query->setParameters($params);
+        $results = $query->execute()->fetchAll();
+        if (!empty($results)) {
+            foreach ($results as $result) {
+                $this->allColumns[] = $result['column_name'];
+            }
+        }
     }
 
     public function getDisplay() {
@@ -65,6 +101,14 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
     public function getParameters() {
         return $this->parameters;
+    }
+
+    public function getTwigForSearchResults() {
+        return $this->twigForSearchResults;
+    }
+
+    public function getTwigForFacetItems() {
+        return $this->twigForFacetItems;
     }
 
     /**
@@ -325,5 +369,9 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         }
 
         return $date;
+    }
+
+    public function getAllColumns() {
+        return $this->allColumns;
     }
 }

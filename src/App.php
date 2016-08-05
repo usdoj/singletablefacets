@@ -124,13 +124,6 @@ class App
             $err = sprintf('The db table must have a %s column with a FULLTEXT index.', $keywordColumn);
             throw new \Exception($err);
         }
-        // Also, if there are more than one FULLTEXT index, something may not
-        // be right, so throw an error about that too.
-        elseif (count($results) > 1) {
-            print_r($results);
-            $err = 'The db table has more than one FULLTEXT index. There should be only a single FULLTEXT text that contains all searchable columns.';
-            throw new \Exception($err);
-        }
 
         // Also, save a list of other columns that are part of the same index,
         // since we'll need that info later.

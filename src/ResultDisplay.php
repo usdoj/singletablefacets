@@ -95,32 +95,11 @@ abstract class ResultDisplay {
 
         $query = $this->getApp()->query();
         $relevanceColumn = $this->getApp()->getRelevanceColumn();
-        $searchResultLabels = $this->getApp()->settings('search result labels');
-        foreach ($searchResultLabels as $column => $label) {
-            // Special case for "stf_score", which gets a fancy MATCH
-            // expression later.
-            if ($column == $relevanceColumn) {
-                continue;
-            }
-            // Otherwise do a normal SELECT.
+
+        // Query all the columns. Because of SQL quirks, we can't use '*'.
+        $allColumns = $this->getApp()->getAllColumns();
+        foreach ($allColumns as $column) {
             $query->addSelect($column);
-        }
-
-        // Special case: make sure any URL columns are queried.
-        $urlColumns = $this->getApp()->settings('output as links');
-        foreach ($urlColumns as $labal => $url) {
-            if (empty($searchResultLabels[$url])) {
-                $query->addSelect($url);
-            }
-        }
-
-        // Another special case, look for any "additional columns" to add to the
-        // query.
-        $additionalColumns = $this->getApp()->settings('columns for additional values');
-        foreach ($additionalColumns as $additionalColumn => $mainColumn) {
-            if (!empty($searchResultLabels[$mainColumn])) {
-                $query->addSelect($additionalColumn);
-            }
         }
 
         // Now make sure that the query gets relevance if needed.
@@ -150,6 +129,7 @@ abstract class ResultDisplay {
         }
 
         // Do we need to consolidate any "additional" values?
+        $additionalColumns = $this->getApp()->settings('columns for additional values');
         if (!empty($additionalColumns)) {
             foreach ($additionalColumns as $additional => $main) {
                 foreach ($results as &$row) {
@@ -172,25 +152,6 @@ abstract class ResultDisplay {
                 $relevance = $result[$relevanceColumn] / $maxRelevance;
                 $relevance = floor($relevance * 100);
                 $result[$relevanceColumn] = $relevance . '%';
-            }
-        }
-
-        // Convert any date columns.
-        $dateFormats = $this->getApp()->getDateFormats();
-        if (!empty($dateFormats)) {
-            foreach ($results as &$result) {
-                foreach ($dateFormats as $dateColumn => $dateFormat) {
-                    if (!empty($result[$dateColumn])) {
-                        $unix = strtotime($result[$dateColumn]);
-                        $formatted = date($dateFormat, $unix);
-                        if (!empty($formatted)) {
-                            $result[$dateColumn] = $formatted;
-                        }
-                    }
-                    else {
-                        $result[$dateColumn] = '';
-                    }
-                }
             }
         }
 
@@ -239,24 +200,22 @@ abstract class ResultDisplay {
 
     protected function getCellContent($row, $column) {
         $tableColumns = $this->getColumnsToDisplay();
-        $hrefColumns = $this->getApp()->settings('output as links');
-        $imageColumns = $this->getApp()->settings('output as images');
 
-        if (empty($row[$column])) {
-            return '';
+        $content = '';
+
+        if (!empty($row[$column])) {
+            $content = $row[$column];
         }
 
-        $content = $row[$column];
-
-        if (!empty($imageColumns[$column])) {
-            $content = '<img src="' . $content . '" />';
-        }
-
-        if (!empty($hrefColumns[$column])) {
-            $hrefColumn = $hrefColumns[$column];
-            if (!empty($row[$hrefColumn])) {
-                $content = '<a href="' . $row[$hrefColumn] . '">' . $content . '</a>';
-            }
+        // Does a Twig template exist?
+        $twigTemplate = $column . '.html.twig';
+        if ($this->getTwigForSearchResults() &&
+            $this->getTwigForSearchResults()->getLoader()->exists($twigTemplate)) {
+            // If so, render it.
+            $content = $this->getTwigForSearchResults()->render($twigTemplate, array(
+                'row' => $row,
+                'value' => $content,
+            ));
         }
 
         return $content;

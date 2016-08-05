@@ -21,10 +21,22 @@ class KeywordCrawler {
 
     public function run() {
 
+        $table = $this->getApp()->settings('database table');
+
+        $affected = $this->getApp()->getDb()->createQueryBuilder()
+            ->update($table)
+            ->set($this->getApp()->getDocumentKeywordColumn(), ':empty')
+            ->setParameter(':empty', '')
+            ->execute();
+
+        if (!empty($affected)) {
+            print sprintf('Cleared keywords from %s rows.', $affected);
+            print PHP_EOL;
+        }
+
         print 'Fetching keywords from files...' . PHP_EOL;
 
         $prefix = $this->getApp()->settings('prefix for relative keyword URLs');
-        $table = $this->getApp()->settings('database table');
         $keywordColumn = $this->getApp()->getDocumentKeywordColumn();
         $idColumn = $this->getApp()->getUniqueColumn();
         $total = 0;

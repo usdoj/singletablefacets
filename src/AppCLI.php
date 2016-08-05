@@ -42,10 +42,6 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
         $importer = new \USDOJ\CsvToMysql\Importer($this->getConfig(), $this->getSourceFile());
         $importer->run();
 
-        // Next make sure there is nothing left in our special keyword column.
-        $clearer = new \USDOJ\SingleTableFacets\KeywordClearer($this);
-        $clearer->run();
-
         // Now crawl for remote keywords.
         $crawler = new \USDOJ\SingleTableFacets\KeywordCrawler($this);
         $crawler->run();
