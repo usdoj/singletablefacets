@@ -108,10 +108,10 @@ class FacetItem {
 
         // If there is a Twig template for this facet column, use that.
         $twigTemplate = $facet . '.html.twig';
-        if ($this->getTwigForFacetItems() &&
-            $this->getTwigForFacetItems()->getLoader()->exists($twigTemplate)) {
+        if ($this->getApp()->getTwigForFacetItems() &&
+            $this->getApp()->getTwigForFacetItems()->getLoader()->exists($twigTemplate)) {
             // If so, render it.
-            $label = $this->getTwigForFacetItems()->render($twigTemplate, array(
+            $label = $this->getApp()->getTwigForFacetItems()->render($twigTemplate, array(
                 'value' => $label,
                 'count' => $this->getCount(),
             ));

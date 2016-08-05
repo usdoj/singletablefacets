@@ -209,10 +209,10 @@ abstract class ResultDisplay {
 
         // Does a Twig template exist?
         $twigTemplate = $column . '.html.twig';
-        if ($this->getTwigForSearchResults() &&
-            $this->getTwigForSearchResults()->getLoader()->exists($twigTemplate)) {
+        if ($this->getApp()->getTwigForSearchResults() &&
+            $this->getApp()->getTwigForSearchResults()->getLoader()->exists($twigTemplate)) {
             // If so, render it.
-            $content = $this->getTwigForSearchResults()->render($twigTemplate, array(
+            $content = $this->getApp()->getTwigForSearchResults()->render($twigTemplate, array(
                 'row' => $row,
                 'value' => $content,
             ));
