@@ -6,8 +6,19 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class ResultDisplayTable
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for displaying the search results as an HTML table.
+ */
 class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
 
+    /**
+     * Render the HTML for this table of results.
+     *
+     * @return string
+     */
     public function render() {
 
         $totalRows = 0;
@@ -48,6 +59,14 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
         return $output;
     }
 
+    /**
+     * Helper method to get the markup for the header for a table column.
+     *
+     * @param $columnName
+     *   The name of the column in the database.
+     *
+     * @return string
+     */
     protected function getTableHeaderLabel($columnName) {
 
         $labels = $this->getApp()->settings('search result labels');

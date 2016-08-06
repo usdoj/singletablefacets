@@ -6,18 +6,44 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class ResultDisplay
+ * @package USDOJ\SingleTableFacets
+ *
+ * An abstract class for ways to display the search results.
+ */
 abstract class ResultDisplay {
 
+    /**
+     * @var \USDOJ\SingleTableFacets\AppWeb
+     *   Reference to the main app.
+     */
     private $app;
 
+    /**
+     * Get the main app object.
+     *
+     * @return \USDOJ\SingleTableFacets\AppWeb
+     */
     public function getApp() {
         return $this->app;
     }
 
+    /**
+     * ResultDisplay constructor.
+     *
+     * @param $app
+     *   Reference to the main app.
+     */
     public function __construct($app) {
         $this->app = $app;
     }
 
+    /**
+     * Get the total number of results given the current query.
+     *
+     * @return int
+     */
     protected function getRowCount() {
 
         $query = $this->getApp()->query();
@@ -34,6 +60,11 @@ abstract class ResultDisplay {
         return 0;
     }
 
+    /**
+     * Get the current page (from the pager) that the user is on.
+     *
+     * @return int
+     */
     protected function getPage() {
         $page = $this->getApp()->getParameter('page');
         if (empty($page)) {
@@ -42,6 +73,11 @@ abstract class ResultDisplay {
         return $page;
     }
 
+    /**
+     * Figure out which database column should be used for sorting.
+     *
+     * @return string
+     */
     protected function getSortField() {
         $field = $this->getApp()->getParameter('sort');
         $sortDirections = $this->getApp()->settings('sort directions');
@@ -64,6 +100,14 @@ abstract class ResultDisplay {
         return $this->getApp()->getUniqueColumn();
     }
 
+    /**
+     * Figure out which direction (ASC or DESC) the sorting should go.
+     *
+     * @param null $sortField
+     *   Optional database column to consider, rather than the current sort.
+     *
+     * @return bool|string
+     */
     protected function getSortDirection($sortField = NULL) {
 
         $sortDirections = $this->getApp()->settings('sort directions');
@@ -91,6 +135,12 @@ abstract class ResultDisplay {
         return FALSE;
     }
 
+    /**
+     * Query the database to fetch the rows of search results.
+     *
+     * @return array
+     *   Array of associative arrays, one for each row of results.
+     */
     public function getRows() {
 
         $query = $this->getApp()->query();
@@ -158,6 +208,11 @@ abstract class ResultDisplay {
         return $results;
     }
 
+    /**
+     * Render the HTML for the pager.
+     *
+     * @return string
+     */
     public function renderPager() {
 
         $itemsPerPage = $this->getApp()->settings('number of items per page');
@@ -187,6 +242,11 @@ abstract class ResultDisplay {
         return '<div class="stf-facet-pager">' . $paginator->toHtml() . '</div>';
     }
 
+    /**
+     * Decide which database columns need to display for each result.
+     *
+     * @return array
+     */
     protected function getColumnsToDisplay() {
         $tableColumns = $this->getApp()->settings('search result labels');
         // Special case. If there are no keywords being searched, do not show
@@ -198,8 +258,17 @@ abstract class ResultDisplay {
         return $tableColumns;
     }
 
+    /**
+     * Given a row+column combination, get the cell content.
+     *
+     * @param $row
+     *   The row data from the search results.
+     * @param $column
+     *   The name of the database column we are looking for.
+     *
+     * @return string
+     */
     protected function getCellContent($row, $column) {
-        $tableColumns = $this->getColumnsToDisplay();
 
         $content = '';
 

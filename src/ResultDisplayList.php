@@ -6,8 +6,19 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class ResultDisplayList
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for displaying search results as an HTML list.
+ */
 class ResultDisplayList extends \USDOJ\SingleTableFacets\ResultDisplay {
 
+    /**
+     * Render the HTML for this list of search results.
+     *
+     * @return string
+     */
     public function render() {
 
         $totalRows = 0;

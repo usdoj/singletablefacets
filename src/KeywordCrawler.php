@@ -6,19 +6,43 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class KeywordCrawler
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for grabbing the keywords from remote documents.
+ */
 class KeywordCrawler {
 
+    /**
+     * @var \USDOJ\SingleTableFacets\AppCLI
+     *   Reference to the main app.
+     */
     private $app;
 
+    /**
+     * KeywordCrawler constructor.
+     *
+     * @param $app
+     *   Reference to the main app.
+     */
     public function __construct($app) {
 
         $this->app = $app;
     }
 
+    /**
+     * Get the main app object.
+     *
+     * @return \USDOJ\SingleTableFacets\AppCLI
+     */
     public function getApp() {
         return $this->app;
     }
 
+    /**
+     * Execute the crawl and save the results in the database.
+     */
     public function run() {
 
         $table = $this->getApp()->settings('database table');

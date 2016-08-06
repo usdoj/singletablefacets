@@ -117,7 +117,7 @@ class FacetItem {
      *
      * @param string $dateFormat
      *   The data format to use if this item belongs to a date facet.
-     * 
+     *
      * @return string
      */
     public function render($dateFormat = 'Y') {

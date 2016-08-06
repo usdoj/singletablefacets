@@ -6,18 +6,44 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class SearchBar
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for the user form for entering keyword searches.
+ */
 class SearchBar {
 
+    /**
+     * @var \USDOJ\SingleTableFacets\AppWeb
+     *   Reference ot the main app.
+     */
     private $app;
 
+    /**
+     * SearchBar constructor.
+     *
+     * @param $app
+     *   Reference to the main app.
+     */
     public function __construct($app) {
         $this->app = $app;
     }
 
+    /**
+     * Get the main app object.
+     *
+     * @return \USDOJ\SingleTableFacets\AppWeb
+     */
     public function getApp() {
         return $this->app;
     }
 
+    /**
+     * Render the HTML for the search widget.
+     *
+     * @return string
+     */
     public function render() {
 
         $keys = $this->getApp()->getParameter('keys');
