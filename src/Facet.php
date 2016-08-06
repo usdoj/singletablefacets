@@ -6,29 +6,97 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class Facet
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for a column from the database to be used as a facet.
+ */
 class Facet {
 
+    /**
+     * @var string
+     *   The column name in the database for this facet.
+     */
     private $name;
+
+    /**
+     * @var string
+     *   The human-readable label to display above the facet.
+     */
     private $label;
+
+    /**
+     * @var \USDOJ\SingleTableFacets\AppWeb
+     *   Reference to the main app.
+     */
     private $app;
+
+    /**
+     * @var array
+     *   All of the \USDOJ\SingleTableFacets\FacetItem objects for this facet.
+     */
     private $items;
+
+    /**
+     * @var bool
+     *   Whether or not an item from this facet has been selected by the user.
+     */
     private $active;
 
+    /**
+     * Get the database column name for the facet.
+     *
+     * @return string
+     */
     public function getName() {
         return $this->name;
     }
+
+    /**
+     * Get the human-readable label for the facet.
+     *
+     * @return string
+     */
     public function getLabel() {
         return $this->label;
     }
+
+    /**
+     * Get the main app.
+     *
+     * @return \USDOJ\SingleTableFacets\AppWeb
+     */
     public function getApp() {
         return $this->app;
     }
+
+    /**
+     * Get the array of FacetItem objects.
+     *
+     * @return array
+     */
     public function getItems() {
         return $this->items;
     }
+
+    /**
+     * Check to see if this facet is active.
+     *
+     * @return bool
+     */
     public function isActive() {
         return $this->active;
     }
+
+    /**
+     * Whether this facet is a date facet.
+     *
+     * Or optionally, if $name is passed, whether that facet is a date facet.
+     *
+     * @param null $name
+     * @return bool
+     */
     public function isDate($name = NULL) {
         if (empty($name)) {
             $name = $this->getName();
@@ -37,6 +105,14 @@ class Facet {
         return in_array($this->getName(), $dateColumns);
     }
 
+    /**
+     * Facet constructor.
+     *
+     * @param $app
+     *   Reference to the main app.
+     * @param $name
+     *   The column name for the facet.
+     */
     public function __construct($app, $name) {
 
         $this->name = $name;
@@ -49,6 +125,15 @@ class Facet {
         $this->items = $this->fetchItems($name);
     }
 
+    /**
+     * Build the array of FacetItem objects for this facet.
+     *
+     * Or optionally if $name is passed, build the FacetItems for that facet.
+     *
+     * @param null $name
+     * @param string $dateGranularity
+     * @return array
+     */
     private function fetchItems($name = NULL, $dateGranularity = 'year') {
 
         $app = $this->getApp();
@@ -112,6 +197,15 @@ class Facet {
         return $items;
     }
 
+    /**
+     * Execute the database query to find facet item values for this facet.
+     *
+     * Or optionally, if $name is passed, query the values for that facet.
+     *
+     * @param null $name
+     * @param string $dateGranularity
+     * @return mixed
+     */
     private function queryFacetItems($name = NULL, $dateGranularity = 'year') {
 
         if (empty($name)) {
@@ -142,6 +236,11 @@ class Facet {
         return $query->execute()->fetchAll();
     }
 
+    /**
+     * If this facet has any dependencies, check to see if they are met.
+     *
+     * @return bool
+     */
     private function meetsDependencies() {
 
         $dependentColumns = $this->getApp()->settings('dependent columns');
@@ -167,6 +266,11 @@ class Facet {
         return TRUE;
     }
 
+    /**
+     * Get the point at which the facet items should be hidden with "View more".
+     *
+     * @return int
+     */
     private function getCollapse() {
 
         $collapseColumns = $this->getApp()->settings('collapse facet items');
@@ -188,6 +292,11 @@ class Facet {
         return $collapseAfter;
     }
 
+    /**
+     * Get the HTML markup for the unordered list of facet items.
+     *
+     * @return string
+     */
     protected function getList() {
 
         $items = $this->getItems();
@@ -257,6 +366,18 @@ class Facet {
         return $output;
     }
 
+    /**
+     * Create <li> tags for each of the passed facet items.
+     *
+     * @param array $facetItems
+     *   An array of \USDOJ\SingleTableFacets\FacetItem objects.
+     * @param $collapseAfter
+     *   The point after which the "View more" should appear.
+     * @param string $dateFormat
+     *   How to render the date values if the facet is a date facet.
+     *
+     * @return string
+     */
     private function getListItems($facetItems, $collapseAfter, $dateFormat = 'Y') {
         $numDisplayed = 0;
         $output = '';
@@ -272,6 +393,11 @@ class Facet {
         return $output;
     }
 
+    /**
+     * Render the full HTML for this facet.
+     *
+     * @return string
+     */
     public function render() {
 
         // If the facet does not meet its dependencies, do not display it.

@@ -6,29 +6,86 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class FacetItem
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for an individual item in a particular facet.
+ */
 class FacetItem {
 
+    /**
+     * @var \USDOJ\SingleTableFacets\Facet
+     *   Reference to the Facet object that this item belongs to.
+     */
     private $facet;
+
+    /**
+     * @var string
+     *   The value in the database for this item.
+     */
     private $value;
+
+    /**
+     * @var int
+     *   Given the current query, the number of matching rows for this item.
+     */
     private $count;
+
+    /**
+     * @var \USDOJ\SingleTableFacets\AppWeb
+     *   Reference to the main app.
+     */
     private $app;
 
+    /**
+     * Get the Facet object this item belongs to.
+     *
+     * @return \USDOJ\SingleTableFacets\Facet
+     */
     public function getFacet() {
         return $this->facet;
     }
 
+    /**
+     * Get the database value for this facet.
+     *
+     * @return string
+     */
     public function getValue() {
         return $this->value;
     }
 
+    /**
+     * Get the number of matching rows for this item.
+     *
+     * @return int
+     */
     public function getCount() {
         return $this->count;
     }
 
+    /**
+     * Get the main app.
+     *
+     * @return \USDOJ\SingleTableFacets\AppWeb
+     */
     public function getApp() {
         return $this->app;
     }
 
+    /**
+     * FacetItem constructor.
+     *
+     * @param $app
+     *   Reference to the main app.
+     * @param $facet
+     *   Reference to the Facet object this item belongs to.
+     * @param $value
+     *   The database value for the item.
+     * @param $count
+     *   The number of matching rows for the item.
+     */
     public function __construct($app, $facet, $value, $count) {
 
         $this->facet = $facet;
@@ -37,6 +94,11 @@ class FacetItem {
         $this->app = $app;
     }
 
+    /**
+     * Check whether this particular facet item has been selected by the user.
+     *
+     * @return bool
+     */
     public function isActive() {
         $parameter = $this->getApp()->getParameter($this->getFacet()->getName());
         if (empty($parameter)) {
@@ -50,6 +112,14 @@ class FacetItem {
         }
     }
 
+    /**
+     * Render the markup for this facet item.
+     *
+     * @param string $dateFormat
+     *   The data format to use if this item belongs to a date facet.
+     * 
+     * @return string
+     */
     public function render($dateFormat = 'Y') {
 
         $parameters = $this->getApp()->getParameters();

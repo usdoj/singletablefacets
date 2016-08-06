@@ -6,6 +6,12 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class App
+ * @package USDOJ\SingleTableFacets
+ *
+ * A base class for this app.
+ */
 class App
 {
     /**
@@ -125,6 +131,8 @@ class App
     }
 
     /**
+     * App constructor.
+     *
      * @param \USDOJ\SingleTableFacets\Config $config
      *   The configuration object for the app.
      *

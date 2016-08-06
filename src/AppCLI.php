@@ -6,6 +6,12 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class AppCLI
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for the command-line version of this app.
+ */
 class AppCLI extends \USDOJ\SingleTableFacets\App
 {
     /**
@@ -16,6 +22,8 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
     private $sourceFile;
 
     /**
+     * AppCLI constructor.
+     *
      * @param \USDOJ\SingleTableFacets\Config $args
      *   The config object for this app.
      *

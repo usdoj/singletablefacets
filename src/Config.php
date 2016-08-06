@@ -6,6 +6,12 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class Config
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for our configuration object.
+ */
 class Config extends \Noodlehaus\Config
 {
     /**

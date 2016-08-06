@@ -6,6 +6,12 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class Document
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for a remote document (HTML or PDF) to be crawled for keywords.
+ */
 class Document {
 
     /**

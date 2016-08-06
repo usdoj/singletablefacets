@@ -6,6 +6,12 @@
 
 namespace USDOJ\SingleTableFacets;
 
+/**
+ * Class AppWeb
+ * @package USDOJ\SingleTableFacets
+ *
+ * A class for the HTML (web) version of this app.
+ */
 class AppWeb extends \USDOJ\SingleTableFacets\App {
 
     /**
@@ -51,6 +57,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     private $allColumns;
 
     /**
+     * AppWeb constructor.
+     *
      * @param \USDOJ\SingleTableFacets\Config $configFile
      *   The config object to use with this app.
      *
