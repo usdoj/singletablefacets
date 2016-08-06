@@ -95,6 +95,16 @@ xls2csv -d utf-8 file.xls > file-utf-8.csv
 
 The library depends on configuration in a separate YAML file. See singletablefacets.yml.dist for defaults on all the possible settings.
 
+## Templating
+
+This library support Twig templates when outputing facet item values, and also when outputing the search results. You control the locations of these Twig templates in the configuration file mentioned above. The template files should be named according to the database column they are affecting, with an extenstion of ".html.twig". So for example, if you want to template the output of the "Title" column, you would create a file called "Title.html.twig".
+
+The templates as passed a variable called "value" which contains the raw value in the database for that cell.
+
+If you are templating a facet item, it also contains a "count" variable which contains the number of matches for that facet item.
+
+If you are templating a search result column, it also contains a "row" variable which contains all of the data for that entire database row. This is useful, for example, if you want to make one column into a link by using data from another column: `<a href="http://example.com/index.php?id={{ row.id }}">{{ value }}</a>
+
 ## Scale limits
 
 Because this solution relies on MySQL's FULLTEXT capabilities, it should scale reasonably well. A Solr implementation would surely perform better though, and might make a good future improvement.
