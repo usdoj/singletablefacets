@@ -62,45 +62,6 @@ class App
         return $this->config;
     }
 
-    public function getDocumentKeywordColumn() {
-        return 'stf_keywords';
-    }
-
-    /**
-     * Get the DATETIME columns.
-     *
-     * @return array
-     */
-    public function getDateColumns() {
-        return $this->dateColumns;
-    }
-
-    /**
-     * Get all the columns in the FULLTEXT index as a comma-separated string.
-     *
-     * @return string
-     */
-    public function getKeywordColumns() {
-        $excludeFullText = $this->settings('allow user to exclude full text from keyword search');
-        $fullTextParam = $this->getParameter('full_text');
-
-        $keywordColumns = $this->databaseKeywordColumns;
-        if (!$excludeFullText || !empty($fullTextParam)) {
-            $keywordColumns[] = $this->getDocumentKeywordColumn();
-        }
-        $keywordColumns = implode(',', $keywordColumns);
-        return $keywordColumns;
-    }
-
-    /**
-     * Get the pseudo-column name we're using for relevance.
-     *
-     * @return string
-     */
-    public function getRelevanceColumn() {
-        return 'stf_score';
-    }
-
     /**
      * Get the unqiue column.
      *
@@ -111,23 +72,12 @@ class App
     }
 
     /**
-     * Helper method for getting configuration settings.
+     * Get the DATETIME columns.
      *
-     * @param $key
-     *   A key from the YAML configuration file to check the value for.
-     * @return null|string
+     * @return array
      */
-    public function settings($key) {
-        return $this->getConfig()->get($key);
-    }
-
-    /**
-     * Start off a database query.
-     *
-     * @return \Doctrine\DBAL\Query\QueryBuilder
-     */
-    public function query() {
-        return $this->getDb()->createQueryBuilder();
+    public function getDateColumns() {
+        return $this->dateColumns;
     }
 
     /**
@@ -227,5 +177,60 @@ class App
         $query->setParameters($params);
         $results = $query->execute()->fetchAll(\PDO::FETCH_COLUMN);
         $this->databaseKeywordColumns = $results;
+    }
+
+    /**
+     * Get the keyword column for documents.
+     *
+     * @return string
+     */
+    public function getDocumentKeywordColumn() {
+        return 'stf_keywords';
+    }
+
+    /**
+     * Get all the columns in the FULLTEXT index as a comma-separated string.
+     *
+     * @return string
+     */
+    public function getKeywordColumns() {
+        $excludeFullText = $this->settings('allow user to exclude full text from keyword search');
+        $fullTextParam = $this->getParameter('full_text');
+
+        $keywordColumns = $this->databaseKeywordColumns;
+        if (!$excludeFullText || !empty($fullTextParam)) {
+            $keywordColumns[] = $this->getDocumentKeywordColumn();
+        }
+        $keywordColumns = implode(',', $keywordColumns);
+        return $keywordColumns;
+    }
+
+    /**
+     * Get the pseudo-column name we're using for relevance.
+     *
+     * @return string
+     */
+    public function getRelevanceColumn() {
+        return 'stf_score';
+    }
+
+    /**
+     * Helper method for getting configuration settings.
+     *
+     * @param $key
+     *   A key from the YAML configuration file to check the value for.
+     * @return null|string
+     */
+    public function settings($key) {
+        return $this->getConfig()->get($key);
+    }
+
+    /**
+     * Start off a database query.
+     *
+     * @return \Doctrine\DBAL\Query\QueryBuilder
+     */
+    public function query() {
+        return $this->getDb()->createQueryBuilder();
     }
 }
