@@ -151,7 +151,7 @@ abstract class ResultDisplay {
         foreach ($allColumns as $column) {
             // No need to query the keywords column, though.
             if ($this->getApp()->getDocumentKeywordColumn() != $column) {
-                $query->addSelect($column);
+                $query->addSelect('`' . $column . '`');
             }
         }
 
