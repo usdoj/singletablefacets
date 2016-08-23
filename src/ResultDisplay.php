@@ -149,7 +149,10 @@ abstract class ResultDisplay {
         // Query all the columns. Because of SQL quirks, we can't use '*'.
         $allColumns = $this->getApp()->getAllColumns();
         foreach ($allColumns as $column) {
-            $query->addSelect($column);
+            // No need to query the keywords column, though.
+            if ($this->getApp()->getDocumentKeywordColumn() != $column) {
+                $query->addSelect($column);
+            }
         }
 
         // Now make sure that the query gets relevance if needed.
@@ -288,5 +291,28 @@ abstract class ResultDisplay {
         }
 
         return $content;
+    }
+
+    /**
+     * Given a row of results, get the distinct values from the grouping column.
+     *
+     * @param $row
+     *   The row data from the search results.
+     *
+     * @return array
+     *   An array of distinct values.
+     */
+    protected function getDistinctGroupValues($rows) {
+        $groupingColumn = $this->getApp()->settings('search result grouping column');
+        $values = array();
+        if (!empty($groupingColumn)) {
+            foreach ($rows as $row) {
+                $cellContent = $this->getCellContent($row, $groupingColumn);
+                $values[$cellContent] = TRUE;
+            }
+        }
+        $values = array_keys($values);
+        sort($values);
+        return $values;
     }
 }

@@ -24,6 +24,7 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
         $totalRows = 0;
         $tableColumns = $this->getColumnsToDisplay();
         $tableColumns = array_keys($tableColumns);
+        $rows = $this->getRows();
 
         $minimumWidths = $this->getApp()->settings('minimum column widths');
 
@@ -41,15 +42,40 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
             $output .= '      <th' . $min_width . '>' . $label . '</th>' . PHP_EOL;
         }
         $output .= '    </tr>' . PHP_EOL . '  </thead>' . PHP_EOL . '  <tbody>' . PHP_EOL;
-        foreach ($this->getRows() as $row) {
-            $rowMarkup = '  <tr>' . PHP_EOL;
-            foreach ($tableColumns as $column) {
-                $td = $this->getCellContent($row, $column);
-                $rowMarkup .= '    <td>' . $td . '</td>' . PHP_EOL;
+
+        // If we are using "grouping" then we need to do several loops - one for
+        // each distinct value in the grouping column.
+        $groups = $this->getDistinctGroupValues($rows);
+        if (empty($groups)) {
+            // If we are not using grouping, then make up a fake group so that
+            // the following code doesn't need to be duplicated.
+            $groups[] = '<fake>';
+        }
+        $groupingColumn = $this->getApp()->settings('search result grouping column');
+
+        foreach ($groups as $group) {
+
+            if ('<fake>' != $group) {
+                $output .= '  <tr class="stf-facet-search-result-group">' . PHP_EOL;
+                $output .= '    <td colspan="' . count($tableColumns) . '">' . $group . '</td>' . PHP_EOL;
+                $output .= '  </tr>' . PHP_EOL;
             }
-            $rowMarkup .= '  </tr>' . PHP_EOL;
-            $output .= $rowMarkup;
-            $totalRows += 1;
+            foreach ($rows as $row) {
+
+                if ('<fake>' != $group) {
+                    if ($group != $this->getCellContent($row, $groupingColumn)) {
+                        continue;
+                    }
+                }
+                $rowMarkup = '  <tr>' . PHP_EOL;
+                foreach ($tableColumns as $column) {
+                    $td = $this->getCellContent($row, $column);
+                    $rowMarkup .= '    <td>' . $td . '</td>' . PHP_EOL;
+                }
+                $rowMarkup .= '  </tr>' . PHP_EOL;
+                $output .= $rowMarkup;
+                $totalRows += 1;
+            }
         }
         $output .= '  </tbody>' . PHP_EOL . '</table>' . PHP_EOL;
         if (empty($totalRows)) {
