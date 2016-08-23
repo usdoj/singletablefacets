@@ -42,6 +42,10 @@ search result labels:
     myDatabaseColumn1: Something Else
     stf_score: Keyword Relevance
 
+# If you would like the search results grouped by the value of a certain column,
+# indicate that column here.
+#search result grouping column: myDatabaseColumn1
+
 # Choose the priority (order) and default direction for the sortable columns.
 # As with search result labels, there is a special field called "stf_score",
 # which you can include to allow users to sort by (keyword) relevance.
