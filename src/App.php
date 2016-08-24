@@ -201,7 +201,7 @@ class App
         if (!$excludeFullText || !empty($fullTextParam)) {
             $keywordColumns[] = $this->getDocumentKeywordColumn();
         }
-        $keywordColumns = implode(',', $keywordColumns);
+        $keywordColumns = '`' . implode('`,`', $keywordColumns) . '`';
         return $keywordColumns;
     }
 
