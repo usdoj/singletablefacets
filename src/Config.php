@@ -53,6 +53,7 @@ class Config extends \Noodlehaus\Config
             'template folder for facet items' => NULL,
             'date facet granularity' => array(),
             'search result grouping column' => NULL,
+            'sort directions' => array(),
         );
     }
 }
