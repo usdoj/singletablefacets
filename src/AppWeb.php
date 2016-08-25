@@ -294,6 +294,11 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
      * @return string
      */
     public function renderResults() {
+        if ($this->settings('require input for search results')) {
+            if (empty($this->getParameters())) {
+                return '';
+            }
+        }
         return $this->getDisplay()->render();
     }
 

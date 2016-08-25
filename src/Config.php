@@ -54,6 +54,7 @@ class Config extends \Noodlehaus\Config
             'date facet granularity' => array(),
             'search result grouping column' => NULL,
             'sort directions' => array(),
+            'require input for search results' => FALSE,
         );
     }
 }
