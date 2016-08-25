@@ -284,10 +284,10 @@ abstract class ResultDisplay {
         if ($this->getApp()->getTwigForSearchResults() &&
             $this->getApp()->getTwigForSearchResults()->getLoader()->exists($twigTemplate)) {
             // If so, render it.
-            $content = $this->getApp()->getTwigForSearchResults()->render($twigTemplate, array(
-                'row' => $row,
-                'value' => $content,
-            ));
+            $templateData = $this->getApp()->getBaseTemplateData();
+            $templateData['row'] = $row;
+            $templateData['value'] = $content;
+            $content = $this->getApp()->getTwigForSearchResults()->render($twigTemplate, $templateData);
         }
 
         return $content;

@@ -57,6 +57,13 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     private $allColumns;
 
     /**
+     * Array of base data to pass into every Twig template.
+     *
+     * @var array
+     */
+    private $baseTemplateData;
+
+    /**
      * AppWeb constructor.
      *
      * @param \USDOJ\SingleTableFacets\Config $configFile
@@ -115,6 +122,10 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                 $this->allColumns[] = $result['column_name'];
             }
         }
+
+        $this->baseTemplateData = array();
+        $this->baseTemplateData['currentUrl'] = $this->getCurrentUrl();
+        $this->baseTemplateData['parameterPrefix'] = $this->getParameterPrefix();
     }
 
     /**
@@ -205,6 +216,16 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
      */
     public function getTwigForFacetItems() {
         return $this->twigForFacetItems;
+    }
+
+    /**
+     * Get the base template data that will be passed into each Twig template.
+     *
+     * @return array
+     *   An associative array, the keys of which can be used in Twig templates.
+     */
+    public function getBaseTemplateData() {
+        return $this->baseTemplateData;
     }
 
     /**
@@ -558,5 +579,16 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
     public function getAllColumns() {
         return $this->allColumns;
+    }
+
+    public function getCurrentUrl() {
+        $parameters = $this->getParameters();
+        $base = $this->getBaseUrl();
+        return $this->getHref($base, $parameters);
+    }
+
+    public function getParameterPrefix() {
+        $parameters = $this->getParameters();
+        return (empty($parameters)) ? '?' : '&';
     }
 }
