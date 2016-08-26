@@ -107,7 +107,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             $loader = new \Twig_Loader_Filesystem($templateFolder);
             $this->twigForSearchResults = new \Twig_Environment($loader);
             foreach ($twigFunctions as $twigFunction) {
-                $this->twigForSearchResultsg->addFunction($twigFunction);
+                $this->twigForSearchResults->addFunction($twigFunction);
             }
         }
         $templateFolder = $this->settings('template folder for facet items');
