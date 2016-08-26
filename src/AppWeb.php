@@ -92,16 +92,32 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
         // Load the Twig templates for later use.
         $templateFolder = $this->settings('template folder for search results');
+        $functionFile = $this->settings('file with twig functions');
+        $functionList = $this->settings('list of twig functions');
+        $twigFunctions = array();
+        if (file_exists($functionFile)) {
+            include($functionFile);
+            foreach ($functionList as $func) {
+                $twigFunctions[] = new \Twig_SimpleFunction($func, $func);
+            }
+        }
+        $functionList = $this->settings('list of twig functions');
         if (!empty($templateFolder) && file_exists($templateFolder)) {
 
             $loader = new \Twig_Loader_Filesystem($templateFolder);
             $this->twigForSearchResults = new \Twig_Environment($loader);
+            foreach ($twigFunctions as $twigFunction) {
+                $this->twigForSearchResultsg->addFunction($twigFunction);
+            }
         }
         $templateFolder = $this->settings('template folder for facet items');
         if (!empty($templateFolder) && file_exists($templateFolder)) {
 
             $loader = new \Twig_Loader_Filesystem($templateFolder);
             $this->twigForFacetItems = new \Twig_Environment($loader);
+            foreach ($twigFunctions as $twigFunction) {
+                $this->twigForFacetItems->addFunction($twigFunction);
+            }
         }
 
         // Save the total array of database columns for later use.
