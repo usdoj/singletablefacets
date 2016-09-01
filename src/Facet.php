@@ -159,7 +159,7 @@ class Facet {
             $items = array_merge($items, $this->queryFacetItems($additional, $dateGranularity));
         }
 
-        // First make add all the duplicates. This is necessary because the same
+        // First remove all the duplicates. This is necessary because the same
         // item may be in more than one of the "additional" columns.
         $keyedByName = array();
         foreach ($items as $item) {
@@ -176,8 +176,15 @@ class Facet {
             }
         }
 
-        // Sort by name;
-        ksort($keyedByName);
+        // Sort the facets alphabetically first.
+        if (!$this->isDate()) {
+            ksort($keyedByName);
+        }
+        else {
+            // But date facets get reverse order.
+            krsort($keyedByName);
+        }
+        // Then sort by item count ("popularity") if the config says to.
         if ($app->settings('sort facet items by popularity')) {
             arsort($keyedByName);
         }
