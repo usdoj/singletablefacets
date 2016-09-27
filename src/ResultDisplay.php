@@ -172,7 +172,13 @@ abstract class ResultDisplay {
         $sortField = $this->getSortField();
         if (!empty($sortField)) {
             $sortDirection = $this->getSortDirection();
-            $query->orderBy($sortField, $sortDirection);
+            // If this column has been specified for "natural sorting", then we
+            // must sort first by length.
+            $naturalColumns = $this->getApp()->settings('columns with natural sorting');
+            if (in_array($sortField, $naturalColumns)) {
+                $query->orderBy("LENGTH(TRIM($sortField))", $sortDirection);
+            }
+            $query->addOrderBy($sortField, $sortDirection);
         }
         try {
             $results = $query->execute()->fetchAll();

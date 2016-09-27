@@ -178,7 +178,21 @@ class Facet {
 
         // Sort the facets alphabetically first.
         if (!$this->isDate()) {
-            ksort($keyedByName);
+            // Should the sort be natural?
+            $naturalColumns = $this->getApp()->settings('columns with natural sorting');
+            if (in_array($name, $naturalColumns)) {
+                $naturalSort = array();
+                $naturalKeys = array_keys($keyedByName);
+                natsort($naturalKeys);
+                foreach ($naturalKeys as $naturalKey) {
+                    $naturalSort[$naturalKey] = $keyedByName[$naturalKey];
+                }
+                $keyedByName = $naturalSort;
+            }
+            else {
+                // If not natural, a simple alphabetical sort.
+                ksort($keyedByName);
+            }
         }
         else {
             // But date facets get reverse order.
@@ -240,6 +254,7 @@ class Facet {
 
         $query->addSelect("COUNT(*) AS count");
         $query->addGroupBy('item');
+
         return $query->execute()->fetchAll();
     }
 

@@ -198,6 +198,20 @@ keyword help label: "Need help searching?"
 # this to true will sort them by their counts, in descending order.
 sort facet items by popularity: false
 
+# As mentioned above, the items within a given facet are normally sorted
+# alphabetically, as are the search results in a table layout when a particular
+# column is click-sorted. This can be a problem when a more "natural" sort is
+# needed. For example, computers will place "Foo10" before "Foo2", because of
+# the fact that "1" comes before "2". (The computer doesn't care about the extra
+# "0" after the "1".) If you would like more natural sorting for particular
+# columns, you can indicate those here. However, be aware that the mechanism
+# used to make it "natural" is the length of each item. So, "Foo2" would come
+# before "Foo10" because of the fact that it's only 4 character long instead of
+# 5. So, only turn this on for columns where you are sure that the length of the
+# items a suitable criteria for the sorting.
+#columns with natural sorting:
+#    - myDatabaseColumn1
+
 # Normally when users do a keyword search, the full text (crawled) data is
 # included. However if you would like to exclude the full text by default, and
 # give the user the option to include it, set this to true.

@@ -123,6 +123,10 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
             }
         }
         $query['sort_direction'] = $direction;
+        // We don't need to carry over the page number.
+        if (isset($query['page'])) {
+            unset($query['page']);
+        }
         $baseUrl = $this->getApp()->getBaseUrl();
         return $this->getApp()->getLink($baseUrl, $label, $query, $class);
     }

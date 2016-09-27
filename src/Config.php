@@ -57,6 +57,7 @@ class Config extends \Noodlehaus\Config
             'require input for search results' => FALSE,
             'file with twig functions' => NULL,
             'list of twig functions' => array(),
+            'columns with natural sorting' => array(),
         );
     }
 }
