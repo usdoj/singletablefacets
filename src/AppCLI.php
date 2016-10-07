@@ -86,7 +86,7 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
     private function getUsage() {
         $ret = 'Usage: singletablefacets [config file] [source file]' . PHP_EOL;
         $ret .= '  config file: Path to .yml configuration file' . PHP_EOL;
-        $ret .= '  source file: Path to source data (must be a csv file with a header matching the database columns)' . PHP_EOL;
+        $ret .= '  source file: Path to source data (must be a CSV or Excel file with a header matching the database columns)' . PHP_EOL;
         return $ret;
     }
 }
