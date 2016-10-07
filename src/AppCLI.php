@@ -65,8 +65,12 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
      */
     public function run() {
 
-        // First import the source data.
-        $importer = new \USDOJ\CsvToMysql\Importer($this->getConfig(), $this->getSourceFile());
+        $importer = new \USDOJ\SingleTableImporter\Importer($this->getConfig(), $this->getSourceFile());
+
+        // First do a test run to make sure there will not be an error.
+        $importer->testRun();
+
+        // Next import the source data.
         $importer->run();
 
         // Now crawl for remote keywords.

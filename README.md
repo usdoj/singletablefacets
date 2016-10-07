@@ -28,7 +28,7 @@ Use composer to bring this into your PHP project. The composer.json should look 
         },
         {
             "type": "vcs",
-            "url": "https://github.com/usdoj/csvtomysql.git"
+            "url": "https://github.com/usdoj/singletableimporter.git"
         }
     ]
 }
@@ -75,20 +75,9 @@ It is up to you to create the database table that you will be using. Some notes:
 
 ## Importing source data
 
-The library includes a command-line tool for re-importing data from a CSV file. That tool can be run with:
+The library includes a command-line tool for re-importing data from a CSV or Excel file. That tool can be run with:
 ```
 ./vendor/bin/singletablefacets [path-to-config-file] [path-to-source-data]
-```
-Note that the source data file must be a CSV file.
-
-Tip: You'll probably usually be getting the CSV file from an XLS file. Since Excel has a problem with special characters, a useful command-line tool is "xls2csv" from the "catdoc" library. To install:
-
-* Linux: `apt-get install catdoc`
-* Babun: `pact install catdoc`
-
-When using xls2csv, to ensure you don't get encoding issues, specify the destination encoding like so:
-```
-xls2csv -d utf-8 file.xls > file-utf-8.csv
 ```
 
 ## Configuration
