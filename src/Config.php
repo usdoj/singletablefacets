@@ -46,8 +46,6 @@ class Config extends \Noodlehaus\Config
             'facet labels' => array(),
             'search result labels' => array(),
             'location of assets' => 'assets',
-            'convert from excel dates' => array(),
-            'convert from unix dates' => array(),
             'search result display' => 'table',
             'template folder for search results' => NULL,
             'template folder for facet items' => NULL,
