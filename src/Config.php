@@ -56,6 +56,8 @@ class Config extends \Noodlehaus\Config
             'file with twig functions' => NULL,
             'list of twig functions' => array(),
             'columns with natural sorting' => array(),
+            'prepopulated facet values' => array(),
+            'facets limited to one choice' => array(),
         );
     }
 }
