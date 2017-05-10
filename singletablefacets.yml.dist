@@ -251,3 +251,13 @@ location of assets: /assets
 # Set this to true if you would like to hide search results until at least one
 # facet items is active or keywords have been submitted.
 require input for search results: false
+
+# If you would like any of the facets to be single-choice only, list them here.
+#facets limited to one choice:
+#    - myDatabaseColumn1
+
+# If you would like the search results to start with any facet values already
+# selected, enter those values here. Probably most useful along with the above
+# option for "facets limited to one choice".
+#prepopulated facet values:
+#    myDatabaseColumn1: 'my value'
