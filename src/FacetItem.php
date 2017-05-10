@@ -154,12 +154,17 @@ class FacetItem {
         }
         // For all non-date facets, we treat them as arrays.
         else {
+            $singleChoiceFacets = $this->getApp()->settings('facets limited to one choice');
+            $singleChoice = (in_array($facet, $singleChoiceFacets));
             // If the current query already has the facet item we need to remove it
             // from the current query.
             if (!empty($parameters[$facet]) && in_array($value, $parameters[$facet])) {
                 $key = array_search($value, $parameters[$facet]);
                 unset($parameters[$facet][$key]);
                 $class = 'stf-facet-item-active';
+            }
+            elseif ($singleChoice) {
+                $parameters[$facet] = array($value);
             }
             // Otherwise we need to add it to the current query.
             else {

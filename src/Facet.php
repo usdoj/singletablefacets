@@ -156,7 +156,7 @@ class Facet {
         // Query the database to get all the items.
         $items = $this->queryFacetItems($name, $dateGranularity);
         foreach ($additionalColumns as $additional) {
-            $items = array_merge($items, $this->queryFacetItems($additional, $dateGranularity));
+            $items = array_merge($items, $this->queryFacetItems($additional, $dateGranularity, $name));
         }
 
         // First remove all the duplicates. This is necessary because the same
@@ -225,14 +225,23 @@ class Facet {
      *
      * @param null $name
      * @param string $dateGranularity
+     * @param string $originalName
+     *   If this is an "additional column", the name of the original column.
      * @return mixed
      */
-    private function queryFacetItems($name = NULL, $dateGranularity = 'year') {
+    private function queryFacetItems($name = NULL, $dateGranularity = 'year', $originalName = NULL) {
 
         if (empty($name)) {
             $name = $this->getName();
         }
-        $query = $this->getApp()->query();
+
+        $singleChoiceFacets = $this->getApp()->settings('facets limited to one choice');
+        $ignoreColumn = NULL;
+        $facetToCheckFor = (!empty($originalName)) ? $originalName : $name;
+        if (in_array($facetToCheckFor, $singleChoiceFacets)) {
+            $ignoreColumn = $facetToCheckFor;
+        }
+        $query = $this->getApp()->query($ignoreColumn);
 
         // Special select for date facets.
         if ($this->isDate($name)) {

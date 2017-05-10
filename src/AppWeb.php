@@ -442,9 +442,12 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     /**
      * Continuation of starting query, taking into account user input.
      *
+     * @param string|null $ignoreColumn
+     *   Specify a column to be ignored in the query.
+     *
      * @return \Doctrine\DBAL\Query\QueryBuilder
      */
-    public function query() {
+    public function query($ignoreColumn = NULL) {
 
         $query = parent::query();
         $query->from($this->settings('database table'));
@@ -461,6 +464,9 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         // Add conditions for the facets. At this point, we consult the full query
         // string, minus any of our "extra" params.
         $parsedQueryString = $this->getParameters();
+        if (!empty($ignoreColumn)) {
+            unset($parsedQueryString[$ignoreColumn]);
+        }
         foreach ($this->getExtraParameters() as $extraParameter) {
             unset($parsedQueryString[$extraParameter]);
         }
