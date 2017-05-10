@@ -5,7 +5,7 @@
 $(document).ready(function () {
 
     // Checkboxes.
-    $('.stf-facet-checkboxes a').not('.stf-facet-processed').each(function (index) {
+    $('.stf-facet-checkboxes a, .stf-facet-radios a').not('.stf-facet-processed').each(function (index) {
         // To avoid confusion with "this", a variable referring to the link.
         var link = this;
         // Add the class now so that it is not processed twice.
@@ -18,8 +18,12 @@ $(document).ready(function () {
         if ($(link).hasClass('stf-facet-item-active')) {
             checked = ' checked="checked"';
         }
+	var inputType = 'checkbox';
+	if ($(link).parents('.stf-facet-radios').length) {
+	    inputType = 'radio';
+	}
         // Create the DOM elements for the checkbox and label.
-        var $checkbox = $('<input type="checkbox" id="' + id + '"' + checked + ' />');
+        var $checkbox = $('<input type="' + inputType + '" id="' + id + '"' + checked + ' />');
         var $label = $('<label for="' + id + '">' + labelText + '</label>');
         // Insert them before the link.
         $checkbox.insertBefore(link);

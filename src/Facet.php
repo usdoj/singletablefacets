@@ -338,7 +338,13 @@ class Facet {
         $collapseAfter = $this->getCollapse();
         $class = 'stf-facet-items';
         if ($this->getApp()->settings('use checkboxes for facets instead of links')) {
-            $class .= ' stf-facet-checkboxes';
+            $singleChoiceFacets = $this->getApp()->settings('facets limited to one choice');
+            if (in_array($this->getName(), $singleChoiceFacets)) {
+                $class .= ' stf-facet-radios';
+            }
+            else {
+                $class .= ' stf-facet-checkboxes';
+            }
         }
         if ($collapseAfter > -1) {
             $class .= ' stf-facet-collapse-outer';
