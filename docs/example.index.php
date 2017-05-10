@@ -37,7 +37,7 @@ $app = new \USDOJ\SingleTableFacets\AppWeb($configFile);
     <?php print $app->renderResults(); ?>
   </div>
   <?php print $app->renderPager(); ?>
-  <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <?php print $app->renderJavascript() ?>
 </body>
 </html>
