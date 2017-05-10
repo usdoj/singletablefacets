@@ -77,6 +77,15 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         parent::__construct($config);
 
         $this->parameters = $this->parseQueryString();
+        if (empty($this->parameters)) {
+            // If no parameters are provided, check for defaults.
+            $default_values = $this->settings('prepopulated facet values');
+            if (!empty($default_values)) {
+                foreach ($default_values as $column => $value) {
+                    $this->parameters[$column] = array($value);
+                }
+            }
+        }
 
         $uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
         $this->baseUrl = $uri_parts[0];
