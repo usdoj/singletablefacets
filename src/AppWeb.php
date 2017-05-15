@@ -77,10 +77,20 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         parent::__construct($config);
 
         $this->parameters = $this->parseQueryString();
-        if (empty($this->parameters)) {
-            // If no parameters are provided, check for defaults.
-            $default_values = $this->settings('prepopulated facet values');
-            if (!empty($default_values)) {
+
+        // We may need to check for "prepopulated facet values".
+        $default_values = $this->settings('prepopulated facet values');
+        if (!empty($default_values)) {
+            $active_facet_parameters = array();
+            if (!empty($this->parameters)) {
+                $possible_facets = array_keys($this->settings('facet labels'));
+                foreach ($this->parameters as $key => $value) {
+                    if (in_array($key, $possible_facets)) {
+                        $active_facet_parameters[] = $key;
+                    }
+                }
+            }
+            if (empty($active_facet_parameters)) {
                 foreach ($default_values as $column => $value) {
                     $this->parameters[$column] = array($value);
                 }
