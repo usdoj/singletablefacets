@@ -192,6 +192,10 @@ class Document {
             $words = explode(' ', $ret);
             print sprintf('-- Success: %s keywords', count($words)) . PHP_EOL;
         }
+
+        // Always clean up after ourselves.
+        unlink($this->getTempPath());
+
         return $ret;
     }
 
