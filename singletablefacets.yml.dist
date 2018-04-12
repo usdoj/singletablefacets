@@ -90,8 +90,8 @@ template folder for facet items: /path/to/templates
 # If you indicated a file with Twig functions above, you also need to list the
 # names of all the functions you want to use.
 #list of twig functions:
-    - my_first_twig_function
-    - my_second_twig_function
+#    - my_first_twig_function
+#    - my_second_twig_function
 
 # List the columns that contain URLs pointing to files with keywords. The
 # keywords in these files will be crawled and indexed. Note, this only works on
