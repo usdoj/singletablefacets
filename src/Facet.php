@@ -214,7 +214,7 @@ class Facet {
         $this->active = FALSE;
         $items = array();
         foreach ($keyedByName as $itemName => $itemCount) {
-            if (!empty($itemCount) && $itemCount > $miniCount) {
+            if (!empty($itemCount) && $itemCount >= $miniCount) {
                 $item = new FacetItem($app, $this, $itemName, $itemCount);
                 if ($item->isActive()) {
                     $this->active = TRUE;
