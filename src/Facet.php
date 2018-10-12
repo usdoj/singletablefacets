@@ -143,8 +143,11 @@ class Facet {
 
         //  Facet items are shown with defined minimum count for each facet.
         $miniCountColumns = $this->getApp()->settings('minimum facet counts');
-        $miniCount = $miniCountColumns[$name];
-        $miniCount = (is_null($miniCount)?0:$miniCount);    // All in if not in
+        $miniCount = 0;
+        if (array_key_exists($name, $miniCountColumns)) {
+            $miniCount = $miniCountColumns[$name];
+            $miniCount = (is_null($miniCount)?0:$miniCount);    // All in if not in
+        }
 
         // Check to see if this facet needs to compile values from additional
         // columns.
