@@ -141,6 +141,11 @@ class Facet {
             $name = $this->getName();
         }
 
+        //  Facet items are shown with defined minimum count for each facet.
+        $miniCountColumns = $this->getApp()->settings('minimum facet counts');
+        $miniCount = $miniCountColumns[$name];
+        $miniCount = (is_null($miniCount)?0:$miniCount);    // All in if not in
+
         // Check to see if this facet needs to compile values from additional
         // columns.
         $additionalColumns = array();
@@ -206,7 +211,7 @@ class Facet {
         $this->active = FALSE;
         $items = array();
         foreach ($keyedByName as $itemName => $itemCount) {
-            if (!empty($itemCount)) {
+            if (!empty($itemCount) && $itemCount > $miniCount) {
                 $item = new FacetItem($app, $this, $itemName, $itemCount);
                 if ($item->isActive()) {
                     $this->active = TRUE;

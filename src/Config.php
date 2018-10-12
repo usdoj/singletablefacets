@@ -58,6 +58,7 @@ class Config extends \Noodlehaus\Config
             'columns with natural sorting' => array(),
             'prepopulated facet values' => array(),
             'facets limited to one choice' => array(),
+            'minimum facet counts' => array(),
         );
     }
 }
