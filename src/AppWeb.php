@@ -344,6 +344,13 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
      * @return string
      */
     public function renderPager() {
+
+        if ($this->settings('require input for search results')) {
+            $params = $this->getParameters();
+            if (empty($params)) {
+                return '';
+            }
+        }
         return $this->getDisplay()->renderPager();
     }
 
