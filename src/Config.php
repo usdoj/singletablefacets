@@ -40,6 +40,7 @@ class Config extends \Noodlehaus\Config
             'keyword help label' => "Need help searching?",
             'sort facet items by popularity' =>  FALSE,
             'text alterations' => array(),
+            'text alterations per column' => array(),
             'keywords in files' => array(),
             'collapse facet items' => array(),
             'required columns' => array(),

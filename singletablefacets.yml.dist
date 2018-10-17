@@ -242,6 +242,10 @@ automatically put wildcards on keywords entered: false
 # change all occurences of § with &#167; uncomment the lines below.
 #text alterations:
 #    "§": "&#167;"
+# Additionally you can specify alterations for a particular column only.
+#text alterations per column:
+#    myDatabaseColumn1:
+#        "§": "&#167;"
 
 # This specifies an alternate location to look for the javascript and CSS files.
 # The default is to look in an "assets" folder in same directory as the search
