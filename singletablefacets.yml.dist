@@ -265,3 +265,9 @@ require input for search results: false
 # option for "facets limited to one choice".
 #prepopulated facet values:
 #    myDatabaseColumn1: 'my value'
+
+# Set the delimiter for CSV imports. Defaults to a comma.
+csv delimiter: ','
+
+# Set the enclosure for CSV imports Defaults to a double-quote.
+csv enclosure: '"'
