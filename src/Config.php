@@ -60,6 +60,7 @@ class Config extends \Noodlehaus\Config
             'prepopulated facet values' => array(),
             'facets limited to one choice' => array(),
             'minimum facet counts' => array(),
+            'minimum facet counts during search' => array(),
         );
     }
 }

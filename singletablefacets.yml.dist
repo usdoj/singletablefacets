@@ -185,6 +185,16 @@ keyword help label: "Need help searching?"
 # this to true will sort them by their counts, in descending order.
 sort facet items by popularity: false
 
+# Optionally specify the minimum counts a facet item must have in order to display.
+#minimum facet counts:
+#    myDatabaseColumn1: 10
+#    myDatabaseColumn2: 5
+
+# Optionally override the minimum counts set above whenever the user is performing a search.
+#minimum facet counts during search:
+#    myDatabaseColumn1: 1
+#    myDatabaseColumn2: 1
+
 # As mentioned above, the items within a given facet are normally sorted
 # alphabetically, as are the search results in a table layout when a particular
 # column is click-sorted. This can be a problem when a more "natural" sort is
