@@ -61,6 +61,7 @@ class Config extends \Noodlehaus\Config
             'facets limited to one choice' => array(),
             'minimum facet counts' => array(),
             'minimum facet counts during search' => array(),
+            'keywords alternatives' => array(),
         );
     }
 }

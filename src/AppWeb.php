@@ -416,6 +416,11 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         }
 
         $keywords = $this->getParameter('keys');
+
+        $pattern = array_keys($this->settings('keywords alternatives'));
+        $replace = array_values($this->settings('keywords alternatives'));
+        $keywords = preg_replace($pattern, $replace, $keywords);
+
         $tokenized = $this->tokenizeQuoted($keywords);
         if ($this->settings('use AND for keyword logic by default')) {
             $ors = array();
