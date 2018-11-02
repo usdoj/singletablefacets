@@ -281,3 +281,9 @@ csv delimiter: ','
 
 # Set the enclosure for CSV imports Defaults to a double-quote.
 csv enclosure: '"'
+
+# Prepare keywords search with regex replacements
+#keywords alternatives:
+#    '/\-/': ' '
+#    '/\./': ' '
+#    '/^([\d]{3})([\d]{3})([\d]{4})$/': '$1 $2 $3'
