@@ -417,8 +417,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
         $keywords = $this->getParameter('keys');
 
-        $pattern = array_keys($this->settings('keywords alternatives'));
-        $replace = array_values($this->settings('keywords alternatives'));
+        $pattern = array_keys($this->settings('regex input alternation'));
+        $replace = array_values($this->settings('regex input alternation'));
         $keywords = preg_replace($pattern, $replace, $keywords);
 
         $tokenized = $this->tokenizeQuoted($keywords);
