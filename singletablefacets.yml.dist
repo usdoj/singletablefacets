@@ -283,10 +283,10 @@ csv delimiter: ','
 csv enclosure: '"'
 
 # Prepare keywords search with regex replacements
-#regex input alternation:
+#regex input alterations:
 #    Replace all - to be a space
 #    '/\-/': ' '
 #    Replace all . to be a space
 #    '/\./': ' '
-#    Check only 10 digits input and format to 3 3 4, like 1234567890 inputted and formating to 123 456 778
+#    For phone number support, look for 10 digits and format to 3 3 4, eg: 1234567890 -> 123 456 778
 #    '/^([\d]{3})([\d]{3})([\d]{4})$/': '$1 $2 $3'
