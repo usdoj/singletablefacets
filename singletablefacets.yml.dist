@@ -281,3 +281,12 @@ csv delimiter: ','
 
 # Set the enclosure for CSV imports Defaults to a double-quote.
 csv enclosure: '"'
+
+# Prepare keywords search with regex replacements
+#regex input alterations:
+#    Replace all - to be a space
+#    '/\-/': ' '
+#    Replace all . to be a space
+#    '/\./': ' '
+#    For phone number support, look for 10 digits and format to 3 3 4, eg: 1234567890 -> 123 456 778
+#    '/^([\d]{3})([\d]{3})([\d]{4})$/': '$1 $2 $3'

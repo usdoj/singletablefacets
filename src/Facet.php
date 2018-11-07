@@ -144,7 +144,7 @@ class Facet {
         //  Facet items are shown with defined minimum count for each facet.
         $miniCountColumns = $this->getApp()->settings('minimum facet counts');
         // If in the middle of a search though, use a different set of minimums.
-        if (!empty($app->getUserKeywords())) {
+        if ($app->getUserKeywords()) {
             $searchMinimums = $app->settings('minimum facet counts during search');
             if (!empty($searchMinimums)) {
                 $miniCountColumns = $searchMinimums;
