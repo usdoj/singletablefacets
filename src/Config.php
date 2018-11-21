@@ -62,7 +62,7 @@ class Config extends \Noodlehaus\Config
             'minimum facet counts' => array(),
             'minimum facet counts during search' => array(),
             'regex input alterations' => array(),
-            'keyword placeholder' => array(),
+            'keyword placeholder' => "",
         );
     }
 }
