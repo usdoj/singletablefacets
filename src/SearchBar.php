@@ -66,6 +66,7 @@ class SearchBar {
         }
 
         $help = $this->getApp()->settings('keyword help');
+        $placeholder = $this->getApp()->settings('keyword placeholder');
         $labelHelp = $this->getApp()->settings('keyword help label');
         if (!empty($help)) {
             $help = '
@@ -79,7 +80,7 @@ class SearchBar {
         $widget = '
         <form method="get">
             <label for="stf-facet-keys">Keywords</label>
-            <input type="text" name="keys" id="stf-facet-keys" value="' . $keys . '" size="50" />
+            <input type="text" name="keys"  placeholder="' . $placeholder . '" id="stf-facet-keys" value="' . $keys . '" size="50" />
             ' . $fullTextOption . '
             <input type="submit" value="' . $this->getApp()->settings('search button text') . '" />
             <input type="button" onclick="location.href=\'' . $this->getApp()->getBaseUrl() . '\';" value="Reset" />

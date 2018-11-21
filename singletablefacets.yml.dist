@@ -181,6 +181,9 @@ keyword help: |
 # Users will click this label to expand the help text above.
 keyword help label: "Need help searching?"
 
+# Show the text on keyword input box before enter any character.
+keyword placeholder: "Search ..."
+
 # The items within a given facet are normally sorted alphabetically, but setting
 # this to true will sort them by their counts, in descending order.
 sort facet items by popularity: false
