@@ -104,6 +104,10 @@ keywords in files:
 # URL of "mydoc.pdf" will be fetched from "http://example.com/files/mydoc.pdf".
 prefix for relative keyword URLs: http://example.com/files/
 
+# Along the same sames as "prefix for relative keyword URLs" but a suffix instead.
+# Used mainly to add a file extension if needed. Example:
+#suffix for relative keyword URLs: .pdf
+
 # List the facet columns that should be collapsed at a certain point. Use 0 to
 # collapse all items, or for example, 5 to collapse items in excess of 5.
 collapse facet items:

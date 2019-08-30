@@ -60,7 +60,6 @@ class KeywordCrawler {
 
         print 'Fetching keywords from files...' . PHP_EOL;
 
-        $prefix = $this->getApp()->settings('prefix for relative keyword URLs');
         $keywordColumn = $this->getApp()->getDocumentKeywordColumn();
         $idColumn = $this->getApp()->getUniqueColumn();
         $total = 0;

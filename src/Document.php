@@ -72,9 +72,14 @@ class Document {
             // already encoded, and some are not. We decide this by looking for
             // common characters that would be encoded: spaces.
             if (strpos($document, ' ') !== FALSE) {
-              $document = rawurlencode($document);
+                $document = rawurlencode($document);
             }
             $document = $prefix . $document;
+            // Also add a suffix if needed.
+            $suffix = $this->getApp()->settings('suffix for relative keyword URLs');
+            if ($suffix) {
+                $document .= $suffix;
+            }
         }
 
         try {
