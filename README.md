@@ -92,7 +92,7 @@ The templates as passed a variable called "value" which contains the raw value i
 
 If you are templating a facet item, it also contains a "count" variable which contains the number of matches for that facet item.
 
-If you are templating a search result column, it also contains a "row" variable which contains all of the data for that entire database row. This is useful, for example, if you want to make one column into a link by using data from another column: `<a href="http://example.com/index.php?id={{ row.id }}">{{ value }}</a>
+If you are templating a search result column, it also contains a "row" variable which contains all of the data for that entire database row. This is useful, for example, if you want to make one column into a link by using data from another column: `<a href="http://example.com/index.php?id={{ row.id }}">{{ value }}</a>`
 
 ## Scale limits
 
