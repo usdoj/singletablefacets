@@ -1,5 +1,7 @@
 # Single Table Facets
 
+June 2026: This repository is being archived after many years without new contributions.
+
 This class is intended as a simple faceted search solution for PHP applications where the data source is a single MySQL table. It does not require any joins or relationships. If you want faceted search, but you want the data source to be as simple as an Excel spreadsheet imported into a MySQL database, this class should help.
 
 ## Dependencies
