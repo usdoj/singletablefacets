@@ -171,7 +171,6 @@ class Document {
         else {
             // Assume binary files are .pdf, since that's all we support.
             try {
-print("parse a pdf file.\n");
                 $reader = new \Asika\Pdf2text;
                 $reader->setFilename($this->getTempPath());
                 $reader->decodePDF();
@@ -189,14 +188,11 @@ print("parse a pdf file.\n");
                 '', $ret);
                 // Deal with HTML entities.
                 $ret = preg_replace('/&#?[a-z0-9]+;/i', '', $ret);
-print("pdf content: " .$ret. "\n");
             }
             catch (\Exception $e) {
-print("error on replacement on pdf file.\n");// Anything?
             }
         }
         if (!empty($ret)) {
-print("parse a pdf file.\n");
             $words = explode(' ', $ret);
             print sprintf('-- Success: %s keywords', count($words)) . PHP_EOL;
         }

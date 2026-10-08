@@ -271,7 +271,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     public function getMatchSQL() {
         $keywordColumns = $this->getKeywordColumns();
         $matchSQL = "MATCH($keywordColumns) AGAINST(:keywords IN BOOLEAN MODE)";
-//error_log($matchSQL);
         return $matchSQL;
     }
 
@@ -481,7 +480,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             $matchSQL = $this->getMatchSQL();
             $query->andWhere($matchSQL);
             $query->setParameter('keywords', $keywords);
-//error_log($matchSQL);
         }
 
         // Add conditions for the facets. At this point, we consult the full query
@@ -565,9 +563,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         foreach ($this->settings('required columns') as $column) {
             $query->andWhere("($column <> '' AND $column IS NOT NULL)");
         }
-//try{
-//    error_log("566 ". $query->getSQL());
-//}catch (\Exception $e) {}
+
         return $query;
     }
 
