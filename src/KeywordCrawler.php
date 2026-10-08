@@ -88,7 +88,8 @@ class KeywordCrawler {
                         $newValue .= ' ' . $keywords;
                         $total += 1;
                     }
-
+                    // Remove any non-ascii characters, since they are not useful for keyword searches.
+                    $newValue = preg_replace('/[^\x20-\x7E]/', '', $newValue);
                     // Update the database.
                     if (!empty($newValue)) {
                         $update = $this->getApp()->query();
