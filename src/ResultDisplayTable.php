@@ -29,6 +29,10 @@ class ResultDisplayTable extends \USDOJ\SingleTableFacets\ResultDisplay {
         $minimumWidths = $this->getApp()->settings('minimum column widths');
 
         $output = '<table class="stf-facet-search-results">' . PHP_EOL;
+        $noborderdef = $this->getApp()->settings('search result no border');
+        if ($noborderdef == true) {
+            $output = '<table class="stf-facet-search-results-no-border" id="results">' . PHP_EOL;
+        }
         $output .= '  <thead>' . PHP_EOL;
         $output .= '    <tr>' . PHP_EOL;
         foreach ($tableColumns as $columnName) {

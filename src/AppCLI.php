@@ -75,6 +75,18 @@ class AppCLI extends \USDOJ\SingleTableFacets\App
     }
 
     /**
+     * Perform the pdf reader.
+     */
+    public function read() {
+
+        $url = "http://intranetdevelopment.doj.gov/civil/frauds/briefs/brief-bank/70_US_Opposition_re_68_MOTION_to_Quash_Writs_of_Garnishm.pdf";
+        $document = new \USDOJ\SingleTableFacets\Document($this, $url);
+
+        // First do a test run to make sure there will not be an error.
+        $document->getKeywords();
+    }
+
+    /**
      * Get the example usage for this CLI command.
      *
      * @return string

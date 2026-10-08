@@ -117,14 +117,14 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         if (file_exists($functionFile)) {
             include($functionFile);
             foreach ($functionList as $func) {
-                $twigFunctions[] = new \Twig_SimpleFunction($func, $func);
+                $twigFunctions[] = new \Twig\TwigFunction($func, $func);
             }
         }
         $functionList = $this->settings('list of twig functions');
         if (!empty($templateFolder) && file_exists($templateFolder)) {
 
-            $loader = new \Twig_Loader_Filesystem($templateFolder);
-            $this->twigForSearchResults = new \Twig_Environment($loader);
+            $loader = new \Twig\Loader\FilesystemLoader($templateFolder);
+            $this->twigForSearchResults = new \Twig\Environment($loader);
             foreach ($twigFunctions as $twigFunction) {
                 $this->twigForSearchResults->addFunction($twigFunction);
             }
@@ -132,8 +132,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         $templateFolder = $this->settings('template folder for facet items');
         if (!empty($templateFolder) && file_exists($templateFolder)) {
 
-            $loader = new \Twig_Loader_Filesystem($templateFolder);
-            $this->twigForFacetItems = new \Twig_Environment($loader);
+            $loader = new \Twig\Loader\FilesystemLoader($templateFolder);
+            $this->twigForFacetItems = new \Twig\Environment($loader);
             foreach ($twigFunctions as $twigFunction) {
                 $this->twigForFacetItems->addFunction($twigFunction);
             }
@@ -151,7 +151,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             'table' => $this->settings('database table'),
         );
         $query->setParameters($params);
-        $results = $query->execute()->fetchAll();
+        $results = $query->fetchAllAssociative();
         if (!empty($results)) {
             foreach ($results as $result) {
                 $this->allColumns[] = $result['column_name'];
@@ -271,6 +271,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
     public function getMatchSQL() {
         $keywordColumns = $this->getKeywordColumns();
         $matchSQL = "MATCH($keywordColumns) AGAINST(:keywords IN BOOLEAN MODE)";
+//error_log($matchSQL);
         return $matchSQL;
     }
 
@@ -416,7 +417,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         }
 
         $keywords = $this->getParameter('keys');
-
         $pattern = array_keys($this->settings('regex input alterations'));
         $replace = array_values($this->settings('regex input alterations'));
         $keywords = preg_replace($pattern, $replace, $keywords);
@@ -481,6 +481,7 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
             $matchSQL = $this->getMatchSQL();
             $query->andWhere($matchSQL);
             $query->setParameter('keywords', $keywords);
+//error_log($matchSQL);
         }
 
         // Add conditions for the facets. At this point, we consult the full query
@@ -508,8 +509,8 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                 }
 
                 // Create an AND statement to construct our WHERE for the facet.
-                $facetWhere = $query->expr()->andX();
-
+                //$facetWhere = $query->expr()->and("2=2","1=1");
+                $facetWhere = "";
                 // Date facets are unique in that they will have only a single
                 // value that we interpret into a hierarchical display. This is
                 // no way, for example, for a date facet to be both "2011" and
@@ -532,11 +533,15 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
                     $startPlaceholder = $query->createNamedParameter($start);
                     $endPlaceholder = $query->createNamedParameter($end);
-                    $dateOr = $query->expr()->orX();
+                    //$dateOr = $query->expr()->or("1=1","2=2");
+                    $dateOr = "";
                     foreach ($columnsToCheck as $columnToCheck) {
-                        $dateOr->add("$columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder");
+                        //$dateOr->with("$columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder","");
+                        if (empty($dateOr)) $dateOr .= "($columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder)";
+                        else $dateOr .= " OR ($columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder)";
                     }
-                    $facetWhere->add($dateOr);
+                    //$facetWhere->with($dateOr);
+                    $facetWhere .= "($dateOr)";
                 }
                 // Otherwise, non-date facets act completely differently. Most
                 // notably, they are treated as arrays. Also, they can be
@@ -546,7 +551,9 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                     foreach ($facetItemValues as $facetItemValue) {
                         $placeholder = $query->createNamedParameter($facetItemValue);
                         $columnsToCheckString = implode(',', $columnsToCheck);
-                        $facetWhere->add("$placeholder IN ($columnsToCheckString)");
+                        //$facetWhere->with("$placeholder IN ($columnsToCheckString)","$placeholder IN ($columnsToCheckString)");
+                        if (empty($facetWhere)) $facetWhere .= "($placeholder IN ($columnsToCheckString))";
+                        else $facetWhere .= " AND ($placeholder IN ($columnsToCheckString))";
                     }
                 }
 
@@ -558,6 +565,9 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
         foreach ($this->settings('required columns') as $column) {
             $query->andWhere("($column <> '' AND $column IS NOT NULL)");
         }
+//try{
+//    error_log("566 ". $query->getSQL());
+//}catch (\Exception $e) {}
         return $query;
     }
 

@@ -101,15 +101,14 @@ class App
             'password' => $this->settings('database password'),
             'host' => $this->settings('database host'),
             'port' => 3306,
-            'charset' => 'utf8',
+            'charset' => 'utf8mb4',
             'driver' => 'pdo_mysql',
         );
         $db = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $dbConfig);
         $this->db = $db;
-
         // One requirement is that the table has at least one unique column.
-        $statement = $this->getDb()->query('DESCRIBE ' . $this->settings('database table'));
-        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $statement = $this->getDb()->executeQuery('DESCRIBE ' . $this->settings('database table'));
+        $result = $statement->fetchAllAssociative(\PDO::FETCH_ASSOC);
         foreach ($result as $column) {
             if (!empty($column['Key'])) {
                 $this->uniqueColumn = $column['Field'];
@@ -123,14 +122,14 @@ class App
         // Take note of all the datetime columns so that their facets can be
         // rendered hierarchically.
         $this->dateColumns = array();
-        $statement = $this->getDb()->query('DESCRIBE ' . $this->settings('database table'));
-        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $statement = $this->getDb()->executeQuery('DESCRIBE ' . $this->settings('database table'));
+        $result = $statement->fetchAllAssociative(\PDO::FETCH_ASSOC);
         foreach ($result as $column) {
-            if ('datetime' == $column['Type']) {
+            if ('datetime' == $column['Type']){
                 $this->dateColumns[] = $column['Field'];
             }
+        
         }
-
         // Another requirement is that at least one column (stf_keywords) has a
         // FULLTEXT index. If something is not right, throw an Exception now.
         $keywordColumn = $this->getDocumentKeywordColumn();
@@ -149,16 +148,18 @@ class App
             'keyword_column' => $keywordColumn,
         );
         $query->setParameters($params);
-        $results = $query->execute()->fetchAll();
-
-        if (empty($results[0]['index_name'])) {
-            $err = sprintf('The db table must have a %s column with a FULLTEXT index.', $keywordColumn);
-            throw new \Exception($err);
-        }
+        $results = $query->fetchAllAssociative();
+        //if (empty($results[0]['index_name'])) {
+        //    $err = sprintf('The db table must have a %s column with a FULLTEXT index.', $keywordColumn);
+        //    throw new \Exception($err);
+        //}
 
         // Also, save a list of other columns that are part of the same index,
         // since we'll need that info later.
-        $indexName = $results[0]['index_name'];
+        $indexName = "";
+        if (is_array($results) && is_array($results[0])) {
+            $indexName = $results[0]['index_name'];
+        }
         $query = $this->getDb()->createQueryBuilder();
         $query
             ->from('information_Schema.STATISTICS')
@@ -175,8 +176,16 @@ class App
             'index_name' => $indexName,
         );
         $query->setParameters($params);
-        $results = $query->execute()->fetchAll(\PDO::FETCH_COLUMN);
-        $this->databaseKeywordColumns = $results;
+        $results = $query->fetchAllAssociative();
+        if (is_array($results) && is_array($results[0])) {
+            $result = array();
+            //$i = 0;
+            foreach($results as $rst) {
+                $result[] = $rst['column_name'];
+                //++$i;   
+            }
+        }
+        $this->databaseKeywordColumns = $result;
     }
 
     /**
