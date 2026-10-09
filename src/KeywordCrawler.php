@@ -50,8 +50,8 @@ class KeywordCrawler {
         $affected = $this->getApp()->getDb()->createQueryBuilder()
             ->update($table)
             ->set($this->getApp()->getDocumentKeywordColumn(), ':empty')
-            ->setParameter(':empty', '')
-            ->execute();
+            ->setParameter('empty', '')
+            ->executeStatement();
 
         if (!empty($affected)) {
             print sprintf('Cleared keywords from %s rows.', $affected);
@@ -73,8 +73,7 @@ class KeywordCrawler {
                 ->addSelect($urlColumn)
                 ->addSelect($keywordColumn)
                 ->addSelect($idColumn)
-                ->execute()
-                ->fetchAll();
+                ->fetchAllAssociative();
             foreach ($rows as $row) {
 
                 $url = $row[$urlColumn];
@@ -88,7 +87,6 @@ class KeywordCrawler {
                         $newValue .= ' ' . $keywords;
                         $total += 1;
                     }
-                    // Remove any non-ascii characters, since they are not useful for keyword searches.
                     $newValue = preg_replace('/[^\x20-\x7E]/', '', $newValue);
                     // Update the database.
                     if (!empty($newValue)) {
@@ -97,9 +95,9 @@ class KeywordCrawler {
                             ->update($table, $table)
                             ->set($keywordColumn, ':keywords')
                             ->where($update->expr()->eq($idColumn, ':id'))
-                            ->setParameter(':keywords', $newValue)
-                            ->setParameter(':id', $id)
-                            ->execute();
+                            ->setParameter('keywords', $newValue)
+                            ->setParameter('id', $id)
+                            ->executeStatement();
                     }
                 }
             }

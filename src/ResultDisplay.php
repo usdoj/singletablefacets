@@ -49,7 +49,7 @@ abstract class ResultDisplay {
         $query = $this->getApp()->query();
         $query->addSelect("COUNT(*) as count");
         try {
-            $result = $query->execute();
+            $result = $query->fetchAllAssociative();
         }
         catch (\Exception $e) {
             die('Database error. Please alert the site administrators.');
@@ -175,25 +175,30 @@ abstract class ResultDisplay {
             // If this column has been specified for "natural sorting", then we
             // must sort first by length.
             $naturalColumns = $this->getApp()->settings('columns with natural sorting');
-            if (in_array($sortField, $naturalColumns)) {
+            if (!empty($naturalColumns) && in_array($sortField, $naturalColumns)) {
                 $query->orderBy("LENGTH(TRIM($sortField))", $sortDirection);
             }
             $query->addOrderBy($sortField, $sortDirection);
         }
         try {
-            $results = $query->execute()->fetchAll();
+            $results = $query->fetchAllAssociative();
         }
         catch (\Exception $e) {
             die('Database error. Please alert the site administrators.');
         }
 
         // Do we need to consolidate any "additional" values?
+        $separatorAdditional = ', ';
+        $checkAdditional = $this->getApp()->settings('separator for additional values');
+        if (!empty($checkAdditional)) {
+            $separatorAdditional = $checkAdditional;
+        }
         $additionalColumns = $this->getApp()->settings('columns for additional values');
         if (!empty($additionalColumns)) {
             foreach ($additionalColumns as $additional => $main) {
                 foreach ($results as &$row) {
                     if (!empty($row[$additional])) {
-                        $row[$main] .= ', ' . $row[$additional];
+                        $row[$main] .= $separatorAdditional . $row[$additional];
                     }
                 }
             }
