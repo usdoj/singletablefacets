@@ -215,9 +215,6 @@ class Importer {
                     if (is_array($requiredColumns) && in_array($column, $requiredColumns) && empty($value)) {
                         continue 2;
                     }
-                    //if (preg_match('/\\x([0-9A-F][0-9A-F])/', $value)) {
-                    //    print "$value\n";
-                    //}
                     $insert->setValue('`' . $column . '`', '?');
                     $anonymousParameters[] = $value;
                 }
