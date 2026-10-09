@@ -86,7 +86,7 @@ class Importer {
             'password' => $this->settings('database password'),
             'host' => $this->settings('database host'),
             'port' => 3306,
-            'charset' => 'utf8mb4',
+            'charset' => 'utf8',
             'driver' => 'pdo_mysql',
         );
         $db = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, $dbConfig);
@@ -96,8 +96,8 @@ class Importer {
         // Take note of all the datetime columns so that their facets can be
         // rendered hierarchically.
         $this->dateColumns = array();
-        $statement = $this->getDb()->query('DESCRIBE ' . $this->settings('database table'));
-        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $statement = $this->getDb()->executeQuery('DESCRIBE ' . $this->settings('database table'));
+        $result = $statement->fetchAllAssociative();
         foreach ($result as $column) {
             if ('datetime' == $column['Type']) {
                 $this->dateColumns[] = $column['Field'];
@@ -215,13 +215,15 @@ class Importer {
                     if (is_array($requiredColumns) && in_array($column, $requiredColumns) && empty($value)) {
                         continue 2;
                     }
-                    
+                    //if (preg_match('/\\x([0-9A-F][0-9A-F])/', $value)) {
+                    //    print "$value\n";
+                    //}
                     $insert->setValue('`' . $column . '`', '?');
                     $anonymousParameters[] = $value;
                 }
                 $numInserted += $insert
                     ->setParameters($anonymousParameters)
-                    ->execute();
+                    ->executeStatement();
             }
             print sprintf('Imported %s rows.', $numInserted) . PHP_EOL;
         } catch (Exception $e) {
@@ -238,7 +240,7 @@ class Importer {
         $table = $this->settings('database table');
         $this->getDb()->createQueryBuilder()
             ->delete($table)
-            ->execute();
+            ->executeStatement();
         print 'Deleted all rows.' . PHP_EOL;
     }
 
@@ -259,8 +261,9 @@ class Importer {
 
         // Support Excel files.
         if ('xls' == $extension || 'xlsx' == $extension) {
-            $objReader = \PHPExcel_IOFactory::createReader('Excel2007');
-            $objPHPExcel = $objReader->load($filePath);
+            //$objReader = \PHPExcel_IOFactory::createReader('Excel2007');
+            $objPHPExcel = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+            //$objPHPExcel = $objReader->load($filePath);
             foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) {
                 $rows = $worksheet->toArray();
                 $header = $rows[0];
@@ -272,7 +275,7 @@ class Importer {
             // If not an Excel file, assume it is CSV.
             $delimiter = $this->getConfig()->get('csv delimiter', ',');
             $enclosure = $this->getConfig()->get('csv enclosure', '"');
-            $rows = new \Keboola\Csv\CsvFile($filePath, $delimiter, $enclosure);
+            $rows = new \Keboola\Csv\CsvReader($filePath, $delimiter, $enclosure);
             $header = $rows->getHeader();
         }
 
