@@ -258,9 +258,7 @@ class Importer {
 
         // Support Excel files.
         if ('xls' == $extension || 'xlsx' == $extension) {
-            //$objReader = \PHPExcel_IOFactory::createReader('Excel2007');
             $objPHPExcel = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
-            //$objPHPExcel = $objReader->load($filePath);
             foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) {
                 $rows = $worksheet->toArray();
                 $header = $rows[0];
