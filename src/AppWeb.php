@@ -507,7 +507,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                 }
 
                 // Create an AND statement to construct our WHERE for the facet.
-                //$facetWhere = $query->expr()->and("2=2","1=1");
                 $facetWhere = "";
                 // Date facets are unique in that they will have only a single
                 // value that we interpret into a hierarchical display. This is
@@ -531,14 +530,11 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
 
                     $startPlaceholder = $query->createNamedParameter($start);
                     $endPlaceholder = $query->createNamedParameter($end);
-                    //$dateOr = $query->expr()->or("1=1","2=2");
                     $dateOr = "";
                     foreach ($columnsToCheck as $columnToCheck) {
-                        //$dateOr->with("$columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder","");
                         if (empty($dateOr)) $dateOr .= "($columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder)";
                         else $dateOr .= " OR ($columnToCheck BETWEEN $startPlaceholder AND $endPlaceholder)";
                     }
-                    //$facetWhere->with($dateOr);
                     $facetWhere .= "($dateOr)";
                 }
                 // Otherwise, non-date facets act completely differently. Most
@@ -549,7 +545,6 @@ class AppWeb extends \USDOJ\SingleTableFacets\App {
                     foreach ($facetItemValues as $facetItemValue) {
                         $placeholder = $query->createNamedParameter($facetItemValue);
                         $columnsToCheckString = implode(',', $columnsToCheck);
-                        //$facetWhere->with("$placeholder IN ($columnsToCheckString)","$placeholder IN ($columnsToCheckString)");
                         if (empty($facetWhere)) $facetWhere .= "($placeholder IN ($columnsToCheckString))";
                         else $facetWhere .= " AND ($placeholder IN ($columnsToCheckString))";
                     }
