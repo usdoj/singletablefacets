@@ -36,6 +36,10 @@ class ResultDisplayList extends \USDOJ\SingleTableFacets\ResultDisplay {
         $groupingColumn = $this->getApp()->settings('search result grouping column');
 
         $output = '<div class="stf-facet-search-results">' . PHP_EOL;
+        $noborderdef = $this->getApp()->settings('search result no border');
+        if ($noborderdef == true) {
+            $output = '<div class="stf-facet-search-results-no-border">' . PHP_EOL;
+        }
         foreach ($groups as $group) {
 
             $output .= '  <div class="stf-facet-search-result-group">' . PHP_EOL;

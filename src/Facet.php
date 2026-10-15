@@ -195,7 +195,8 @@ class Facet {
         if (!$this->isDate()) {
             // Should the sort be natural?
             $naturalColumns = $this->getApp()->settings('columns with natural sorting');
-            if (in_array($name, $naturalColumns)) {
+
+            if (!empty($naturalColumns) && in_array($name, $naturalColumns)) {
                 $naturalSort = array();
                 $naturalKeys = array_keys($keyedByName);
                 natsort($naturalKeys);
@@ -279,7 +280,7 @@ class Facet {
         $query->addSelect("COUNT(*) AS count");
         $query->addGroupBy('item');
 
-        return $query->execute()->fetchAll();
+        return $query->fetchAllAssociative();
     }
 
     /**

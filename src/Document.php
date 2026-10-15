@@ -190,7 +190,6 @@ class Document {
                 $ret = preg_replace('/&#?[a-z0-9]+;/i', '', $ret);
             }
             catch (\Exception $e) {
-                // Anything?
             }
         }
         if (!empty($ret)) {

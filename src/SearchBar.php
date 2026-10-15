@@ -76,6 +76,10 @@ class SearchBar {
                 </div>
             ';
         }
+        else {
+            $help = '
+                <div class="stf-facet-help">' . $labelHelp . '</div>';
+        }
 
         $widget = '
         <form method="get">

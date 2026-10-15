@@ -1,24 +1,40 @@
 {
-    "name": "usdoj/singletablefacets",
     "require": {
-        "doctrine/dbal": "2.5.4",
-        "jasongrimes/paginator": "1.0.2",
-        "asika/pdf2text": "1.0.3",
-        "hassankhan/config": "0.10.0",
-        "symfony/yaml": "2.0.7",
-        "twig/twig": "1.24.1",
-        "usdoj/singletableimporter": "dev-master"
+        "asika/pdf2text": "^1.0",
+        "doctrine/annotations": "^2.0",
+        "doctrine/cache": "^2.2",
+        "doctrine/collections": "2.6.0",
+        "doctrine/common": "^3.5",
+        "doctrine/dbal": "^4.4",
+        "doctrine/inflector": "^2.1",
+        "doctrine/lexer": "^3.0",
+        "hassankhan/config": "^3.2",
+        "jasongrimes/paginator": "^1.0",
+        "keboola/csv": "^4.1",
+        "nategood/httpful": "^1.0",
+        "symfony/yaml": "7.4.18",
+        "twig/twig": "^3.28",
+        "phpoffice/phpspreadsheet": "^5.9",
+        "maennchen/zipstream-php": "3.1.1",
+        "noodlehaus/config": "^3.0",
+        "smalot/pdfparser": "^2.12",
+        "usdoj/singletablefacets": "dev-master"
     },
     "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/usdoj/singletablefacets.git"
+        },
         {
             "type": "vcs",
             "url": "https://github.com/usdoj/singletableimporter.git"
         }
     ],
-    "autoload": {
-        "psr-4": {
-            "USDOJ\\SingleTableFacets\\": "src"
+    "minimum-stability": "dev",
+    "prefer-stable" : true,
+    "config": {
+        "platform": {
+            "php": "5.3.2"
         }
-    },
-    "bin": ["bin/singletablefacets"]
+    }
 }
