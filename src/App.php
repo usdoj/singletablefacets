@@ -149,6 +149,10 @@ class App
         );
         $query->setParameters($params);
         $results = $query->fetchAllAssociative();
+        //if (empty($results[0]['index_name'])) {
+        //    $err = sprintf('The db table must have a %s column with a FULLTEXT index.', $keywordColumn);
+        //    throw new \Exception($err);
+        //}
 
         // Also, save a list of other columns that are part of the same index,
         // since we'll need that info later.
